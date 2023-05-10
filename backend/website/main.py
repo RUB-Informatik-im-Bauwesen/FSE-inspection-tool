@@ -6,8 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model
 from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project
+import logging
 
 app = FastAPI()
+
+logger = logging.getLogger("api")
 
 #For authentication later
 SECRET = "super-secret-key"

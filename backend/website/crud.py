@@ -9,7 +9,8 @@ from backend.website.models import User, Project, Image, Model
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-import backend.utils.model_utils
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio
+import logging
 
 #Active Learning
 import torch
@@ -122,9 +123,6 @@ async def fetch_images_by_projects(id):
 
 async def upload_model(model, user):
   document = dict(model, **{"username": user["username"]})
-  check_same_model = await collection_models.find_one({"name" : document["name"]})
-  if check_same_model:
-      raise HTTPException(status_code=404, detail="Change model name!")
   check_same_path = await collection_models.find_one({"path" : document["path"]})
   if check_same_path:
       raise HTTPException(status_code=404, detail="Same path as an other model!")
@@ -182,6 +180,8 @@ async def fetch_rankings_images_by_project(project_id):
     async for document in images:
         path = document["path"]
         paths_to_images.append(path)
+    if not images:
+        raise HTTPException(status_code=404, detail="No images found in the project.")
 
     # Load the model
     models = []
@@ -196,9 +196,9 @@ async def fetch_rankings_images_by_project(project_id):
     rankings_list = []
 
     if (len(models) > 1):
-      async for img in paths_to_images:
+      for img in paths_to_images:
             results_list = []
-            async for model in models:
+            for model in models:
                 result = model(img)
                 results_list.append(result)
 
@@ -208,7 +208,7 @@ async def fetch_rankings_images_by_project(project_id):
             labels_list = []
 
 
-            async for results in results_list:
+            for results in results_list:
 
                 # Extract DataFrame for first object detected
                 df = results.pandas().xyxy[0]
@@ -242,27 +242,27 @@ async def fetch_rankings_images_by_project(project_id):
                     iou_matrix = np.zeros((len(boxes_list[i]), len(boxes_list[j])))
                     for idx_i, boxes_i in enumerate(boxes_list[i]):
                         for idx_j, boxes_j in enumerate(boxes_list[j]):
-                            iou_matrix[idx_i, idx_j] = backend.utils.iou(boxes_i, boxes_j)
+                            iou_matrix[idx_i, idx_j] = iou(boxes_i, boxes_j)
                     iou_df = pd.DataFrame(iou_matrix, index=[f"Model {i} Box {idx_i}" for idx_i in range(len(boxes_list[i]))],
                                         columns=[f"Model {j} Box {idx_j}" for idx_j in range(len(boxes_list[j]))])
                     iou_matrices.append(iou_df)
 
-            roi_matches, matches, min_matches = backend.utils.get_roi_matches(iou_matrices)
+            roi_matches, matches, min_matches = get_roi_matches(iou_matrices)
 
             #Get Classes for each min value in each iou_matrices
             test_min = []
-            async for match in min_matches:
-                min_match = backend.utils.merge_subarrays_match(match,matches.copy())
+            for match in min_matches:
+                min_match = merge_subarrays_match(match,matches.copy())
                 test_min.append(min_match)
 
-            class_matches = backend.utils.get_class_matches(test_min,labels_list)
+            class_matches = get_class_matches(test_min,labels_list)
 
             #Calculate Consensus Score
-            variation_ratios = backend.utils.variation_ratio(class_matches)
-            variation_ratios = [[ratio] async for ratio in variation_ratios]
+            variation_ratios = variation_ratio(class_matches)
+            variation_ratios = [[ratio] for ratio in variation_ratios]
 
             min_values = []
-            async for entry in roi_matches:
+            for entry in roi_matches:
                 min_values.append(min(entry))
 
             #To numpy for multiplication
@@ -284,14 +284,18 @@ async def fetch_rankings_images_by_project(project_id):
 
     # Create a new list of lists with the image name and rank
     ranked_images = {}
-    async for rank, item in enumerate(rankings_list, start=1):
-        image_name = item[2].split("/")[-1]
+    for rank, item in enumerate(rankings_list, start=1):
+        image_name = item[2]
         ranked_images[image_name] = rank
 
     updated_ranks = []
-    async for img in images:
-        updated_image = await collection_images.find_one_and_update({"_id": ObjectId(id)}, {"$set": {"ranking":ranked_images[img]}})
-        updated_ranks.append(updated_image)
+    images = await collection_images.find({"project_id": project_id}).to_list(None)
+    for img in images:
+        filter = {"project_id": project_id, "path": img["path"]}
+        update = {"$set": {"ranking": ranked_images.get(img["path"], 0)}}
+        result = await collection_images.find_one_and_update(filter, update)
+        updated_ranks.append(dict(result))
+
 
     return updated_ranks
 
