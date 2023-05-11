@@ -276,8 +276,13 @@ async def fetch_rankings_images_by_project(project_id):
             rankings_list.append(result)
 
     if(len(models) == 1):
-        # Uncertainty Score with only one model
-        return {}
+        for img in paths_to_images:
+            results = models[0](img)
+            df = results.pandas().xyxy[0]
+            confidence_scores = df['confidence'].values.tolist()
+            average_confidence_score = np.mean(confidence_scores)
+            result = [results.pandas().xywhn[0] ,average_confidence_score, img]
+            rankings_list.append(result)
 
     # Sort the rankings list by the uncertainty score in descending order
     rankings_list.sort(key=lambda x: x[1], reverse=True)
