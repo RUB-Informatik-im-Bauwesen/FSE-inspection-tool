@@ -5,12 +5,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models
-from backend.website.models import User, Project, Image, Model
+from backend.website.models import User, Project, Image, Model, Annotation
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio
-import logging
+import os
+import shutil
+import random
+import yaml
 
 #Active Learning
 import torch
@@ -30,6 +33,29 @@ async def create_user(user):
 
 async def create_project(project, user):
   document = dict(project, **{"username": user["username"]})
+  check_name = await collection_projects.find_one({"name": document["name"]})
+  if check_name:
+      raise HTTPException(status_code=409, detail="Choose a different name!")
+  # specify the path where you want to create the new folder
+  path = "storage\\Projects"
+  #cwd = os.getcwd()
+  #path = os.path.join(cwd,path)
+  # specify the name of the new folder
+  folder_name = user["username"] + "_" + document["name"]
+  path_print = os.path.join(path, folder_name)
+  # check if the folder already exists
+  if not os.path.exists(os.path.join(path, folder_name)):
+    # create the new folder
+    os.makedirs(os.path.join(path, folder_name))
+    # create the images and labels folders inside the new folder
+    os.makedirs(os.path.join(path, folder_name, "images"))
+    os.makedirs(os.path.join(path, folder_name, "labels"))
+    # create the train and val folders inside the images and labels folders
+    os.makedirs(os.path.join(path, folder_name, "images", "train"))
+    os.makedirs(os.path.join(path, folder_name, "images", "val"))
+    os.makedirs(os.path.join(path, folder_name, "labels", "train"))
+    os.makedirs(os.path.join(path, folder_name, "labels", "val"))
+  document = dict(project, **{"username": user["username"],"train_path": os.path.join(path, folder_name, "images", "train"), "val_path": os.path.join(path, folder_name, "images", "val")})
   await collection_projects.insert_one(document)
 
 async def update_project(id, name, description, user):
@@ -107,7 +133,7 @@ async def delete_image(id, user):
 
 async def fetch_images_by_user(user):
     images = []
-    cursor = collection_images.find({"username": user})
+    cursor = collection_images.find({"username": user["username"]})
     async for document in cursor:
         image = Image(**document)
         images.append(image)
@@ -304,4 +330,125 @@ async def fetch_rankings_images_by_project(project_id):
 
     return updated_ranks
 
+async def fetch_selected_images(project_id):
+    images = []
+    cursor = collection_images.find({"project_id": project_id, "selected":True})
+    async for document in cursor:
+        image = Image(**document)
+        images.append(image)
+    return images
 
+async def prepare_for_training(project_id, user):
+
+    project = await collection_projects.find_one({"_id": ObjectId(project_id)})
+      # specify the path where you want to create the new folder
+    path = "storage\\Projects\\"
+    # specify the name of the new folder
+    folder_name = user["username"] + "_" + project["name"]
+    train_dir = path + folder_name + "\\" + "images" + "\\"+ "train"#os.path.join(path, folder_name, "images", "train")
+    val_dir = path + folder_name + "\\" + "images" + "\\"+ "val"
+    train_ratio = 0.8  # ratio of images to use for training
+
+    # Get list of selected images
+    # Get image paths
+    images = []
+    images_for_return = []
+    cursor = collection_images.find({"project_id": project_id, "selected": True})
+    async for document in cursor:
+        path = document["path"]
+        images.append(path)
+        images_for_return.append(Image(**document))
+
+    # Split into training and validation sets
+    num_train = int(len(images) * train_ratio)
+    random.shuffle(images)
+    train_images = images[:num_train]
+    val_images = images[num_train:]
+
+    # Copy training images to training directory
+    for image_path in train_images:
+        basename = os.path.basename(image_path)
+        dest_path = os.path.join(train_dir, basename)
+        shutil.copyfile(image_path, dest_path)
+
+    # Copy validation images to validation directory
+    for image_path in val_images:
+        basename = os.path.basename(image_path)
+        dest_path = os.path.join(val_dir, basename)
+        shutil.copyfile(image_path, dest_path)
+
+    return images_for_return
+
+
+
+async def train_models(project_id, models_id, image_size, epoch_len, batch_size, class_names):
+    model = collection_models.find_one({"_id": ObjectId(models_id)})
+    if not model:
+        raise HTTPException(status_code=404, detail="No models found in the project.")
+    project = collection_projects.find_one({"project_id": ObjectId(project_id)})
+
+    dict_file = [{'path': [project["path"]]},{'train':[project["train_path"]]},{'val':[project['val_path']]}, {'names': class_names}]
+
+    #Create YAML
+
+    with open(project["path"] + "\\data.yaml") as file:
+        documents = yaml.dump(dict_file,file)
+
+async def upload_annotation(annotation, user):
+  document = dict(annotation, **{"username": user["username"]})
+  check_same_annotation = await collection_annotations.find_one({"name" : document["name"]})
+  check_same_project = await collection_annotations.find_one({"image_id" : document["image_id"]})
+  if check_same_annotation or check_same_project:
+      raise HTTPException(status_code=404, detail="Change Annotations name or Image ID!")
+  check_same_path = await collection_annotations.find_one({"name" : document["path"]})
+  if check_same_path and check_same_project:
+      raise HTTPException(status_code=404, detail="Same path as an other annotation!")
+  await collection_annotations.insert_one(document)
+  return document
+
+
+async def update_annotation(id, annotation, user):
+    doc = dict(annotation)
+    try:
+        document = await collection_annotations.find_one({"_id": ObjectId(id)})
+    except InvalidId:
+        raise HTTPException(
+            status_code=422, detail="Id not in the right format")
+    if not document:
+        raise HTTPException(status_code=404, detail="ID not found")
+    if user["username"] != document["username"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    updated_annotation = await collection_annotations.find_one_and_update({"_id": ObjectId(id)}, {"$set": {"name": doc["name"], "path": doc["path"], "image_id":doc["image_id"], "project_id":doc["project_id"]}})
+    return updated_annotation
+
+
+async def delete_annotation(id, user):
+    try:
+        document = await collection_annotations.find_one({"_id": ObjectId(id)})
+    except InvalidId:
+        raise HTTPException(
+            status_code=422, detail="Id not in the right format")
+    if not document:
+        raise HTTPException(status_code=404, detail="ID not found")
+    if user["username"] != document["username"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    document = await collection_annotations.find_one_and_delete({"_id": ObjectId(id)})
+    return document
+
+
+async def fetch_annotations_by_user(user):
+    annotations = []
+    cursor = collection_annotations.find({"username": user})
+    async for document in cursor:
+        annotation = Annotation(**document)
+        annotations.append(annotation)
+    return annotations
+
+
+async def fetch_annotations_by_project(id):
+    annotations = []
+    cursor = collection_annotations.find({"project_id": id})
+    async for document in cursor:
+        annotation = Annotation(**document)
+        annotations.append(annotation)
+    return annotations

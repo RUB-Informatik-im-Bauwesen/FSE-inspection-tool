@@ -121,3 +121,10 @@ def get_roi_matches(iou_matrices):
         max_values.append(max_values_entry)
 
     return max_values, matches, min_match
+
+
+def train_model(image_size, epoch_len, batch_size, yaml_path, weights_path):
+   #subprocess.run(
+       # ["python", yolov5_train_dir, "--img", image_size, "--batch", batch_size, "--epochs", epoch_len, "--data", yaml_path,
+         #"--weights", weights_path, "--project", "storage/Models/", "--name", "YOLO_MODEL_1","--device","0"], check=True)
+    pass

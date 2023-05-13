@@ -4,9 +4,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
-from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project
+from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project
 import logging
+from typing import List
 
 app = FastAPI()
 
@@ -83,13 +84,23 @@ async def delete_images(id:str, user=Depends(manager)):
     return Image(**item)
 
 @app.get("/get_images_by_user")
-async def get_images(user: str):
+async def get_images(user=Depends(manager)):
     images = await fetch_images_by_user(user)
     return images
 
 @app.get("/get_images_by_project/{id}")
-async def get_project_images(id :str):
+async def get_project_images(id :str , user=Depends(manager)):
     images = await fetch_images_by_projects(id)
+    return images
+
+@app.get("/get_selected_images_by_project/{id}")
+async def get_selected_images(id: str, user=Depends(manager)):
+    images = await fetch_selected_images(id)
+    return images
+
+@app.get("/prepare_selected_for_training/{id}")
+async def prepare_selected_images(id: str, user=Depends(manager)):
+    images = await prepare_for_training(id, user)
     return images
 
 #Models
@@ -119,6 +130,33 @@ async def get_models(id: str):
     models = await fetch_models_by_project(id)
     return models
 
+#Annotations
+
+@app.post("/upload_annotations")
+async def upload_annotations(annotation: NewAnnotation, user=Depends(manager)):
+    await upload_annotation(annotation, user)
+    return annotation
+
+@app.put("/update_annotation/{id}")
+async def update_annotations(id: str, annotation: NewAnnotation, user=Depends(manager)):
+    item = await update_annotation(id, annotation,user)
+    return Annotation(**item)
+
+@app.delete("/delete_annotation/{id}")
+async def delete_annotations(id: str, user=Depends(manager)):
+    item = await delete_annotation(id, user)
+    return Annotation(**item)
+
+@app.get("/get_annotations_by_user")
+async def get_annotations_by_user(user: str):
+    annotations =  await fetch_annotations_by_user(user)
+    return annotations
+
+@app.get("/get_annotations_by_project/{id}")
+async def get_annotations_by_project(id: str):
+    annotations = await fetch_annotations_by_project(id)
+    return annotations
+
 #Active Learning
 
 @app.get("/get_rankings_of_images/{project_id}")
@@ -128,3 +166,9 @@ async def get_rankings_of_images(project_id: str):
     for ranked_image in images_with_rankings:
         ranked_images.append(Image(**ranked_image))
     return ranked_images
+
+
+@app.post("/train_model/{project_id}")
+async def train_model(project_id: str, models_id: str, image_size: int, epoch_len: int, batch_size: int, class_names: List[str]):
+    await train_models(project_id, models_id, image_size, epoch_len, batch_size, class_names)
+    return project_id

@@ -28,6 +28,10 @@ class NewUser(User):
 class NewProject(BaseModel):
     name: str
     description: Optional[str]
+    path: str
+    train_path: str
+    val_path: str
+    #yaml_path: str
 
 class Project(NewProject):
     id: PydanticObjectId = Field(..., alias="_id")
@@ -40,7 +44,8 @@ class NewImage(BaseModel):
     date_uploaded: str
     path: str
     ranking: int
-    annotations: Tuple[int,float,float,float,float]
+    annotations: List[Tuple[int,float,float,float,float]]
+    selected: bool
     project_id: str
 
 class Image(NewImage):
@@ -55,4 +60,13 @@ class NewModel(BaseModel):
     project_id: str
 
 class Model(NewModel):
+    id: PydanticObjectId = Field(..., alias="_id")
+
+class NewAnnotation(BaseModel):
+    name:str
+    path:str
+    image_id: str
+    project_id: str
+
+class Annotation(NewAnnotation):
     id: PydanticObjectId = Field(..., alias="_id")
