@@ -5,7 +5,7 @@ from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder
 import logging
 from typing import List
 
@@ -129,6 +129,11 @@ async def get_models(user: str):
 async def get_models(id: str):
     models = await fetch_models_by_project(id)
     return models
+
+@app.post("/create_model_folder/{id}")
+async def prepare_models_folder(id:str):
+    model = await prepare_model_folder(id)
+    return model
 
 #Annotations
 

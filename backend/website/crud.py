@@ -198,6 +198,12 @@ async def fetch_models_by_project(id):
         models.append(model)
     return models
 
+async def prepare_model_folder(id):
+    model = collection_models.find({"_id":ObjectId(id)})
+    async for doc in model:
+        os.makedirs(doc["path"])
+    return model
+
 async def fetch_rankings_images_by_project(project_id):
 
     # Get image paths
@@ -421,6 +427,8 @@ async def train_models(project_id, models_id, image_size, epoch_len, batch_size,
         yaml.dump(data, file, allow_unicode=True)
 
     train_model(image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
+
+    
 
     return model
 

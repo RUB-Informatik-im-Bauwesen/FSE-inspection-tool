@@ -125,7 +125,7 @@ def get_roi_matches(iou_matrices):
 
 def train_model(image_size, epoch_len, batch_size, yaml_path, models_id):
     old_path = "storage/Models/"+str(models_id)
-    new_path = "storage/Models/Deleted"
+    new_path = "storage/Models/Deleted2"
     os.rename(old_path,new_path)
     weights_path = new_path + "/weights/best.pt"
     subprocess.run(
