@@ -1,0 +1,8 @@
+names:
+  0: Wandhydrant
+  1: Steigleitung
+  2: Loeschwasserleitung
+  3: Feuerloescher
+path: C:\Users\Ayman\Desktop\training\Application-Active-Learning\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\storage\Projects\string_test5
+train: images/train
+val: images/val

@@ -29,9 +29,6 @@ class NewProject(BaseModel):
     name: str
     description: Optional[str]
     path: str
-    train_path: str
-    val_path: str
-    #yaml_path: str
 
 class Project(NewProject):
     id: PydanticObjectId = Field(..., alias="_id")

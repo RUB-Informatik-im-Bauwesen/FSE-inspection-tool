@@ -123,8 +123,12 @@ def get_roi_matches(iou_matrices):
     return max_values, matches, min_match
 
 
-def train_model(image_size, epoch_len, batch_size, yaml_path, weights_path):
-   #subprocess.run(
-       # ["python", yolov5_train_dir, "--img", image_size, "--batch", batch_size, "--epochs", epoch_len, "--data", yaml_path,
-         #"--weights", weights_path, "--project", "storage/Models/", "--name", "YOLO_MODEL_1","--device","0"], check=True)
-    pass
+def train_model(image_size, epoch_len, batch_size, yaml_path, models_id):
+    old_path = "storage/Models/"+str(models_id)
+    new_path = "storage/Models/Deleted"
+    #os.rename(old_path,new_path)
+    weights_path = old_path + "/weights/best.pt"
+    subprocess.run(
+        ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size), "--epochs", str(epoch_len), "--data", yaml_path,
+        "--weights", weights_path, "--project", "storage/Models/", "--name", str(models_id),"--device","0"], check=True)
+

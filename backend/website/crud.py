@@ -9,7 +9,7 @@ from backend.website.models import User, Project, Image, Model, Annotation
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model
 import os
 import shutil
 import random
@@ -347,17 +347,28 @@ async def prepare_for_training(project_id, user):
     folder_name = user["username"] + "_" + project["name"]
     train_dir = path + folder_name + "\\" + "images" + "\\"+ "train"#os.path.join(path, folder_name, "images", "train")
     val_dir = path + folder_name + "\\" + "images" + "\\"+ "val"
+    train_label_dir = path + folder_name + "\\" + "labels" + "\\"+ "train"
+    val_label_dir = path + folder_name + "\\" + "labels" + "\\"+ "val"
     train_ratio = 0.8  # ratio of images to use for training
 
-    # Get list of selected images
+    # Get list of selected images and get list of annotations from selected images
     # Get image paths
     images = []
+    image_ids = []
     images_for_return = []
+    annotations = []
     cursor = collection_images.find({"project_id": project_id, "selected": True})
     async for document in cursor:
         path = document["path"]
         images.append(path)
+        image_id = str(document["_id"])
+        image_ids.append(image_id)
         images_for_return.append(Image(**document))
+
+    for image_id in image_ids:
+        annotation = collection_annotations.find({"image_id":image_id})
+        async for doc in annotation:
+            annotations.append({"name": doc["name"], "path":doc["path"]})
 
     # Split into training and validation sets
     num_train = int(len(images) * train_ratio)
@@ -369,12 +380,22 @@ async def prepare_for_training(project_id, user):
     for image_path in train_images:
         basename = os.path.basename(image_path)
         dest_path = os.path.join(train_dir, basename)
+        for annotation in annotations:
+            if annotation["name"] == os.path.splitext(basename)[0]:
+                basename_annotation = os.path.basename(annotation["path"])
+                dest_annotation_path = os.path.join(train_label_dir,basename_annotation)
+                shutil.copyfile(annotation["path"], dest_annotation_path)
         shutil.copyfile(image_path, dest_path)
 
     # Copy validation images to validation directory
     for image_path in val_images:
         basename = os.path.basename(image_path)
         dest_path = os.path.join(val_dir, basename)
+        for annotation in annotations:
+            if annotation["name"] == os.path.splitext(basename)[0]:
+                basename_annotation = os.path.basename(annotation["path"])
+                dest_annotation_path = os.path.join(val_label_dir,basename_annotation)
+                shutil.copyfile(annotation["path"], dest_annotation_path)
         shutil.copyfile(image_path, dest_path)
 
     return images_for_return
@@ -385,14 +406,25 @@ async def train_models(project_id, models_id, image_size, epoch_len, batch_size,
     model = collection_models.find_one({"_id": ObjectId(models_id)})
     if not model:
         raise HTTPException(status_code=404, detail="No models found in the project.")
-    project = collection_projects.find_one({"project_id": ObjectId(project_id)})
+    project = await collection_projects.find_one({"_id": ObjectId(project_id)})
+    project = dict(project)
+    names_dict = {i: class_names[i] for i in range(len(class_names))}
+    path_to_project = os.getcwd() + "\\" + project["path"]
+    data = {
+        "path": path_to_project,
+        "train": "images/train",
+        "val": "images/val",
+        "names": names_dict
+    }
 
-    dict_file = [{'path': [project["path"]]},{'train':[project["train_path"]]},{'val':[project['val_path']]}, {'names': class_names}]
+    with open(project["path"] + "\\data.yaml", "w") as file:
+        yaml.dump(data, file, allow_unicode=True)
 
-    #Create YAML
+    train_model(image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
 
-    with open(project["path"] + "\\data.yaml") as file:
-        documents = yaml.dump(dict_file,file)
+    return model
+
+
 
 async def upload_annotation(annotation, user):
   document = dict(annotation, **{"username": user["username"]})
