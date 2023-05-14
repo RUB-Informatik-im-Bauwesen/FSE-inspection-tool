@@ -1,6 +1,6 @@
-weights: yolov5s.pt
+weights: storage/Models/Deleted/weights/best.pt
 cfg: ''
-data: /content/drive/MyDrive/train_dataset/labels.yaml
+data: storage\Projects\string_test5\data.yaml
 hyp:
   lr0: 0.01
   lrf: 0.01
@@ -30,8 +30,8 @@ hyp:
   mosaic: 1.0
   mixup: 0.0
   copy_paste: 0.0
-epochs: 50
-batch_size: 16
+epochs: 5
+batch_size: 1
 imgsz: 640
 rect: false
 resume: false
@@ -41,7 +41,7 @@ noautoanchor: false
 noplots: false
 evolve: null
 bucket: ''
-cache: ram
+cache: null
 image_weights: false
 device: '0'
 multi_scale: false
@@ -49,8 +49,8 @@ single_cls: false
 optimizer: SGD
 sync_bn: false
 workers: 8
-project: runs/train
-name: YOLO_MODEL_v4
+project: storage/Models/
+name: 645c1580dcdc487dd9fdfcbc
 exist_ok: false
 quad: false
 cos_lr: false
@@ -65,4 +65,4 @@ entity: null
 upload_dataset: false
 bbox_interval: -1
 artifact_alias: latest
-save_dir: runs/train/YOLO_MODEL_v42
+save_dir: storage\Models\645c1580dcdc487dd9fdfcbc
