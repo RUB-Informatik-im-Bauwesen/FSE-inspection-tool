@@ -428,7 +428,14 @@ async def train_models(project_id, models_id, image_size, epoch_len, batch_size,
 
     train_model(image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
 
-    
+    for root, dirs, files in os.walk(project["path"]):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                os.remove(file_path)
+                print(f'Deleted file: {file_path}')
+            except Exception as e:
+                print(f'Error deleting file: {file_path}\n{e}')
 
     return model
 
