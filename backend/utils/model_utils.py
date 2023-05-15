@@ -126,7 +126,8 @@ def get_roi_matches(iou_matrices):
 def train_model(image_size, epoch_len, batch_size, yaml_path, models_id):
     old_path = "storage/Models/"+str(models_id)
     new_path = "storage/Models/Deleted"
-    os.rename(old_path,new_path)
+    if(os.path.exists(old_path)):
+        os.rename(old_path,new_path)
     weights_path = new_path + "/weights/best.pt"
     subprocess.run(
         ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size), "--epochs", str(epoch_len), "--data", yaml_path,

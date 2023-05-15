@@ -28,7 +28,6 @@ class NewUser(User):
 class NewProject(BaseModel):
     name: str
     description: Optional[str]
-    path: str
 
 class Project(NewProject):
     id: PydanticObjectId = Field(..., alias="_id")

@@ -55,7 +55,7 @@ async def create_project(project, user):
     os.makedirs(os.path.join(path, folder_name, "images", "val"))
     os.makedirs(os.path.join(path, folder_name, "labels", "train"))
     os.makedirs(os.path.join(path, folder_name, "labels", "val"))
-  document = dict(project, **{"username": user["username"],"train_path": os.path.join(path, folder_name, "images", "train"), "val_path": os.path.join(path, folder_name, "images", "val")})
+  document = dict(project, **{"username": user["username"],"path":path_print, "train_path": os.path.join(path, folder_name, "images", "train"), "val_path": os.path.join(path, folder_name, "images", "val")})
   await collection_projects.insert_one(document)
 
 async def update_project(id, name, description, user):
@@ -201,8 +201,8 @@ async def fetch_models_by_project(id):
 async def prepare_model_folder(id):
     model = collection_models.find({"_id":ObjectId(id)})
     async for doc in model:
-        os.makedirs(doc["path"])
-    return model
+        os.makedirs(os.path.dirname(doc["path"]))
+    return {"Success": "Created folders"}
 
 async def fetch_rankings_images_by_project(project_id):
 

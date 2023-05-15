@@ -1,6 +1,6 @@
-weights: storage/Models/Deleted2/weights/best.pt
+weights: storage/Models/Deleted/weights/best.pt
 cfg: ''
-data: storage\Projects\string_test5\data.yaml
+data: storage\Projects\string_Feuerloescher\data.yaml
 hyp:
   lr0: 0.01
   lrf: 0.01
@@ -30,7 +30,7 @@ hyp:
   mosaic: 1.0
   mixup: 0.0
   copy_paste: 0.0
-epochs: 5
+epochs: 4
 batch_size: 1
 imgsz: 640
 rect: false
