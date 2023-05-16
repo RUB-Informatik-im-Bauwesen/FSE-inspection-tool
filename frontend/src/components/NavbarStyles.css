@@ -2,9 +2,22 @@ nav{
   display: flex;
   align-items: 	center;
   justify-content: space-between;
-  background: #1b2430;
+  background: #d43428;
   padding: 20px 80px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+}
+
+nav img{
+  width:80px;
+  height:80px;
+}
+
+nav h1{
+  font-family: 'Varela Round';
+  color: #fff;
+  justify-content:flex-start;
+  margin-right: auto;
+  padding: 0px 0px 0px 20px;
 }
 
 #navbar{
@@ -21,6 +34,7 @@ nav{
 
 #navbar li a{
   text-decoration: none;
+  font-family: 'Varela Round';
   font-size: 1.3rem;
   font-weight: 600;
   color: #fff;
@@ -29,7 +43,7 @@ nav{
 
 #navbar li a:hover,
 #navbar li a.active{
-  color: #17cf97
+  color: #383130
 }
 
 #navbar li a:hover::after,
@@ -37,7 +51,7 @@ nav{
   content: "";
   width: 30%;
   height: 2px;
-  background: #17cf97;
+  background: #383130;
   position: absolute;
   bottom: -4px;
   left: 20px;
@@ -62,7 +76,7 @@ nav{
     right: -300px;
     width: 300px;
     height: 100vh;
-    background-color: #2a3239;
+    background-color: #d43428;
     box-shadow: 0 40px 60px rgba(0,0,0,0.1);
     padding: 40px 0 0 10px;
     transition: 0.3s ease-in-out;
