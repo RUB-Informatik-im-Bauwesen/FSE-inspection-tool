@@ -25,9 +25,6 @@ async def create_user(user):
     document = await collection_users.find_one({"username": user["username"]})
     if document:
         raise HTTPException(status_code=409, detail="User already registered")
-    document = await collection_users.find_one({"email": user["email"]})
-    if document:
-        raise HTTPException(status_code=409, detail="Email already registered")
     await collection_users.insert_one(user)
 
 

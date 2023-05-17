@@ -1,15 +1,16 @@
 nav{
   display: flex;
+  flex: 1;
   align-items: 	center;
   justify-content: space-between;
   background: #d43428;
-  padding: 20px 80px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.06);
 }
 
 nav img{
   width:80px;
   height:80px;
+  margin: 20px;
 }
 
 nav h1{
@@ -17,7 +18,8 @@ nav h1{
   color: #fff;
   justify-content:flex-start;
   margin-right: auto;
-  padding: 0px 0px 0px 20px;
+  font-size: 30px;
+  padding: 10px 0px 0px 20px;
 }
 
 #navbar{
@@ -57,6 +59,13 @@ nav h1{
   left: 20px;
 }
 
+.display-on {
+  display: block;
+}
+
+.display-off {
+  display: none;
+}
 #mobile {
   display: none;
 }
@@ -65,25 +74,42 @@ nav h1{
   color: #fff;
 }
 
+
+
 @media screen and (max-width: 769px){
+
+
+
+  nav h1{
+    font-size: 22px;
+    padding: 10px 0px 0px 0px;
+    display: none;
+  }
+
   #navbar{
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
     position: fixed;
-    top: 90px;
-    right: -300px;
-    width: 300px;
+    top: 120px;
+    right: -250px;
+    width: 200px;
     height: 100vh;
-    background-color: #d43428;
-    box-shadow: 0 40px 60px rgba(0,0,0,0.1);
+    background-color: rgb(212, 52, 40,0.8);
+    box-shadow: 0 40px 60px rgba(0,0,0,0.5);
     padding: 40px 0 0 10px;
     transition: 0.3s ease-in-out;
   }
 
+
   #navbar li{
     margin-bottom: 25px;
+  }
+
+  #navbar li a{
+    opacity: 1;
   }
 
   #navbar.active{
@@ -97,5 +123,6 @@ nav h1{
   #mobile i{
     font-size: 24px;
     cursor: pointer;
+    padding: 10px 50px 0px 0px
   }
 }

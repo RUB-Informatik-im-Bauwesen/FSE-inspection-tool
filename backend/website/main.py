@@ -11,7 +11,15 @@ from typing import List
 
 app = FastAPI()
 
-logger = logging.getLogger("api")
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #For authentication later
 SECRET = "super-secret-key"
@@ -43,6 +51,10 @@ async def login(data: OAuth2PasswordRequestForm = Depends()):
 
     access_token = manager.create_access_token(data={"sub": username})
     return {"access_token": access_token}
+
+@app.get("/get_user")
+async def get_user(user=Depends(manager)):
+    return user["username"]
 
 #Projects
 

@@ -17,7 +17,6 @@ class PydanticObjectId(BsonObjectId):
 # User model
 class User(BaseModel):
     username: str
-    email: EmailStr
     password: str
 
 class NewUser(User):
