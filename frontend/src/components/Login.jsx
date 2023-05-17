@@ -139,7 +139,7 @@ export default function (props) {
               />
             </div>
             <div className="d-grid gap-2 mt-3">
-              <button onClick={register} type="submit" className="btn btn-primary">
+              <button onClick={register} type="button" className="btn btn-primary">
                 Submit
               </button>
             </div>
