@@ -1,16 +1,35 @@
-import React from 'react'
+import React, {useState} from 'react'
 import "./NavbarStyles.css"
 import img from './fire_extinguisher.png'
+import axios from 'axios'
 
-class Navbar extends React.Component{
-  state={clicked: false, loggedIn: false}
+const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
 
+  const [clicked, SetClicked] = useState(false)
+  const [loggedIn, SetLoggedIn] = useState(false)
+  const [projects, SetProject] = useState([])
 
-  handleClick = () => {
-    this.setState({clicked: !this.state.clicked})
+  const handleClick = () => {
+    SetClicked(!clicked)
   }
 
-  render(){
+  const get_projects_by_user = () => {
+
+    axios
+      .get("http://127.0.0.1:8000/get_all_projects_by_user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        SetProject(res.data)
+        setProjects(res.data)
+      }).catch((err) => {
+        console.log(err)
+      });
+    setTimeout(() => {
+      window.location.replace("http://127.0.0.1:5173/Projects")
+    },500)
+  }
+
     return (
       <nav>
 
@@ -20,30 +39,29 @@ class Navbar extends React.Component{
         </a>
         <h1>AL Application for TBE</h1>
 
-        <div className={this.props.isLoggedIn ? "display-on" : "display-off"}>
-          <ul id="navbar" className={this.state.clicked ? "#navbar active" : "#navbar"}>
+        <div className={isLoggedIn ? "display-on" : "display-off"}>
+          <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
             <li><a className='active' href='index.html'>Home</a></li>
-            <li><a href='index.html'>Projects</a></li>
+            <li><a onClick={get_projects_by_user}>Projects</a></li>
             <li><a href='index.html'>Statistics</a></li>
             <li><a href='index.html'>FAQ</a></li>
-            <li><a onClick={this.props.onLogout} href='index.html'>Welcome {this.props.username}! Logout</a></li>
+            <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
           </ul>
         </div>
 
-        <div className={this.props.isLoggedIn ? "display-off" : "display-on"}>
-          <ul id="navbar" className={this.state.clicked ? "#navbar active" : "#navbar"}>
+        <div className={isLoggedIn ? "display-off" : "display-on"}>
+          <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
             <li><a className='active' href='index.html'>Home</a></li>
             <li><a href='index.html'>FAQ</a></li>
           </ul>
         </div>
 
         <div id='mobile'>
-          <i id='bar' className={this.state.clicked ? 'fas fa-times' : 'fas fa-bars'} onClick={this.handleClick}></i>
+          <i id='bar' className={clicked ? 'fas fa-times' : 'fas fa-bars'} onClick={handleClick}></i>
         </div>
 
       </nav>
     )
   }
-}
 
 export default Navbar

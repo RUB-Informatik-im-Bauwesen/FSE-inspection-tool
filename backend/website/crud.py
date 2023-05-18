@@ -83,7 +83,7 @@ async def delete_project(id, user):
 
 async def fetch_projects_by_user(user):
     projects = []
-    cursor = collection_projects.find({"username": user})
+    cursor = collection_projects.find({"username": user["username"]})
     async for document in cursor:
         project = Project(**document)
         projects.append(project)

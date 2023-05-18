@@ -5,26 +5,29 @@ import './App.css'
 import Navbar from './components/Navbar'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "./components/Login"
+import ProjectList from './components/ProjectList'
 
 function App() {
 
   const[isLoggedIn, SetIsLoggedIn] = useState(false);
   const[accessToken, SetAcessToken] = useState("");
   const[userName, SetUsername] = useState("")
+  const[projects, SetProjects] = useState([])
 
   useEffect(() => {
     // Check if user is already logged in from localStorage
     const username = window.localStorage.getItem("Username")
     SetUsername(username)
     const loggedInStatus = window.localStorage.getItem('isLoggedIn');
-    console.log(loggedInStatus)
-    console.log("hello")
     if (loggedInStatus === 'true') {
       SetIsLoggedIn(true);
     } else{
       SetIsLoggedIn(false);
     }
-
+    SetAcessToken(window.localStorage.getItem("Access_token"));
+    if (window.localStorage.getItem("Projects")){
+      SetProjects(JSON.parse(window.localStorage.getItem("Projects")))
+    }
   }, []);
 
   const handleUsername = (username) => {
@@ -48,19 +51,29 @@ function App() {
   }
 
   const setToken = (accessToken) => {
-    if(isLoggedIn){
-      SetAcessToken(accessToken)
-    }
-    else{
-      SetAcessToken("")
-    }
+    SetAcessToken(accessToken)
+    window.localStorage.setItem("Access_token",accessToken)
   }
 
+  const setProject = (projects) => {
+    SetProjects(projects)
+    console.log("hey")
+    console.log(projects)
+    window.localStorage.setItem("Projects",JSON.stringify(projects))
+  }
+
+
+
   return (
+    <BrowserRouter>
       <div className='App'>
-        <Navbar username = {userName} accessToken={accessToken} isLoggedIn={isLoggedIn} onLogout={handleLogout}></Navbar>
-        <Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn}></Login>
+        <Navbar username = {userName} accessToken={accessToken} isLoggedIn={isLoggedIn} onLogout={handleLogout} setProjects = {setProject}></Navbar>
+        <Routes>
+          <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
+          <Route path="/Projects" element={<ProjectList projects = {projects}/>}/>
+        </Routes>
       </div>
+    </BrowserRouter>
   )
 }
 

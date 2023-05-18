@@ -74,7 +74,7 @@ async def delete_projects(id: str, user=Depends(manager)):
     return Project(**item)
 
 @app.get("/get_all_projects_by_user")
-async def get_projects_by_user(user: str):
+async def get_projects_by_user(user=Depends(manager)):
     projects = await fetch_projects_by_user(user)
     return projects
 
