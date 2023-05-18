@@ -70,7 +70,7 @@ function App() {
         <Navbar username = {userName} accessToken={accessToken} isLoggedIn={isLoggedIn} onLogout={handleLogout} setProjects = {setProject}></Navbar>
         <Routes>
           <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
-          <Route path="/Projects" element={<ProjectList projects = {projects}/>}/>
+          <Route path="/Projects" element={<ProjectList projects = {projects} accessToken={accessToken}/>}/>
         </Routes>
       </div>
     </BrowserRouter>

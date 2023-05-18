@@ -1,0 +1,54 @@
+.projects {
+  width: 200px;
+  height: 300px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: white;
+  margin: 15px;
+  margin-top: 20px;
+}
+
+.projectImage {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.description {
+  margin-top: 16px;
+}
+
+.description a {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+  text-decoration: none;
+}
+
+.description p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #777;
+}
+
+.counts {
+  display: flex;
+  align-items: center;
+  color: #777;
+}
+
+.counts span {
+  margin-right: 8px;
+}
+
+.counts img {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}

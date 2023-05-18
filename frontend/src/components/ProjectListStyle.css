@@ -1,0 +1,34 @@
+.projectListContainer {
+   /* Set the background color to a light gray */
+  padding: 16px;
+  justify-content: center;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.title {
+  margin-top: 0px;
+  font-size: 24px;
+  color: white;
+}
+
+.projectsContainer {
+  width: 100%;
+  max-height: calc(100vh - navbarHeight);
+  overflow-y: auto;
+}
+
+.projectsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content:flex-start
+}
+
+
+@media screen and (max-width: 821px){
+.projectsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+}
