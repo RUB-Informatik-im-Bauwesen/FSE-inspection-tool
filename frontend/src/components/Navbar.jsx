@@ -8,10 +8,14 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
   const [clicked, SetClicked] = useState(false)
   const [loggedIn, SetLoggedIn] = useState(false)
   const [projects, SetProject] = useState([])
+  const [activeLink, setActiveLink] = useState(""); // Initialize with an empty string
+
 
   const handleClick = () => {
     SetClicked(!clicked)
   }
+
+
 
   const get_projects_by_user = () => {
 
@@ -41,18 +45,18 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
 
         <div className={isLoggedIn ? "display-on" : "display-off"}>
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a className='active' href='index.html'>Home</a></li>
+            <li><a href='/'>Home</a></li>
             <li><a onClick={get_projects_by_user}>Projects</a></li>
-            <li><a href='index.html'>Statistics</a></li>
-            <li><a href='index.html'>FAQ</a></li>
+            <li><a href='/Statistics'>Statistics</a></li>
+            <li><a href='/FAQ'>FAQ</a></li>
             <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
           </ul>
         </div>
 
         <div className={isLoggedIn ? "display-off" : "display-on"}>
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a className='active' href='index.html'>Home</a></li>
-            <li><a href='index.html'>FAQ</a></li>
+            <li><a href='/'>Home</a></li>
+            <li><a href='/FAQ'>FAQ</a></li>
           </ul>
         </div>
 

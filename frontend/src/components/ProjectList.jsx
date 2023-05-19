@@ -7,25 +7,31 @@ import "./ProjectListStyle.css";
 const ProjectList = ({projects, accessToken}) => {
   return (
     <div className='projectListContainer'>
+      <div className="topRightContainer">
       <h1 className="title">Projects</h1> {/* Added title */}
-      <div className='projectsContainer'>
+        <input
+          type="text"
+          placeholder="Search..."
+        />
+        <button className="addButton">Add</button>
+
+      </div>
         <div className='projectsWrapper'>
+          <div className='consider_grid'>
           {projects.map((item, index) => {
             return (
               <Project
                 key={index}
                 name={item.name}
                 description={item.description}
-                image=""
-                imageCount=""
-                modelCount=""
                 _id = {item._id}
                 accessToken = {accessToken}
               />
             );
           })}
+          </div>
         </div>
-      </div>
+
     </div>
   );
 }

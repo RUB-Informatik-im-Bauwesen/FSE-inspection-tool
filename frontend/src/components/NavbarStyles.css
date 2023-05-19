@@ -26,6 +26,7 @@ nav h1{
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
 #navbar li{
@@ -97,7 +98,7 @@ nav h1{
     right: -250px;
     width: 200px;
     height: 100vh;
-    background-color: rgb(212, 52, 40,0.8);
+    background-color: rgb(212, 52, 40,0.9);
     box-shadow: 0 40px 60px rgba(0,0,0,0.5);
     padding: 40px 0 0 10px;
     transition: 0.3s ease-in-out;
