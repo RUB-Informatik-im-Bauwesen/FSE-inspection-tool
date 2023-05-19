@@ -79,6 +79,8 @@ async def delete_project(id, user):
     if user["username"] != document["username"]:
         raise HTTPException(status_code=403, detail="Unauthorized")
     document = await collection_projects.find_one_and_delete({"_id": ObjectId(id)})
+    if os.path.exists(document["path"]):
+        shutil.rmtree(document["path"])
     return document
 
 async def fetch_projects_by_user(user):

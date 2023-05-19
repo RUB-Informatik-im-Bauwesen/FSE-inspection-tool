@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import "./NavbarStyles.css"
-import img from './fire_extinguisher.png'
+import img from '/fire_extinguisher.png'
 import axios from 'axios'
 
 const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
