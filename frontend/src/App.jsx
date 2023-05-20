@@ -6,6 +6,7 @@ import Navbar from './components/Navbar'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "./components/Login"
 import ProjectList from './components/ProjectList'
+import ProjectSite from './components/ProjectSite'
 
 function App() {
 
@@ -71,6 +72,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
           <Route path="/Projects" element={<ProjectList projects = {projects} accessToken={accessToken}/>}/>
+          <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
         </Routes>
       </div>
     </BrowserRouter>

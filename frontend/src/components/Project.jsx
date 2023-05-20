@@ -57,7 +57,7 @@ const Project = ({key, name, description,_id, accessToken} ) => {
       <img src={get_images_of_project(accessToken,_id) ? get_images_of_project(accessToken,_id) : "/noimage.png"} className='projectImage'/>
       <div className='description'>
         <div className='title-container'>
-          <a href='/Projects' className='title'>{name}</a>
+          <a href={`/Projects/${_id}`} className='title'>{name}</a>
           <Button onClick={() =>{
            const confirmBox = window.confirm(`Do you really want to delete this project ${name}?`)
            if(confirmBox === true){

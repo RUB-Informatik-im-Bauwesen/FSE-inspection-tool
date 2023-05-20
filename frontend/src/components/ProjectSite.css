@@ -1,0 +1,59 @@
+.project-site {
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tab-navigation button {
+  border: none;
+  background-color: #f2f2f2;
+  padding: 10px 20px;
+  margin-right: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333; /* Adjust text color */
+}
+
+.tab-navigation button.active {
+  background-color: #ccc;
+  color: #fff; /* Adjust text color */
+}
+
+.tab-buttons button {
+  border: none;
+  padding: 10px 20px;
+  color:white;
+  background-color: #f31b1be3;
+  border-radius: 4px;
+  cursor: pointer;/* Adjust background color */
+  margin-right: 10px; /* Adjust text color */
+}
+
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-gap: 20px;
+}
+
+@media screen and (max-width: 821px){
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .tab-navigation button {
+    border: none;
+    background-color: #f2f2f2;
+    padding: 10px 20px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  }
