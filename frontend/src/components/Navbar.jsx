@@ -45,7 +45,6 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
 
         <div className={isLoggedIn ? "display-on" : "display-off"}>
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a href='/'>Home</a></li>
             <li><a onClick={get_projects_by_user}>Projects</a></li>
             <li><a href='/Statistics'>Statistics</a></li>
             <li><a href='/FAQ'>FAQ</a></li>
@@ -55,7 +54,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
 
         <div className={isLoggedIn ? "display-off" : "display-on"}>
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a href='/'>Home</a></li>
+            <li><a href='/'>Login</a></li>
             <li><a href='/FAQ'>FAQ</a></li>
           </ul>
         </div>

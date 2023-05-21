@@ -29,6 +29,10 @@
   cursor: pointer;
 }
 
+.addButton:hover{
+  background-color: #be1818d2;
+}
+
 
 .title {
   margin-top: 0px;

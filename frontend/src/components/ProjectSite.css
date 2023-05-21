@@ -1,12 +1,14 @@
 .project-site {
-  padding: 20px;
+  overflow-y: auto;
   border-radius: 4px;
 }
 
 .button-container {
   display: flex;
   justify-content: space-between;
+  margin-left: 10px;
 }
+
 
 .tab-navigation button {
   border: none;
@@ -26,18 +28,22 @@
 .tab-buttons button {
   border: none;
   padding: 10px 20px;
-  color:white;
+  color: white;
   background-color: #f31b1be3;
   border-radius: 4px;
-  cursor: pointer;/* Adjust background color */
-  margin-right: 10px; /* Adjust text color */
+  cursor: pointer;
+  margin-right: 10px;/* Adjust background color */
 }
 
+.tab-buttons button:hover{
+  background-color: #be1818d2;
+}
 
 .card-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
 }
 
 @media screen and (max-width: 821px){
@@ -56,4 +62,46 @@
     border-radius: 4px;
     cursor: pointer;
   }
+
+  .card-grid {
+    height: 100%;
+    overflow-y: scroll;
+    display: inline-flex;
+    flex-wrap: wrap;
   }
+
+  }
+
+
+@media screen and (max-width: 440px){
+
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .tab-navigation button {
+    border: none;
+    background-color: #f2f2f2;
+    padding: 10px 20px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .card-grid {
+    max-height: 68vh;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  }
+
+
+
+
+

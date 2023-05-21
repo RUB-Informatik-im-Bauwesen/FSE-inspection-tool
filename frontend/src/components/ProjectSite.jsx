@@ -8,7 +8,7 @@ const ProjectSite = ({ accessToken }) => {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [models, setModels] = useState([]);
-  const [activeTab, setActiveTab] = useState('images'); // Track the active tab
+  const [activeTab, setActiveTab] = useState(''); // Track the active tab
   const { id } = useParams();
 
   const getImagesOfProject = () => {
@@ -111,19 +111,19 @@ const ProjectSite = ({ accessToken }) => {
         <div className="tab-buttons">
           {activeTab === 'images' && (
             <>
-              <button className='btn btn-danger' onClick={addImage}>Add Images</button>
-              <button className='btn btn-danger' onClick={rankImages}>Rank Images</button>
+              <button className='addButton'  onClick={addImage}>Add Images</button>
+              <button className='addButton'  onClick={rankImages}>Rank Images</button>
             </>
           )}
           {activeTab === 'annotations' && (
             <>
-              <button className='btn btn-danger' onClick={addAnnotation}>Add Annotations</button>
+              <button  onClick={addAnnotation}>Add Annotations</button>
             </>
           )}
           {activeTab === 'models' && (
             <>
-              <button className='btn btn-danger' onClick={addModel}>Add Models</button>
-              <button className='btn btn-danger' onClick={startTraining}>Start Training</button>
+              <button  onClick={addModel}>Add Models</button>
+              <button  onClick={startTraining}>Start Training</button>
             </>
           )}
         </div>

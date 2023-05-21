@@ -63,6 +63,8 @@ export default function (props) {
         setloginError(false);
       }, 3000);
     })
+
+    window.location.replace("http://127.0.0.1:5173/Projects")
   }
 
   if (authMode === "signin" && !props.isLoggedIn) {
