@@ -6,7 +6,8 @@ const ProjectSiteCard = ({ data, type }) => {
 
   // Determine the image source based on the type
   if (type === 'images') {
-    imageSrc = "/" + data.name + ".jpg";
+    imageSrc = "/" + data.name;
+    console.log(imageSrc)
   } else if (type === 'annotations') {
     imageSrc = '/txt.png'; // Replace with the actual image path for annotations
   } else if (type === 'models') {

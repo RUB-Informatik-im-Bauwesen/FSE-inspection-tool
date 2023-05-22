@@ -1,5 +1,5 @@
 # Backend
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, UploadFile
 from fastapi_login import LoginManager
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
@@ -91,6 +91,20 @@ async def fetch_projects_by_user(user):
         projects.append(project)
     return projects
 
+async def upload_image_input(id, file: UploadFile, user):
+    contents = await file.read()
+
+    dest_path = f"frontend/public/{file.filename}"
+
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    image = {"name":file.filename, "file_type":"." + file.content_type.split("/")[1],"path":dest_path,"ranking":0,"selected":False,"project_id":id}
+
+    await upload_image(image, user)
+
+    return {"filename":file.filename}
+
 async def upload_image(image, user):
   document = dict(image, **{"username": user["username"]})
   check_same_image = await collection_images.find_one({"name" : document["name"]})
@@ -145,6 +159,7 @@ async def fetch_images_by_projects(id):
         image = Image(**document)
         images.append(image)
     return images
+
 
 async def upload_model(model, user):
   document = dict(model, **{"username": user["username"]})

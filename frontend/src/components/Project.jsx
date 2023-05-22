@@ -29,7 +29,7 @@ const Project = ({key, name, description,_id, accessToken} ) => {
         if (res.data && res.data.length > 0){
             data = res.data[0]
             image_paths = data.name
-            final_path = "/" + data.name + ".jpg"
+            final_path = "/" + data.name
             SetImagePath(final_path)
             SetImageLength(res.data.length)
           }

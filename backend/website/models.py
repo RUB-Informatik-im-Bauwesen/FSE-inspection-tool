@@ -36,10 +36,8 @@ class Project(NewProject):
 class NewImage(BaseModel):
     name: str
     file_type: str
-    date_uploaded: str
     path: str
     ranking: int
-    annotations: List[Tuple[int,float,float,float,float]]
     selected: bool
     project_id: str
 

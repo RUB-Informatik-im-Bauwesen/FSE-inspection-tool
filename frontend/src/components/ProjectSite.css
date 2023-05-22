@@ -40,11 +40,13 @@
 }
 
 .card-grid {
-  height: 100%;
-  overflow-y: auto;
+  height: 83vh;
+  overflow-y: scroll;
+  overflow: auto;
   display: inline-flex;
   flex-wrap: wrap;
 }
+
 
 @media screen and (max-width: 821px){
   .button-container {

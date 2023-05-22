@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './ProjectSite.css'; // Import the CSS file for styling
 import ProjectSiteCard from './ProjectSiteCard';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 
 const ProjectSite = ({ accessToken }) => {
   const [images, setImages] = useState([]);
@@ -10,6 +13,17 @@ const ProjectSite = ({ accessToken }) => {
   const [models, setModels] = useState([]);
   const [activeTab, setActiveTab] = useState(''); // Track the active tab
   const { id } = useParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [files, setFiles] = useState(null);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
 
   const getImagesOfProject = () => {
     const url = `http://127.0.0.1:8000/get_images_by_project/${id}`;
@@ -85,8 +99,54 @@ const ProjectSite = ({ accessToken }) => {
     }
   };
 
+  const handleImageUpload = (event) => {
+    const files = event.target.files;
+    setFiles(files)
+  }
+
+  const handleSubmitUpload = () => {
+    Array.from(files).forEach((file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const url = `http://127.0.0.1:8000/upload_images_input/${id}`;
+      axios
+        .post(url, formData, {
+          headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+
+    closeModal()
+  }
+
   return (
     <div className="project-site">
+      <Modal
+        show={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Upload Image Modal"
+      >
+      <Modal.Header closeModal>
+        <Modal.Title>Upload Images</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+      <input type="file" onChange={handleImageUpload} multiple="multiple"/>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={closeModal}>
+            Cancel
+        </Button>
+        <Button variant="danger" onClick={()=> handleSubmitUpload()}>
+            Submit
+        </Button>
+      </Modal.Footer>
+      </Modal>
       <div className="button-container">
         <div className="tab-navigation">
           <button
@@ -111,7 +171,7 @@ const ProjectSite = ({ accessToken }) => {
         <div className="tab-buttons">
           {activeTab === 'images' && (
             <>
-              <button className='addButton'  onClick={addImage}>Add Images</button>
+              <button className='addButton'  onClick={openModal}>Add Images</button>
               <button className='addButton'  onClick={rankImages}>Rank Images</button>
             </>
           )}
