@@ -169,6 +169,23 @@ async def upload_model(model, user):
   await collection_models.insert_one(document)
   return document
 
+async def upload_model_input(id, file: UploadFile, user):
+    contents = await file.read()
+
+    dest_folder = f"storage/Models/{file.filename}/weights"
+    os.makedirs(dest_folder, exist_ok=True)
+
+    dest_path = os.path.join(dest_folder, file.filename)
+
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    model = {"name":file.filename, "file_type":file.content_type,"path":dest_path,"project_id":id}
+
+    await upload_model(model, user)
+
+    return {"filename":file.filename}
+
 async def update_model(id, model, user):
     doc = dict(model)
     try:
@@ -467,6 +484,19 @@ async def upload_annotation(annotation, user):
   await collection_annotations.insert_one(document)
   return document
 
+async def upload_annotation_input(project_id, image_id, file: UploadFile, user):
+    contents = await file.read()
+
+    dest_path = f"storage/Annotations/{file.filename}"
+
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    annotation = {"name":file.filename,"path":dest_path, "image_id":image_id, "project_id":project_id}
+
+    await upload_annotation(annotation, user)
+
+    return {"filename":file.filename}
 
 async def update_annotation(id, annotation, user):
     doc = dict(annotation)

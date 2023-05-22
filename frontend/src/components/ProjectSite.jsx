@@ -34,6 +34,7 @@ const ProjectSite = ({ accessToken }) => {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           setImages(res.data);
+          console.log(res.data)
         }
       });
   };
@@ -99,7 +100,7 @@ const ProjectSite = ({ accessToken }) => {
     }
   };
 
-  const handleImageUpload = (event) => {
+  const handleFileUpload = (event) => {
     const files = event.target.files;
     setFiles(files)
   }
@@ -107,9 +108,24 @@ const ProjectSite = ({ accessToken }) => {
   const handleSubmitUpload = () => {
     Array.from(files).forEach((file) => {
       const formData = new FormData();
+      let desiredImage = ""
+      let id_desiredImage = null
+      let url = ""
       formData.append('file', file);
-
-      const url = `http://127.0.0.1:8000/upload_images_input/${id}`;
+      switch(activeTab){
+        case "images":
+          url = `http://127.0.0.1:8000/upload_images_input/${id}`;
+          break;
+        case "annotations":
+          desiredImage = images.find(image => image.name.split('.')[0] === file.name.split('.')[0]);
+          id_desiredImage = desiredImage._id
+          console.log(id_desiredImage)
+          url = `http://127.0.0.1:8000/upload_annotations_input/${id}/${id_desiredImage}`;
+          break;
+        case "models":
+          url = `http://127.0.0.1:8000/upload_models_input/${id}`;
+          break;
+      }
       axios
         .post(url, formData, {
           headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }
@@ -133,10 +149,14 @@ const ProjectSite = ({ accessToken }) => {
         contentLabel="Upload Image Modal"
       >
       <Modal.Header closeModal>
-        <Modal.Title>Upload Images</Modal.Title>
+      <Modal.Title>
+        {activeTab === 'images' && 'Upload Images'}
+        {activeTab === 'annotations' && 'Upload Annotations'}
+        {activeTab === 'models' && 'Upload Models'}
+  </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-      <input type="file" onChange={handleImageUpload} multiple="multiple"/>
+      <input type="file" onChange={handleFileUpload} multiple="multiple"/>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={closeModal}>
@@ -177,12 +197,12 @@ const ProjectSite = ({ accessToken }) => {
           )}
           {activeTab === 'annotations' && (
             <>
-              <button  onClick={addAnnotation}>Add Annotations</button>
+              <button  onClick={openModal}>Add Annotations</button>
             </>
           )}
           {activeTab === 'models' && (
             <>
-              <button  onClick={addModel}>Add Models</button>
+              <button  onClick={openModal}>Add Models</button>
               <button  onClick={startTraining}>Start Training</button>
             </>
           )}

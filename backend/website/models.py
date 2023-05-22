@@ -48,7 +48,6 @@ class Image(NewImage):
 class NewModel(BaseModel):
     name: str
     file_type: str
-    date_uploaded: str
     path: str
     project_id: str
 

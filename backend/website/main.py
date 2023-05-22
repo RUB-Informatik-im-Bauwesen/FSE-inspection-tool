@@ -5,9 +5,10 @@ from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input
 import logging
 from typing import List
+from datetime import timedelta
 
 app = FastAPI()
 
@@ -49,7 +50,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends()):
     if user["password"] != password:
         raise InvalidCredentialsException
 
-    access_token = manager.create_access_token(data={"sub": username})
+    access_token = manager.create_access_token(data={"sub": username}, expires=timedelta(hours=12))
     return {"access_token": access_token}
 
 @app.get("/get_user")
@@ -127,6 +128,11 @@ async def upload_models(model:NewModel, user=Depends(manager)):
     await upload_model(model, user)
     return model
 
+@app.post("/upload_models_input/{id}")
+async def upload_models_input(id:str, file: UploadFile, user=Depends(manager)):
+    contents = await upload_model_input(id=id, file=file, user=user)
+    return contents
+
 @app.put("/update_model/{id}")
 async def update_models(id: str, model:NewModel, user=Depends(manager)):
     item = await update_model(id, model, user)
@@ -158,6 +164,11 @@ async def prepare_models_folder(id:str):
 async def upload_annotations(annotation: NewAnnotation, user=Depends(manager)):
     await upload_annotation(annotation, user)
     return annotation
+
+@app.post("/upload_annotations_input/{project_id}/{image_id}")
+async def upload_annotations_input(project_id:str, image_id:str, file: UploadFile, user=Depends(manager)):
+    contents = await upload_annotation_input(project_id=project_id,image_id=image_id, file=file, user=user)
+    return contents
 
 @app.put("/update_annotation/{id}")
 async def update_annotations(id: str, annotation: NewAnnotation, user=Depends(manager)):
