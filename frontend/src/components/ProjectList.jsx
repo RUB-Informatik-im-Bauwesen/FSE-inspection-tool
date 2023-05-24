@@ -5,10 +5,20 @@ import axios from 'axios'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "./ProjectListStyle.css";
 
-const ProjectList = ({projects, accessToken}) => {
+const ProjectList = ({setProject ,projects, accessToken}) => {
   const [showPopup, setShowPopup] = useState(false);
   const [showFiltered, setShowFiltered] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    /*axios.get("http://127.0.0.1:8000/get_all_projects_by_user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        setProject(res.data)
+      }).catch((err) => {
+      });*/
+  },[])
 
 
   const handleTogglePopup = () => {
@@ -24,9 +34,11 @@ const ProjectList = ({projects, accessToken}) => {
     setSearchTerm(event.target.value);
   };
 
+
   const filteredProjects = projects.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   return (
     <div className='projectListContainer'>
@@ -51,7 +63,7 @@ const ProjectList = ({projects, accessToken}) => {
               _id = {item._id}
               accessToken = {accessToken}
             />
-          )) : projects.map((item, index) => {
+          )) : projects.length > 0 ? projects.map((item, index) => {
             return (
               <Project
                 key={index}
@@ -61,7 +73,7 @@ const ProjectList = ({projects, accessToken}) => {
                 accessToken = {accessToken}
               />
             );
-          })}
+          }) : "" }
           </div>
         </div>
 

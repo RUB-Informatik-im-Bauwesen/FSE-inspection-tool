@@ -39,10 +39,14 @@ function App() {
 
   const handleLogout = () => {
     // Clear login status from localStorage
-    window.localStorage.setItem('isLoggedIn', 'false');
     SetIsLoggedIn(false);
     SetUsername("")
+    SetAcessToken("")
+    SetProjects([])
+    window.localStorage.setItem('isLoggedIn', 'false');
     window.localStorage.setItem("Username","")
+    window.localStorage.setItem("Access_token","")
+    window.localStorage.setItem("Projects","")
   }
 
   const setLogin = () => {
@@ -58,8 +62,6 @@ function App() {
 
   const setProject = (projects) => {
     SetProjects(projects)
-    console.log("hey")
-    console.log(projects)
     window.localStorage.setItem("Projects",JSON.stringify(projects))
   }
 
@@ -71,7 +73,7 @@ function App() {
         <Navbar username = {userName} accessToken={accessToken} isLoggedIn={isLoggedIn} onLogout={handleLogout} setProjects = {setProject}></Navbar>
         <Routes>
           <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
-          <Route path="/Projects" element={<ProjectList projects = {projects} accessToken={accessToken}/>}/>
+          <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
         </Routes>
       </div>

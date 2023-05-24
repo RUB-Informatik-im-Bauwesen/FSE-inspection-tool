@@ -30,7 +30,7 @@ async def create_user(user):
 
 async def create_project(project, user):
   document = dict(project, **{"username": user["username"]})
-  check_name = await collection_projects.find_one({"name": document["name"]})
+  check_name = await collection_projects.find_one({"username": document["username"], "name" :document["name"]})
   if check_name:
       raise HTTPException(status_code=409, detail="Choose a different name!")
   # specify the path where you want to create the new folder
