@@ -118,7 +118,7 @@ async def upload_image(image, user):
   return document
 
 async def update_image(id, image, user):
-    doc = dict(image)
+    doc = image
     try:
         document = await collection_images.find_one({"_id": ObjectId(id)})
     except InvalidId:
@@ -128,7 +128,8 @@ async def update_image(id, image, user):
         raise HTTPException(status_code=404, detail="ID not found")
     if user["username"] != document["username"]:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    updated_image = await collection_images.find_one_and_update({"_id": ObjectId(id)}, {"$set": {"name": doc["name"], "file_type": doc["file_type"], "date_uploaded":doc["date_uploaded"], "path":doc["path"]}})
+    update_data = {"$set": image}  # Assuming `image` contains the fields to update
+    updated_image = await collection_images.find_one_and_update({"_id": ObjectId(id)}, update_data)
     return updated_image
 
 async def delete_image(id, user):

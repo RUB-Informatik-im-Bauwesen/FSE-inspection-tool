@@ -7,7 +7,7 @@ from backend.website.db import collection_users, collection_annotations, collect
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation
 from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input
 import logging
-from typing import List
+from typing import List, Dict
 from datetime import timedelta
 
 app = FastAPI()
@@ -91,8 +91,8 @@ async def upload_images_input(id:str, file: UploadFile, user=Depends(manager)):
     contents = await upload_image_input(id=id, file=file, user=user)
     return contents
 
-@app.put("/update_image/{id}")
-async def update_images(id:str, image: NewImage, user=Depends(manager)):
+@app.patch("/update_image/{id}")
+async def update_images(id:str, image: Dict, user=Depends(manager)):
     item = await update_image(id, image, user)
     return Image(**item)
 
@@ -105,6 +105,7 @@ async def delete_images(id:str, user=Depends(manager)):
 async def get_images(user=Depends(manager)):
     images = await fetch_images_by_user(user)
     return images
+
 
 @app.get("/get_images_by_project/{id}")
 async def get_project_images(id :str , user=Depends(manager)):

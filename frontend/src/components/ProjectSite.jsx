@@ -215,7 +215,7 @@ const ProjectSite = ({ accessToken }) => {
             {activeTab === 'images' && (
           <div className="card-grid">
             {images.map((image, index) => (
-              <ProjectSiteCard key={index} data={image} type="images" />
+              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={image} type="images" />
             ))}
           </div>
         )}
@@ -223,14 +223,14 @@ const ProjectSite = ({ accessToken }) => {
         {activeTab === 'annotations' && (
           <div className="card-grid">
             {annotations.map((annotation, index) => (
-              <ProjectSiteCard key={index} data={annotation} type="annotations" />
+              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={annotation} type="annotations" />
             ))}
           </div>
         )}
         {activeTab === 'models' && (
           <div className="card-grid">
             {models.map((model, index) => (
-              <ProjectSiteCard key={index} data={model} type="models" />
+              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={model} type="models" />
             ))}
     </div>
   )}
