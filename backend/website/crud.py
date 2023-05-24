@@ -108,12 +108,9 @@ async def upload_image_input(id, file: UploadFile, user):
 async def upload_image(image, user):
   document = dict(image, **{"username": user["username"]})
   check_same_image = await collection_images.find_one({"name" : document["name"]})
-  check_same_project = await collection_images.find_one({"project_id" : document["project_id"]})
+  check_same_project = await collection_images.find_one({"name" : document["name"], "project_id" : document["project_id"]})
   if check_same_image and check_same_project:
       raise HTTPException(status_code=404, detail="Change Image name!")
-  check_same_path = await collection_images.find_one({"name" : document["path"]})
-  if check_same_path and check_same_project:
-      raise HTTPException(status_code=404, detail="Same path as an other image!")
   await collection_images.insert_one(document)
   return document
 
