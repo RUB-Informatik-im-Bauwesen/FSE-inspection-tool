@@ -24,7 +24,7 @@ const ProjectSite = ({ accessToken }) => {
     setIsModalOpen(false);
   };
 
-  
+
 
 
   const getImagesOfProject = () => {
@@ -37,6 +37,8 @@ const ProjectSite = ({ accessToken }) => {
         if (res.data && res.data.length > 0) {
           setImages(res.data);
           console.log(res.data)
+        } else{
+          setImages("")
         }
       });
   };
@@ -50,6 +52,8 @@ const ProjectSite = ({ accessToken }) => {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           setModels(res.data);
+        } else{
+          setModels("")
         }
       });
   };
@@ -63,6 +67,8 @@ const ProjectSite = ({ accessToken }) => {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           setAnnotations(res.data);
+        } else{
+          setAnnotations("")
         }
       });
   };
@@ -84,7 +90,16 @@ const ProjectSite = ({ accessToken }) => {
   };
 
   const rankImages = () => {
-    // Logic to rank the images
+    const url = `http://127.0.0.1:8000/get_rankings_of_images/${id}`;
+    axios
+      .get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        setImages(res.data)
+        console.log("Ranked Images")
+        console.log(res.data)
+      });
   };
 
   const handleTabChange = (tab) => {
@@ -121,7 +136,6 @@ const ProjectSite = ({ accessToken }) => {
         case "annotations":
           desiredImage = images.find(image => image.name.split('.')[0] === file.name.split('.')[0]);
           id_desiredImage = desiredImage._id
-          console.log(id_desiredImage)
           url = `http://127.0.0.1:8000/upload_annotations_input/${id}/${id_desiredImage}`;
           break;
         case "models":
@@ -214,22 +228,22 @@ const ProjectSite = ({ accessToken }) => {
       {/* Tab content */}
       <div className="tab-content">
 
-            {activeTab === 'images' && (
+            {activeTab === 'images' && images && (
           <div className="card-grid">
-            {images.map((image, index) => (
+            {images.sort((a,b) => a.ranking - b.ranking).map((image, index) => (
               <ProjectSiteCard id={id} access_token={accessToken} key={index} data={image} type="images" />
             ))}
           </div>
         )}
 
-        {activeTab === 'annotations' && (
+        {activeTab === 'annotations' && annotations && (
           <div className="card-grid">
             {annotations.map((annotation, index) => (
               <ProjectSiteCard id={id} access_token={accessToken} key={index} data={annotation} type="annotations" />
             ))}
           </div>
         )}
-        {activeTab === 'models' && (
+        {activeTab === 'models' && models && (
           <div className="card-grid">
             {models.map((model, index) => (
               <ProjectSiteCard id={id} access_token={accessToken} key={index} data={model} type="models" />

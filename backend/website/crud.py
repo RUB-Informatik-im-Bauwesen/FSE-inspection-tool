@@ -346,7 +346,10 @@ async def fetch_rankings_images_by_project(project_id):
             rankings_list.append(result)
 
     # Sort the rankings list by the uncertainty score in descending order
-    rankings_list.sort(key=lambda x: x[1], reverse=True)
+    if(len(models) == 1):
+        rankings_list.sort(key=lambda x: x[1], reverse=False)
+    else:
+        rankings_list.sort(key=lambda x: x[1], reverse=True)
 
     # Create a new list of lists with the image name and rank
     ranked_images = {}
@@ -473,7 +476,7 @@ async def train_models(project_id, models_id, image_size, epoch_len, batch_size,
 async def upload_annotation(annotation, user):
   document = dict(annotation, **{"username": user["username"]})
   check_same_annotation = await collection_annotations.find_one({"name" : document["name"]})
-  check_same_project = await collection_annotations.find_one({"image_id" : document["image_id"]})
+  check_same_project = await collection_annotations.find_one({"image_id" : document["image_id"],"project_id" : document["project_id"]})
   if check_same_annotation or check_same_project:
       raise HTTPException(status_code=404, detail="Change Annotations name or Image ID!")
   check_same_path = await collection_annotations.find_one({"name" : document["path"]})

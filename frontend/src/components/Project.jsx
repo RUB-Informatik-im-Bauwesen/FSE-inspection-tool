@@ -25,7 +25,6 @@ const Project = ({key, name, description,_id, accessToken} ) => {
     axios.get(url, {
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
-        console.log(res.data)
         if (res.data && res.data.length > 0){
             data = res.data[0]
             image_paths = data.name

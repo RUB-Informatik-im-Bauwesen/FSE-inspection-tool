@@ -194,7 +194,7 @@ async def get_annotations_by_project(id: str):
 #Active Learning
 
 @app.get("/get_rankings_of_images/{project_id}")
-async def get_rankings_of_images(project_id: str):
+async def get_rankings_of_images(project_id: str, user=Depends(manager)):
     images_with_rankings = await fetch_rankings_images_by_project(project_id)
     ranked_images = []
     for ranked_image in images_with_rankings:

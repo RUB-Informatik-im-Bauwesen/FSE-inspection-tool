@@ -40,7 +40,6 @@ export default function (props) {
     axios.get("http://127.0.0.1:8000/get_user", {
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
-        console.log(res.data)
         props.setUsername(res.data)
       })
   }
@@ -53,7 +52,6 @@ export default function (props) {
     axios.post("http://127.0.0.1:8000/login", data).then((res) => {
       setLoggedIn(true);
       props.login()
-      console.log(res.data.access_token)
       props.setToken(res.data.access_token)
       get_username(res.data.access_token)
     }).catch((err) => {

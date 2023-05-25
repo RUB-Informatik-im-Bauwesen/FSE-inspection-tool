@@ -62,7 +62,7 @@
     }
 
     .card-grid {
-            max-height: 100vh;
+            max-height: 87vh;
             overflow-y: auto;
             display: flex;
             flex-wrap: wrap;

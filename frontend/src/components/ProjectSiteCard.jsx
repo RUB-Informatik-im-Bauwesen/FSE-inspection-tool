@@ -32,7 +32,6 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
       axios.get(url, {
         headers: { Authorization: `Bearer ${access_token}` },
         }).then((res) => {
-          console.log(res.data)
           if (res.data && res.data.length > 0){
             dataNew = res.data.find((item) => item._id === data._id);
             if (dataNew) {
@@ -76,7 +75,6 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
     axios.patch(url,{selected: !isChecked}, {
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
-        console.log(res.data)
         }
       ).catch((err) => {
         console.log(err)
@@ -99,7 +97,6 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
     axios.delete(url,{
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
-        console.log(res.data)
         }
       ).catch((err) => {
         console.log(err)
@@ -111,7 +108,7 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
       <div className="icons-container">
         <span className="trash-icon">
         <Button onClick={() =>{
-           const confirmBox = window.confirm(`Do you really want to delete this project ${name}?`)
+           const confirmBox = window.confirm(`Do you really want to delete this item${name}?`)
            if(confirmBox === true){
             delete_item(type)
            }}} className='trash-icon' variant="secondary">
@@ -124,6 +121,9 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
       </div>
       <img src={imageSrc} alt={data.name} />
       <div className="card-text"><a href="#">{data.name}</a></div>
+      {type === 'images' && (
+        <p>Rank: {data.ranking}</p>
+      )}
     </div>
   );
 };
