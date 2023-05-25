@@ -161,16 +161,15 @@ async def fetch_images_by_projects(id):
 
 async def upload_model(model, user):
   document = dict(model, **{"username": user["username"]})
-  check_same_path = await collection_models.find_one({"path" : document["path"]})
-  if check_same_path:
-      raise HTTPException(status_code=404, detail="Same path as an other model!")
   await collection_models.insert_one(document)
   return document
 
 async def upload_model_input(id, file: UploadFile, user):
     contents = await file.read()
 
-    dest_folder = f"storage/Models/{file.filename}/weights"
+    random_int = random.randint(10000000, 99999999)
+
+    dest_folder = f"storage/Models/{file.filename}_{str(random_int)}/weights"
     os.makedirs(dest_folder, exist_ok=True)
 
     dest_path = os.path.join(dest_folder, file.filename)
