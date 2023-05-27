@@ -70,8 +70,24 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
     update_image()
   };
 
+  const handleCheckboxChangeModel = () => {
+    setIsChecked(!isChecked)
+    update_model()
+  }
+
   const update_image = () => {
     const url = `http://127.0.0.1:8000/update_image/${imageID}`
+    axios.patch(url,{selected: !isChecked}, {
+      headers: { Authorization: `Bearer ${access_token}` },
+      }).then((res) => {
+        }
+      ).catch((err) => {
+        console.log(err)
+      })
+  }
+
+  const update_model = () => {
+    const url = `http://127.0.0.1:8000/update_model/${modelID}`
     axios.patch(url,{selected: !isChecked}, {
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
@@ -115,8 +131,11 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
           <i className="fas fa-trash" />
         </Button>
         </span>
-        {type === 'images' && (
+        {type === 'images'  && (
           <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
+        )}
+        {type === 'models'  && (
+          <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChangeModel} />
         )}
       </div>
       <img src={imageSrc} alt={data.name} />

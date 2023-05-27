@@ -73,20 +73,24 @@ const ProjectSite = ({ accessToken }) => {
       });
   };
 
-  const addImage = () => {
-    // Logic to add an image to the project
-  };
-
-  const addAnnotation = () => {
-    // Logic to add an annotation to the project
-  };
-
-  const addModel = () => {
-    // Logic to add a model to the project
-  };
-
   const startTraining = () => {
-    // Logic to start training the models
+    let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
+    axios
+      .get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        console.log(res.data)
+      });
+    const data = {image_size:640,epoch_len:4,batch_size:4,class_names:["test"]}
+    url = `http://127.0.0.1:8000/train_model/${id}`
+    axios
+      .get(url, data, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        console.log(res.data)
+      });
   };
 
   const rankImages = () => {

@@ -134,8 +134,8 @@ async def upload_models_input(id:str, file: UploadFile, user=Depends(manager)):
     contents = await upload_model_input(id=id, file=file, user=user)
     return contents
 
-@app.put("/update_model/{id}")
-async def update_models(id: str, model:NewModel, user=Depends(manager)):
+@app.patch("/update_model/{id}")
+async def update_models(id: str, model:Dict, user=Depends(manager)):
     item = await update_model(id, model, user)
     return Model(**item)
 

@@ -177,14 +177,14 @@ async def upload_model_input(id, file: UploadFile, user):
     with open(dest_path, "wb") as f:
         f.write(contents)
 
-    model = {"name":file.filename, "file_type":file.content_type,"path":dest_path,"project_id":id}
+    model = {"name":file.filename, "file_type":file.content_type,"path":dest_path,"selected":False, "project_id":id}
 
     await upload_model(model, user)
 
     return {"filename":file.filename}
 
 async def update_model(id, model, user):
-    doc = dict(model)
+    doc = model
     try:
         document = await collection_models.find_one({"_id": ObjectId(id)})
     except InvalidId:
@@ -194,7 +194,8 @@ async def update_model(id, model, user):
         raise HTTPException(status_code=404, detail="ID not found")
     if user["username"] != document["username"]:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    updated_model = await collection_models.find_one_and_update({"_id": ObjectId(id)}, {"$set": {"name": doc["name"], "file_type": doc["file_type"], "date_uploaded":doc["date_uploaded"], "path":doc["path"]}})
+    update_data = {"$set": doc}
+    updated_model = await collection_models.find_one_and_update({"_id": ObjectId(id)}, update_data)
     return updated_model
 
 async def delete_model(id, user):

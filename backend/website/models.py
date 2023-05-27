@@ -50,6 +50,7 @@ class NewModel(BaseModel):
     file_type: str
     path: str
     project_id: str
+    selected: bool
 
 class Model(NewModel):
     id: PydanticObjectId = Field(..., alias="_id")
