@@ -63,3 +63,10 @@ class NewAnnotation(BaseModel):
 
 class Annotation(NewAnnotation):
     id: PydanticObjectId = Field(..., alias="_id")
+
+class TrainModel(BaseModel):
+    models_id: str
+    image_size: int
+    epoch_len: int
+    batch_size: int
+    class_names : List[str]

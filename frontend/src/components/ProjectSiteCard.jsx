@@ -3,11 +3,12 @@ import './ProjectSiteCardStyle.css';
 import axios from "axios"
 import Button from 'react-bootstrap/Button';
 
-const ProjectSiteCard = ({id, access_token, data, type }) => {
+const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [imageID, setImageID] = useState("")
   const [modelID, setModelID] = useState("")
   const [annotationID, setAnnotationID] = useState("")
+  const [alreadyModel, setAlreadyModel] = useState(false)
   let imageSrc;
   let image_name;
   let dataNew;
@@ -47,7 +48,10 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
         }).then((res) => {
           if (res.data && res.data.length > 0){
             dataNew = res.data.find((item) => item._id === data._id);
+            const hasSelectedModel = res.data.some((item) => item.selected === true);
+            setAlreadyModel(hasSelectedModel)
             if (dataNew) {
+              setIsChecked(dataNew.selected);
               setModelID(dataNew._id)
             }
             }
@@ -73,6 +77,7 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
   const handleCheckboxChangeModel = () => {
     setIsChecked(!isChecked)
     update_model()
+    setModelTrainingID(modelID)
   }
 
   const update_image = () => {
@@ -124,7 +129,7 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
       <div className="icons-container">
         <span className="trash-icon">
         <Button onClick={() =>{
-           const confirmBox = window.confirm(`Do you really want to delete this item${name}?`)
+           const confirmBox = window.confirm(`Do you really want to delete this item?`)
            if(confirmBox === true){
             delete_item(type)
            }}} className='trash-icon' variant="secondary">
@@ -134,7 +139,7 @@ const ProjectSiteCard = ({id, access_token, data, type }) => {
         {type === 'images'  && (
           <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
         )}
-        {type === 'models'  && (
+        {type === 'models' && (
           <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChangeModel} />
         )}
       </div>

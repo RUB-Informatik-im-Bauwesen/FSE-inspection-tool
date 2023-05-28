@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models
-from backend.website.models import User, Project, Image, Model, Annotation
+from backend.website.models import User, Project, Image, Model, Annotation, TrainModel
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
@@ -419,7 +419,8 @@ async def prepare_for_training(project_id, user):
         basename = os.path.basename(image_path)
         dest_path = os.path.join(train_dir, basename)
         for annotation in annotations:
-            if annotation["name"] == os.path.splitext(basename)[0]:
+            imagename = os.path.splitext(basename)[0] + ".txt"
+            if annotation["name"] == imagename:
                 basename_annotation = os.path.basename(annotation["path"])
                 dest_annotation_path = os.path.join(train_label_dir,basename_annotation)
                 shutil.copyfile(annotation["path"], dest_annotation_path)
@@ -430,7 +431,7 @@ async def prepare_for_training(project_id, user):
         basename = os.path.basename(image_path)
         dest_path = os.path.join(val_dir, basename)
         for annotation in annotations:
-            if annotation["name"] == os.path.splitext(basename)[0]:
+            if annotation["name"] == os.path.splitext(basename)[0] + ".txt":
                 basename_annotation = os.path.basename(annotation["path"])
                 dest_annotation_path = os.path.join(val_label_dir,basename_annotation)
                 shutil.copyfile(annotation["path"], dest_annotation_path)
@@ -440,10 +441,17 @@ async def prepare_for_training(project_id, user):
 
 
 
-async def train_models(project_id, models_id, image_size, epoch_len, batch_size, class_names):
-    model = collection_models.find_one({"_id": ObjectId(models_id)})
+async def train_models(project_id, trainmodel, user):
+    models_id = trainmodel.models_id
+    image_size = trainmodel.image_size
+    epoch_len = trainmodel.epoch_len
+    batch_size = trainmodel.batch_size
+    class_names = trainmodel.class_names
+
+    model = await collection_models.find_one({"_id": ObjectId(models_id), "selected":True})
     if not model:
         raise HTTPException(status_code=404, detail="No models found in the project.")
+    model_path = model["path"]
     project = await collection_projects.find_one({"_id": ObjectId(project_id)})
     project = dict(project)
     names_dict = {i: class_names[i] for i in range(len(class_names))}
@@ -458,7 +466,11 @@ async def train_models(project_id, models_id, image_size, epoch_len, batch_size,
     with open(project["path"] + "\\data.yaml", "w") as file:
         yaml.dump(data, file, allow_unicode=True)
 
-    train_model(image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
+    new_model = train_model(model_path, image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
+
+    model = {"name":"best.pt", "file_type":"application/octet-stream","path":"storage/Models/" + new_model + "/weights/best.pt","selected":False, "project_id":project_id}
+
+    await upload_model(model, user)
 
     for root, dirs, files in os.walk(project["path"]):
         for file in files:

@@ -6,6 +6,7 @@ import ProjectSiteCard from './ProjectSiteCard';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import { WithContext as ReactTags } from 'react-tag-input';
 
 const ProjectSite = ({ accessToken }) => {
   const [images, setImages] = useState([]);
@@ -14,7 +15,34 @@ const ProjectSite = ({ accessToken }) => {
   const [activeTab, setActiveTab] = useState(''); // Track the active tab
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenTraining, setIsModalOpenTraining] = useState(false);
   const [files, setFiles] = useState(null);
+  const [tags, setTags] = useState([]);
+  const [imageSize, setImageSize] = useState('');
+  const [epochLength, setEpochLength] = useState('');
+  const [batchSize, setBatchSize] = useState('');
+  const [modelID, setModelID] = useState('')
+
+  function handleImageSizeChange(event) {
+    setImageSize(event.target.value);
+  }
+
+  function handleEpochLengthChange(event) {
+    setEpochLength(event.target.value);
+  }
+
+  function handleBatchSizeChange(event) {
+    setBatchSize(event.target.value);
+  }
+
+
+  function handleTagChange(newTags) {
+    setTags(newTags);
+  }
+
+  const setModelTrainingID = (model) => {
+    setModelID(model)
+  }
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -24,6 +52,13 @@ const ProjectSite = ({ accessToken }) => {
     setIsModalOpen(false);
   };
 
+  const openModalTraining = () => {
+    setIsModalOpenTraining(true);
+  };
+
+  const closeModalTraining = () => {
+    setIsModalOpenTraining(false);
+  };
 
 
 
@@ -161,6 +196,28 @@ const ProjectSite = ({ accessToken }) => {
     closeModal()
   }
 
+  const handleSubmitUploadTraining = () => {
+    let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
+    axios
+      .get(url,{
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        console.log(res.data)
+      });
+    const classNames = tags.map(tag => tag.text)
+    console.log(classNames)
+    const data = {models_id : modelID,image_size:imageSize,epoch_len:epochLength,batch_size:batchSize,class_names:classNames}
+    url = `http://127.0.0.1:8000/train_model/${id}`
+    axios
+      .post(url, data, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        console.log(res.data)
+      });
+  }
+
   return (
     <div className="project-site">
       <Modal
@@ -168,25 +225,80 @@ const ProjectSite = ({ accessToken }) => {
         onRequestClose={closeModal}
         contentLabel="Upload Image Modal"
       >
-      <Modal.Header closeModal>
-      <Modal.Title>
-        {activeTab === 'images' && 'Upload Images'}
-        {activeTab === 'annotations' && 'Upload Annotations'}
-        {activeTab === 'models' && 'Upload Models'}
-  </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-      <input type="file" onChange={handleFileUpload} multiple="multiple"/>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={closeModal}>
+        <Modal.Header closeModal>
+          <Modal.Title>
+            {activeTab === 'images' && 'Upload Images'}
+            {activeTab === 'annotations' && 'Upload Annotations'}
+            {activeTab === 'models' && 'Upload Models'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input type="file" onChange={handleFileUpload} multiple="multiple"/>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeModal}>
             Cancel
-        </Button>
-        <Button variant="danger" onClick={()=> handleSubmitUpload()}>
+          </Button>
+          <Button variant="danger" onClick={()=> handleSubmitUpload()}>
             Submit
-        </Button>
-      </Modal.Footer>
+          </Button>
+        </Modal.Footer>
       </Modal>
+
+      <Modal
+        show={isModalOpenTraining}
+        onRequestClose={closeModalTraining}
+        contentLabel="Train Model Modal"
+      >
+        <Modal.Header closeModal>
+          <Modal.Title>
+            Start Training
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="input-row">
+            <label>Image Size:</label>
+            <input onChange={handleImageSizeChange} type="number" name="imageSize" className="long-input" />
+          </div>
+
+          <div className="input-row">
+            <label>Epoch Length:</label>
+            <input onChange={handleEpochLengthChange} type="number" name="epochLength" className="long-input" />
+          </div>
+
+          <div className="input-row">
+            <label>Batch Size:</label>
+            <input onChange={handleBatchSizeChange} type="number" name="batchSize" className="long-input" />
+          </div>
+
+          <div className="input-row">
+            <label>Class Names:</label>
+            <ReactTags
+              tags={tags}
+              handleDelete={(index) => handleTagChange(tags.filter((_, i) => i !== index))}
+              handleAddition={(tag) => handleTagChange([...tags, tag])}
+              placeholder="Add class names"
+              classNames={{
+                tags: 'tag-container',
+                tagInput: 'tag-input',
+                tag: 'tag',
+                remove: 'tag-remove',
+                suggestions: 'tag-suggestions',
+                activeSuggestion: 'tag-active-suggestion',
+              }}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeModalTraining}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={()=> handleSubmitUploadTraining()}>
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <div className="button-container">
         <div className="tab-navigation">
           <button
@@ -223,7 +335,7 @@ const ProjectSite = ({ accessToken }) => {
           {activeTab === 'models' && (
             <>
               <button  onClick={openModal}>Add Models</button>
-              <button  onClick={startTraining}>Start Training</button>
+              <button  onClick={openModalTraining}>Start Training</button>
             </>
           )}
         </div>
@@ -250,7 +362,7 @@ const ProjectSite = ({ accessToken }) => {
         {activeTab === 'models' && models && (
           <div className="card-grid">
             {models.map((model, index) => (
-              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={model} type="models" />
+              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={model} setModelTrainingID={setModelTrainingID} type="models" />
             ))}
     </div>
   )}

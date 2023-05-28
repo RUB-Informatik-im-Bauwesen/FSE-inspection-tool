@@ -3,6 +3,7 @@ import subprocess
 import pandas as pd
 import shutil
 import numpy as np
+import random
 
 def variation_ratio(data):
     ratios = []
@@ -123,15 +124,17 @@ def get_roi_matches(iou_matrices):
     return max_values, matches, min_match
 
 
-def train_model(image_size, epoch_len, batch_size, yaml_path, models_id):
-    old_path = "storage/Models/"+str(models_id)
-    new_path = "storage/Models/Deleted"
-    if(os.path.exists(old_path)):
-        os.rename(old_path,new_path)
-    weights_path = new_path + "/weights/best.pt"
+def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, models_id):
+    model_path_new = model_path.split("/")
+    model_name = model_path[3]
+    model_name_new = model_name.split("_")
+    model_name = model_name_new[0]
+    weights_path = model_path
+    random_int = random.randint(10000000, 99999999)
+    new_model_name = "best.pt" + "_" + str(random_int)
     subprocess.run(
         ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size), "--epochs", str(epoch_len), "--data", yaml_path,
-        "--weights", weights_path, "--project", "storage/Models/", "--name", str(models_id),"--device","0"], check=True)
+        "--weights", weights_path, "--project", "storage/Models/", "--name", new_model_name,"--device","0"], check=True)
 
-    shutil.rmtree(new_path)
+    return new_model_name
 
