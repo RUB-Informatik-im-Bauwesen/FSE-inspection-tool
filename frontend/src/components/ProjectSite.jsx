@@ -22,6 +22,9 @@ const ProjectSite = ({ accessToken }) => {
   const [epochLength, setEpochLength] = useState('');
   const [batchSize, setBatchSize] = useState('');
   const [modelID, setModelID] = useState('')
+  const [isLoadingTraining, setIsLoadingTraining] = useState(false);
+  const [isLoadingRanking, setIsLoadingRanking] = useState(false)
+
 
   function handleImageSizeChange(event) {
     setImageSize(event.target.value);
@@ -54,6 +57,7 @@ const ProjectSite = ({ accessToken }) => {
 
   const openModalTraining = () => {
     setIsModalOpenTraining(true);
+    getModelsOfProject();
   };
 
   const closeModalTraining = () => {
@@ -115,7 +119,6 @@ const ProjectSite = ({ accessToken }) => {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
-        console.log(res.data)
       });
     const data = {image_size:640,epoch_len:4,batch_size:4,class_names:["test"]}
     url = `http://127.0.0.1:8000/train_model/${id}`
@@ -124,21 +127,25 @@ const ProjectSite = ({ accessToken }) => {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
-        console.log(res.data)
       });
   };
 
   const rankImages = () => {
-    const url = `http://127.0.0.1:8000/get_rankings_of_images/${id}`;
-    axios
-      .get(url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-        setImages(res.data)
-        console.log("Ranked Images")
-        console.log(res.data)
-      });
+    setIsLoadingRanking(true)
+    if(!models){
+      alert("No Models uploaded!")
+      setIsLoadingRanking(false)
+    } else{
+      const url = `http://127.0.0.1:8000/get_rankings_of_images/${id}`;
+      axios
+        .get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+          setImages(res.data)
+          setIsLoadingRanking(false)
+        });
+    }
   };
 
   const handleTabChange = (tab) => {
@@ -186,7 +193,7 @@ const ProjectSite = ({ accessToken }) => {
           headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }
         })
         .then((res) => {
-          console.log(res);
+
         })
         .catch((err) => {
           console.log(err);
@@ -197,25 +204,38 @@ const ProjectSite = ({ accessToken }) => {
   }
 
   const handleSubmitUploadTraining = () => {
-    let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
-    axios
-      .get(url,{
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-        console.log(res.data)
-      });
     const classNames = tags.map(tag => tag.text)
-    console.log(classNames)
-    const data = {models_id : modelID,image_size:imageSize,epoch_len:epochLength,batch_size:batchSize,class_names:classNames}
-    url = `http://127.0.0.1:8000/train_model/${id}`
-    axios
-      .post(url, data, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-        console.log(res.data)
-      });
+    const hasSelected = Object.values(models).some(model => model.selected === true);
+    const selectedModels = Object.values(models).filter(model => model.selected === true);
+    if(!hasSelected){
+      alert("You need to select a model! (Only one!)")
+    } else if(selectedModels.length > 1){
+      alert("Only select one model!")
+    } else if(!modelID || !imageSize || !epochLength || !batchSize || !classNames){
+      alert("Fill out all the data!")
+    } else {
+      let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
+      axios
+        .get(url,{
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+        });
+      setIsLoadingTraining(true)
+      const data = {models_id : modelID,image_size:imageSize,epoch_len:epochLength,batch_size:batchSize,class_names:classNames}
+      url = `http://127.0.0.1:8000/train_model/${id}`
+      axios
+        .post(url, data, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+          setIsLoadingTraining(false)
+        });
+      closeModalTraining()
+      setBatchSize("")
+      setEpochLength("")
+      setImageSize("")
+    }
   }
 
   return (
@@ -324,7 +344,10 @@ const ProjectSite = ({ accessToken }) => {
           {activeTab === 'images' && (
             <>
               <button className='addButton'  onClick={openModal}>Add Images</button>
-              <button className='addButton'  onClick={rankImages}>Rank Images</button>
+              <button className='addButton'  onClick={rankImages}>
+                Rank Images
+                {isLoadingRanking && <div className="loading-circle"></div>}
+              </button>
             </>
           )}
           {activeTab === 'annotations' && (
@@ -335,7 +358,11 @@ const ProjectSite = ({ accessToken }) => {
           {activeTab === 'models' && (
             <>
               <button  onClick={openModal}>Add Models</button>
-              <button  onClick={openModalTraining}>Start Training</button>
+              <button onClick={openModalTraining}>
+                Start Training
+                {isLoadingTraining && <div className="loading-circle"></div>}
+              </button>
+
             </>
           )}
         </div>

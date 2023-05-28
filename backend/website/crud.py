@@ -448,7 +448,7 @@ async def train_models(project_id, trainmodel, user):
     batch_size = trainmodel.batch_size
     class_names = trainmodel.class_names
 
-    model = await collection_models.find_one({"_id": ObjectId(models_id), "selected":True})
+    model = await collection_models.find_one({"project_id": project_id, "selected":True})
     if not model:
         raise HTTPException(status_code=404, detail="No models found in the project.")
     model_path = model["path"]
@@ -468,7 +468,7 @@ async def train_models(project_id, trainmodel, user):
 
     new_model = train_model(model_path, image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
 
-    model = {"name":"best.pt", "file_type":"application/octet-stream","path":"storage/Models/" + new_model + "/weights/best.pt","selected":False, "project_id":project_id}
+    model = {"name":"best"+ "_" + new_model.split("_")[1] +".pt", "file_type":"application/octet-stream","path":"storage/Models/" + new_model + "/weights/best.pt","selected":False, "project_id":project_id}
 
     await upload_model(model, user)
 
