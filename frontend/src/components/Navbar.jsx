@@ -37,7 +37,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
     return (
       <nav>
 
-        <a href='index.html'>
+        <a href='/Projects'>
           <img src={img}/>
 
         </a>
