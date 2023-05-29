@@ -1,2 +1,7 @@
 app/
 app/Lib/site-packages/six.py
+backend/utils/__pycache__/model_utils.cpython-39.pyc
+backend/website/__pycache__/crud.cpython-39.pyc
+backend/website/__pycache__/db.cpython-39.pyc
+backend/website/__pycache__/main.cpython-39.pyc
+backend/website/__pycache__/models.cpython-39.pyc
