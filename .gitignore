@@ -1,4 +1,5 @@
 app/
+storage/
 app/Lib/site-packages/six.py
 backend/utils/__pycache__/model_utils.cpython-39.pyc
 backend/website/__pycache__/crud.cpython-39.pyc
@@ -87,3 +88,19 @@ storage/Projects/string_test22/labels/val/20210803_095933.txt
 storage/Projects/string_test22/labels/val/20210803_095953.txt
 storage/Projects/string_test22/labels/val/20210803_100008.txt
 storage/Projects/string_test22/labels/val/20210803_100120.txt
+storage/Annotations/20210803_095537.txt
+storage/Annotations/20210803_095545.txt
+storage/Annotations/20210803_095559.txt
+storage/Annotations/20210803_095612.txt
+storage/Annotations/20210803_095621.txt
+storage/Annotations/20210803_095715.txt
+storage/Annotations/20210803_095754.txt
+storage/Annotations/20210803_095805.txt
+storage/Annotations/20210803_095822.txt
+storage/Annotations/20210803_095855.txt
+storage/Annotations/20210803_095902.txt
+storage/Annotations/20210803_095912.txt
+storage/Annotations/20210803_095926.txt
+storage/Annotations/20210803_095933.txt
+storage/Annotations/20210803_095953.txt
+storage/Annotations/20210803_100008.txt

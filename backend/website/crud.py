@@ -317,7 +317,7 @@ async def process_images(models, paths_to_images):
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 
             rankings_list.append(result)
-            
+
     if(len(models) == 1):
         for img in paths_to_images:
             results = await asyncio.to_thread(models[0],img)
@@ -497,7 +497,7 @@ async def train_models(project_id, trainmodel, user):
 
 async def upload_annotation(annotation, user):
   document = dict(annotation, **{"username": user["username"]})
-  check_same_annotation = await collection_annotations.find_one({"name" : document["name"]})
+  check_same_annotation = await collection_annotations.find_one({"name" : document["name"], "project_id" : document["project_id"]})
   check_same_project = await collection_annotations.find_one({"image_id" : document["image_id"],"project_id" : document["project_id"]})
   if check_same_annotation or check_same_project:
       raise HTTPException(status_code=404, detail="Change Annotations name or Image ID!")

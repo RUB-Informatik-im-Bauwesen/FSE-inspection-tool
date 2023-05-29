@@ -200,7 +200,7 @@ const ProjectSite = ({ accessToken }) => {
     } else if(selectedModels.length > 1){
       alert("Only select one model!")
     } else if(!modelID || !imageSize || !epochLength || !batchSize || !classNames){
-      alert("Fill out all the data!")
+      alert("Fill out all the data! (If this is already the case then reselect the model) ")
     } else {
       let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
       axios
