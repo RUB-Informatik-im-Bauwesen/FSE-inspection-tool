@@ -112,24 +112,6 @@ const ProjectSite = ({ accessToken }) => {
       });
   };
 
-  const startTraining = () => {
-    let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
-    axios
-      .get(url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-      });
-    const data = {image_size:640,epoch_len:4,batch_size:4,class_names:["test"]}
-    url = `http://127.0.0.1:8000/train_model/${id}`
-    axios
-      .get(url, data, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-      });
-  };
-
   const rankImages = () => {
     setIsLoadingRanking(true)
     if(!models){
@@ -181,6 +163,10 @@ const ProjectSite = ({ accessToken }) => {
           break;
         case "annotations":
           desiredImage = images.find(image => image.name.split('.')[0] === file.name.split('.')[0]);
+          if(!desiredImage){
+            alert("One or more images not in this project! Please check again if all txt files have a corresponding image!")
+            break;
+          }
           id_desiredImage = desiredImage._id
           url = `http://127.0.0.1:8000/upload_annotations_input/${id}/${id_desiredImage}`;
           break;
@@ -188,17 +174,19 @@ const ProjectSite = ({ accessToken }) => {
           url = `http://127.0.0.1:8000/upload_models_input/${id}`;
           break;
       }
-      axios
-        .post(url, formData, {
-          headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }
-        })
-        .then((res) => {
+        if(url){
+          axios
+            .post(url, formData, {
+              headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }
+            })
+            .then((res) => {
 
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      });
 
     closeModal()
   }
