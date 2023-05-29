@@ -4,6 +4,9 @@ import pandas as pd
 import shutil
 import numpy as np
 import random
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 
 def variation_ratio(data):
     ratios = []
@@ -124,7 +127,7 @@ def get_roi_matches(iou_matrices):
     return max_values, matches, min_match
 
 
-def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, models_id):
+async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, models_id):
     model_path_new = model_path.split("/")
     model_name = model_path[3]
     model_name_new = model_name.split("_")
@@ -132,9 +135,19 @@ def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, models_
     weights_path = model_path
     random_int = random.randint(10000000, 99999999)
     new_model_name = "best.pt" + "_" + str(random_int)
-    subprocess.run(
-        ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size), "--epochs", str(epoch_len), "--data", yaml_path,
-        "--weights", weights_path, "--project", "storage/Models/", "--name", new_model_name,"--device","0"], check=True)
+    # Define the blocking function to be executed in a separate thread
+    def run_training():
+        subprocess.run(
+            ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size),
+            "--epochs", str(epoch_len), "--data", yaml_path, "--weights", weights_path,
+            "--project", "storage/Models/", "--name", new_model_name, "--device", "0"],
+            check=True
+        )
+
+    # Run the blocking function in a separate thread using the thread pool executor
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        await loop.run_in_executor(executor, run_training)
 
     return new_model_name
 

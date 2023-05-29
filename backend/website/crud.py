@@ -14,6 +14,8 @@ import os
 import shutil
 import random
 import yaml
+import asyncio
+import concurrent.futures
 
 #Active Learning
 import torch
@@ -233,34 +235,14 @@ async def prepare_model_folder(id):
         os.makedirs(os.path.dirname(doc["path"]))
     return {"Success": "Created folders"}
 
-async def fetch_rankings_images_by_project(project_id):
-
-    # Get image paths
-    paths_to_images = []
-    images = collection_images.find({"project_id": project_id})
-    async for document in images:
-        path = document["path"]
-        paths_to_images.append(path)
-    if not images:
-        raise HTTPException(status_code=404, detail="No images found in the project.")
-
-    # Load the model
-    models = []
-    models_collection = collection_models.find({"project_id": project_id})
-    if not models_collection:
-        raise HTTPException(status_code=404, detail="No models found in the project.")
-    async for document in models_collection:
-        path = document["path"]
-        model = torch.hub.load('ultralytics/yolov5', 'custom', path=path)
-        models.append(model)
-
+async def process_images(models, paths_to_images):
     rankings_list = []
 
     if (len(models) > 1):
       for img in paths_to_images:
             results_list = []
             for model in models:
-                result = model(img)
+                result = await asyncio.to_thread(model,img)
                 results_list.append(result)
 
             # Bounding Boxes, Scores, and Labels
@@ -335,15 +317,43 @@ async def fetch_rankings_images_by_project(project_id):
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 
             rankings_list.append(result)
-
+            
     if(len(models) == 1):
         for img in paths_to_images:
-            results = models[0](img)
+            results = await asyncio.to_thread(models[0],img)
             df = results.pandas().xyxy[0]
             confidence_scores = df['confidence'].values.tolist()
             average_confidence_score = np.mean(confidence_scores)
             result = [results.pandas().xywhn[0] ,average_confidence_score, img]
             rankings_list.append(result)
+
+    return rankings_list
+
+def load_model(path):
+    return torch.hub.load('ultralytics/yolov5', 'custom', path=path)
+
+async def fetch_rankings_images_by_project(project_id):
+
+    # Get image paths
+    paths_to_images = []
+    images = collection_images.find({"project_id": project_id})
+    async for document in images:
+        path = document["path"]
+        paths_to_images.append(path)
+    if not images:
+        raise HTTPException(status_code=404, detail="No images found in the project.")
+
+    # Load the model
+    models = []
+    models_collection = collection_models.find({"project_id": project_id})
+    if not models_collection:
+        raise HTTPException(status_code=404, detail="No models found in the project.")
+    async for document in models_collection:
+        path = document["path"]
+        model = await asyncio.to_thread(load_model, path)
+        models.append(model)
+
+    rankings_list = await process_images(models, paths_to_images)
 
     # Sort the rankings list by the uncertainty score in descending order
     if(len(models) == 1):
@@ -466,7 +476,7 @@ async def train_models(project_id, trainmodel, user):
     with open(project["path"] + "\\data.yaml", "w") as file:
         yaml.dump(data, file, allow_unicode=True)
 
-    new_model = train_model(model_path, image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
+    new_model = await train_model(model_path, image_size,epoch_len, batch_size, project["path"] + "\\data.yaml",models_id)
 
     model = {"name":"best"+ "_" + new_model.split("_")[1] +".pt", "file_type":"application/octet-stream","path":"storage/Models/" + new_model + "/weights/best.pt","selected":False, "project_id":project_id}
 
