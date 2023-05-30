@@ -7,6 +7,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { WithContext as ReactTags } from 'react-tag-input';
+import ImageAnnotationModal from './AnnotationPopup';
 
 const ProjectSite = ({ accessToken }) => {
   const [images, setImages] = useState([]);
@@ -16,6 +17,7 @@ const ProjectSite = ({ accessToken }) => {
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenTraining, setIsModalOpenTraining] = useState(false);
+  const [isModalOpenAnnotation, setIsModalOpenAnnotation] = useState(false);
   const [files, setFiles] = useState(null);
   const [tags, setTags] = useState([]);
   const [imageSize, setImageSize] = useState('');
@@ -54,6 +56,14 @@ const ProjectSite = ({ accessToken }) => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
+  const openModalAnnotation = () => {
+    setIsModalOpenAnnotation(true)
+  }
+
+  const closeModalAnnotation = () => {
+    setIsModalOpenAnnotation(false)
+  }
 
   const openModalTraining = () => {
     setIsModalOpenTraining(true);
@@ -317,6 +327,12 @@ const ProjectSite = ({ accessToken }) => {
         </Modal.Footer>
       </Modal>
 
+      {isModalOpenAnnotation && (
+        <div>
+          <ImageAnnotationModal isOpen={openModalAnnotation} onClose={closeModalAnnotation} selectedImages={Object.values(images).filter((image) => image.selected === true)}/>
+        </div>
+      )}
+
       <div className="button-container">
         <div className="tab-navigation">
           <button
@@ -351,6 +367,7 @@ const ProjectSite = ({ accessToken }) => {
           {activeTab === 'annotations' && (
             <>
               <button  onClick={openModal}>Add Annotations</button>
+              <button onClick={openModalAnnotation}>Make Annotations</button>
             </>
           )}
           {activeTab === 'models' && (
