@@ -58,6 +58,8 @@ const ProjectSite = ({ accessToken }) => {
   const openModalTraining = () => {
     setIsModalOpenTraining(true);
     getModelsOfProject();
+    getImagesOfProject();
+    getAnnotationsOfProject();
   };
 
   const closeModalTraining = () => {
@@ -194,13 +196,25 @@ const ProjectSite = ({ accessToken }) => {
   const handleSubmitUploadTraining = () => {
     const classNames = tags.map(tag => tag.text)
     const hasSelected = Object.values(models).some(model => model.selected === true);
+    const selectedImages = images.some(image => image.selected === true)
+    const countSelectedImages = Object.values(images).filter(image => image.selected === true)
+    console.log(countSelectedImages)
     const selectedModels = Object.values(models).filter(model => model.selected === true);
+    const isSelectedImageAnnotated = images
+    .filter(image => image.selected)
+    .every(selectedImage =>
+    annotations.some(annotation => annotation.image_id === selectedImage._id)
+    );
     if(!hasSelected){
       alert("You need to select a model! (Only one!)")
     } else if(selectedModels.length > 1){
       alert("Only select one model!")
     } else if(!modelID || !imageSize || !epochLength || !batchSize || !classNames){
       alert("Fill out all the data! (If this is already the case then reselect the model) ")
+    } else if(countSelectedImages.length < 3){
+      alert("Please select atleast more than two images.")
+    }else if(!isSelectedImageAnnotated){
+      alert("Some of the selected images dont have annotations!")
     } else {
       let url = `http://127.0.0.1:8000/prepare_selected_for_training/${id}`;
       axios
@@ -230,10 +244,8 @@ const ProjectSite = ({ accessToken }) => {
     <div className="project-site">
       <Modal
         show={isModalOpen}
-        onRequestClose={closeModal}
-        contentLabel="Upload Image Modal"
       >
-        <Modal.Header closeModal>
+        <Modal.Header>
           <Modal.Title>
             {activeTab === 'images' && 'Upload Images'}
             {activeTab === 'annotations' && 'Upload Annotations'}
@@ -255,10 +267,8 @@ const ProjectSite = ({ accessToken }) => {
 
       <Modal
         show={isModalOpenTraining}
-        onRequestClose={closeModalTraining}
-        contentLabel="Train Model Modal"
       >
-        <Modal.Header closeModal>
+        <Modal.Header>
           <Modal.Title>
             Start Training
           </Modal.Title>
