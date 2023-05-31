@@ -10,6 +10,7 @@ from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model
+from backend.utils.cvat_utils import create_and_upload_task
 import os
 import shutil
 import random
@@ -566,3 +567,50 @@ async def fetch_annotations_by_project(id):
         annotation = Annotation(**document)
         annotations.append(annotation)
     return annotations
+
+#CVAT
+
+async def annotate_images_cvat(project_id, trainmodel, user):
+
+    #Important folders
+    source_folder = "storage/CVAT/obj_train_data"
+    dest_folder = "storage/Annotations"
+
+    # Get a list of all files in the folder
+    files = os.listdir(source_folder)
+
+    # Delete each file in the folder
+    for file in files:
+        file_path = os.path.join(source_folder, file)
+        os.remove(file_path)
+
+    server = "http://localhost:8080"
+    api_version = "api"
+    auth = ('admin', 'hydropic30##12')
+    images = []
+    cursor = collection_images.find({"project_id": project_id, "selected": True})
+    async for document in cursor:
+        path = document["path"]
+        image_id = document["_id"]
+        images.append([path, image_id])
+    labels = labels = [{'name': class_name} for class_name in trainmodel.class_names]
+
+    # Upload images to cvat
+    create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
+
+    # Get a list of all files in the source folder
+    files = os.listdir(source_folder)
+
+    # Move each .txt file to the destination folder
+    for file in files:
+        image_id = ""
+        for image in images:
+            if os.path.splitext(os.path.basename(image[0]))[0] == os.path.splitext(file)[0]:
+                image_id = image[1]
+        annotation = {"name":file,"path":dest_folder + "/" + file, "image_id":str(image_id), "project_id":project_id}
+
+        await upload_annotation(annotation, user)
+
+        source_file = os.path.join(source_folder, file)
+        destination_file = os.path.join(dest_folder, file)
+        shutil.move(source_file, destination_file)

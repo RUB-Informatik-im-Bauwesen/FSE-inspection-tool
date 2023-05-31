@@ -329,7 +329,7 @@ const ProjectSite = ({ accessToken }) => {
 
       {isModalOpenAnnotation && (
         <div>
-          <ImageAnnotationModal isOpen={openModalAnnotation} onClose={closeModalAnnotation} selectedImages={Object.values(images).filter((image) => image.selected === true)}/>
+          <ImageAnnotationModal project_id={id} accessToken={accessToken} isOpen={openModalAnnotation} onClose={closeModalAnnotation} selectedImages={Object.values(images).filter((image) => image.selected === true)}/>
         </div>
       )}
 

@@ -58,7 +58,7 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
           }
         )
     }
-  },[])
+  },[data])
 
   // Determine the image source based on the type
   if (type === 'images') {
