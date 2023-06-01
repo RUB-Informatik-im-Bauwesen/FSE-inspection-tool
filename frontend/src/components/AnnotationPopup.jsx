@@ -11,6 +11,16 @@ import axios from "axios"
 const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnnotation, isLoadingAnnotating, project_id, accessToken, isOpen, onClose, selectedImages }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [tags, setTags] = useState([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleUsernameChange = (e) => {
+    setUsername(e.target.value);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  };
 
   useEffect(() => {
     setTags(tagsAnnotations)
@@ -41,7 +51,7 @@ const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnno
       setLoadingAnnotation(false)
       return;
     }
-    const data = {models_id : "0",image_size:0,epoch_len:0,batch_size:0,class_names:classNames}
+    const data = {class_names:classNames, username:username, password:password}
     console.log(project_id)
     const url = `http://127.0.0.1:8000/annotate_on_cvat/${project_id}`
     axios
@@ -64,6 +74,17 @@ const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnno
             <button onClick={handlePreviousImage}><FontAwesomeIcon icon={faChevronLeft} /></button>
             {selectedImages.length > 0 && (<img src={"/" + selectedImages[currentImageIndex].path.split('/').pop()} alt="Selected Image" className="centered-image" />)}
             <button onClick={handleNextImage}><FontAwesomeIcon icon={faChevronRight} /></button>
+          </div>
+          <div className="credentials-container">
+            <div className="credentials-title">CVAT Credentials</div>
+            <div className="credential-input">
+              <label>Username:</label>
+              <input type="text" value={username} onChange={handleUsernameChange} />
+            </div>
+            <div className="credential-input">
+              <label>Password:</label>
+              <input type="password" value={password} onChange={handlePasswordChange} />
+            </div>
           </div>
           <div className="tag-container">
             <label>Class Names:</label>

@@ -70,3 +70,8 @@ class TrainModel(BaseModel):
     epoch_len: int
     batch_size: int
     class_names : List[str]
+
+class AnnotationModel(BaseModel):
+    class_names: List[str]
+    username: str
+    password: str

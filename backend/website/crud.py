@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models
-from backend.website.models import User, Project, Image, Model, Annotation, TrainModel
+from backend.website.models import User, Project, Image, Model, Annotation, TrainModel, AnnotationModel
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
@@ -570,7 +570,7 @@ async def fetch_annotations_by_project(id):
 
 #CVAT
 
-async def annotate_images_cvat(project_id, trainmodel, user):
+async def annotate_images_cvat(project_id, annotationModel, user):
 
     #Important folders
     source_folder = "storage/CVAT/obj_train_data"
@@ -586,14 +586,14 @@ async def annotate_images_cvat(project_id, trainmodel, user):
 
     server = "http://localhost:8080"
     api_version = "api"
-    auth = ('admin', 'hydropic30##12')
+    auth = (annotationModel.username, annotationModel.password)
     images = []
     cursor = collection_images.find({"project_id": project_id, "selected": True})
     async for document in cursor:
         path = document["path"]
         image_id = document["_id"]
         images.append([path, image_id])
-    labels = labels = [{'name': class_name} for class_name in trainmodel.class_names]
+    labels = labels = [{'name': class_name} for class_name in annotationModel.class_names]
 
     # Upload images to cvat
     await create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
