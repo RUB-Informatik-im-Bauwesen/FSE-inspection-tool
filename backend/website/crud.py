@@ -609,6 +609,11 @@ async def annotate_images_cvat(project_id, trainmodel, user):
                 image_id = image[1]
         annotation = {"name":file,"path":dest_folder + "/" + file, "image_id":str(image_id), "project_id":project_id}
 
+        check_same_annotation = await collection_annotations.find_one({"name" : annotation["name"], "project_id" : annotation["project_id"]})
+        check_same_project = await collection_annotations.find_one({"image_id" : annotation["image_id"],"project_id" : annotation["project_id"]})
+        if check_same_annotation or check_same_project:
+            document = await collection_annotations.find_one_and_delete({"name": annotation["name"]})
+
         await upload_annotation(annotation, user)
 
         source_file = os.path.join(source_folder, file)

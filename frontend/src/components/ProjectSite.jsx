@@ -26,6 +26,8 @@ const ProjectSite = ({ accessToken }) => {
   const [modelID, setModelID] = useState('')
   const [isLoadingTraining, setIsLoadingTraining] = useState(false);
   const [isLoadingRanking, setIsLoadingRanking] = useState(false)
+  const [isLoadingAnnotating, setLoadingAnnotating] = useState(false)
+  const [tagsAnnotations, setTagsAnnotations] = useState([])
 
 
   function handleImageSizeChange(event) {
@@ -59,6 +61,7 @@ const ProjectSite = ({ accessToken }) => {
 
   const openModalAnnotation = () => {
     setIsModalOpenAnnotation(true)
+    getImagesOfProject()
   }
 
   const closeModalAnnotation = () => {
@@ -76,7 +79,9 @@ const ProjectSite = ({ accessToken }) => {
     setIsModalOpenTraining(false);
   };
 
-
+  const setLoadingAnnotation = (boolean) => {
+    setLoadingAnnotating(boolean)
+  }
 
   const getImagesOfProject = () => {
     const url = `http://127.0.0.1:8000/get_images_by_project/${id}`;
@@ -329,7 +334,7 @@ const ProjectSite = ({ accessToken }) => {
 
       {isModalOpenAnnotation && (
         <div>
-          <ImageAnnotationModal project_id={id} accessToken={accessToken} isOpen={openModalAnnotation} onClose={closeModalAnnotation} selectedImages={Object.values(images).filter((image) => image.selected === true)}/>
+          <ImageAnnotationModal tagsAnnotations={tagsAnnotations} setTagsAnnotations={setTagsAnnotations} setLoadingAnnotation={setLoadingAnnotation} isLoadingAnnotating={isLoadingAnnotating} project_id={id} accessToken={accessToken} isOpen={openModalAnnotation} onClose={closeModalAnnotation} selectedImages={Object.values(images).filter((image) => image.selected === true)}/>
         </div>
       )}
 

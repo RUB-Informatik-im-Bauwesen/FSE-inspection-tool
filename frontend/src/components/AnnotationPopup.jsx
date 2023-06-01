@@ -8,15 +8,17 @@ import { WithContext as ReactTags } from 'react-tag-input';
 import axios from "axios"
 
 
-const ImageAnnotationModal = ({ project_id, accessToken, isOpen, onClose, selectedImages }) => {
+const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnnotation, isLoadingAnnotating, project_id, accessToken, isOpen, onClose, selectedImages }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-  }, [currentImageIndex]);
+    setTags(tagsAnnotations)
+  }, [currentImageIndex, selectedImages]);
 
   function handleTagChange(newTags) {
     setTags(newTags);
+    setTagsAnnotations(newTags)
   }
 
   const handlePreviousImage = () => {
@@ -28,9 +30,16 @@ const ImageAnnotationModal = ({ project_id, accessToken, isOpen, onClose, select
   };
 
   const annotation_CVAT = () => {
+    setLoadingAnnotation(true)
     let classNames = ""
     if (tags){
       classNames = tags.map(tag => tag.text)
+      console.log(classNames)
+    }
+    if(classNames.length < 1){
+      alert("Please input the classnames (in the correct order!)")
+      setLoadingAnnotation(false)
+      return;
     }
     const data = {models_id : "0",image_size:0,epoch_len:0,batch_size:0,class_names:classNames}
     console.log(project_id)
@@ -40,7 +49,7 @@ const ImageAnnotationModal = ({ project_id, accessToken, isOpen, onClose, select
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
-        console.log(res.data)
+        setLoadingAnnotation(false)
       });
   }
 
@@ -53,7 +62,7 @@ const ImageAnnotationModal = ({ project_id, accessToken, isOpen, onClose, select
         <div>
           <div className="image-container">
             <button onClick={handlePreviousImage}><FontAwesomeIcon icon={faChevronLeft} /></button>
-            <img src={"/" + selectedImages[currentImageIndex].path.split('/').pop()} alt="Selected Image" className="centered-image" />
+            {selectedImages.length > 0 && (<img src={"/" + selectedImages[currentImageIndex].path.split('/').pop()} alt="Selected Image" className="centered-image" />)}
             <button onClick={handleNextImage}><FontAwesomeIcon icon={faChevronRight} /></button>
           </div>
           <div className="tag-container">
@@ -74,7 +83,7 @@ const ImageAnnotationModal = ({ project_id, accessToken, isOpen, onClose, select
             />
           </div>
           {selectedImages && selectedImages.length > 0 && (
-            <Button onClick={annotation_CVAT} className='buttonCvat' variant="secondary">Generate Tasks for CVAT</Button>
+            <Button disabled={isLoadingAnnotating} onClick={annotation_CVAT} className='buttonCvat' variant="secondary">Generate Tasks for CVAT {isLoadingAnnotating && <div className="loading-circle"></div>}</Button>
           )}
         </div>
       </Modal.Body>
