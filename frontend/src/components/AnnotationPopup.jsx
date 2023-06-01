@@ -51,6 +51,11 @@ const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnno
       setLoadingAnnotation(false)
       return;
     }
+    if(!username || !password){
+      alert("Please fill the credentials for CVAT!")
+      setLoadingAnnotation(false)
+      return;
+    }
     const data = {class_names:classNames, username:username, password:password}
     console.log(project_id)
     const url = `http://127.0.0.1:8000/annotate_on_cvat/${project_id}`
