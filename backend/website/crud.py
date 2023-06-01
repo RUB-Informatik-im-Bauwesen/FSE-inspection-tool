@@ -596,7 +596,7 @@ async def annotate_images_cvat(project_id, trainmodel, user):
     labels = labels = [{'name': class_name} for class_name in trainmodel.class_names]
 
     # Upload images to cvat
-    create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
+    await create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
 
     # Get a list of all files in the source folder
     files = os.listdir(source_folder)
