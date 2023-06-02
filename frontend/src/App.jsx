@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "./components/Login"
 import ProjectList from './components/ProjectList'
 import ProjectSite from './components/ProjectSite'
+import Statistics from './components/Statistics'
 
 function App() {
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
+          <Route path="/Statistics" element={<Statistics/>}/>
         </Routes>
       </div>
     </BrowserRouter>
