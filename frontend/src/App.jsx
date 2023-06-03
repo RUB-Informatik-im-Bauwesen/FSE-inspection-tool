@@ -76,7 +76,7 @@ function App() {
           <Route path="/" element={<Login setUsername={handleUsername} setToken={setToken} login={setLogin} isLoggedIn={isLoggedIn} />}/>
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
-          <Route path="/Statistics" element={<Statistics accessToken={accessToken}/>}/>
+          <Route path="/Statistics" element={<Statistics accessToken={accessToken} projects={projects}/>}/>
         </Routes>
       </div>
     </BrowserRouter>

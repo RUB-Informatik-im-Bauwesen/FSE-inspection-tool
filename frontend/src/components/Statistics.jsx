@@ -15,11 +15,11 @@ import { faker } from '@faker-js/faker';
 import "./StatisticsStyle.css"
 import axios from "axios"
 
-const Statistics = ({accessToken}) => {
+const Statistics = ({accessToken, projects}) => {
   const [selectedModel1, setSelectedModel1] = useState('');
   const [selectedModel2, setSelectedModel2] = useState('');
-  const [projects, setProject] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProject, setSelectedProject] = useState({});
+  const [models, setModels] = useState({});
 
   ChartJS.register(
     CategoryScale,
@@ -31,21 +31,16 @@ const Statistics = ({accessToken}) => {
     Legend
   );
 
-  const fetchProjects = () => {
-
-    axios.get("http://127.0.0.1:8000/get_all_projects_by_user", {
+  useEffect(() => {
+    const url = `http://127.0.0.1:8000/get_models_by_project/${selectedProject._id}`;
+    axios
+      .get(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
-        setProject(res.data)
-      }).catch((err) => {
-    });
-
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+        setModels(res.data);
+      });
+  },[selectedProject])
 
   const options = {
     responsive: true,
@@ -142,9 +137,9 @@ const Statistics = ({accessToken}) => {
   ];
 
   const handleProjectChange = (e) => {
-    setSelectedProject(e.target.value);
-    console.log(projects)
-    console.log(selectedProject)
+    const projectId = e.target.value;
+    const selectedProject = projects.find((project) => project._id === projectId);
+    setSelectedProject(selectedProject);
   };
 
   const handleModel1Change = (e) => {
@@ -163,12 +158,12 @@ const Statistics = ({accessToken}) => {
             <div className="input-group">
               <select
                 className="form-select"
-                value={selectedProject}
+                value={selectedProject ? selectedProject.id : ''}
                 onChange={handleProjectChange}
               >
                 <option value="test">Select Project</option>
                 {projects.map((project) => (
-                <option value={project} key={project.name}>{project.name}</option>
+                <option value={project._id} key={project._id}>{project.name}</option>
                 ))}
               </select>
             </div>
@@ -184,9 +179,15 @@ const Statistics = ({accessToken}) => {
                 onChange={handleModel1Change}
               >
                 <option value="">Select Model 1</option>
-                {/* Add options for models dynamically */}
-                <option value="model1">Model 1</option>
-                <option value="model2">Model 2</option>
+                {models.length > 0 ? (
+                  models.map((model) => (
+                    <option value={model._id} key={model._id}>
+                      {model.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No models available</option>
+                )}
               </select>
               <span className="input-group-text">&rarr;</span>
               <select
@@ -195,9 +196,15 @@ const Statistics = ({accessToken}) => {
                 onChange={handleModel2Change}
               >
                 <option value="">Select Model 2</option>
-                {/* Add options for models dynamically */}
-                <option value="model1">Model 1</option>
-                <option value="model2">Model 2</option>
+                {models.length > 0 ? (
+                  models.map((model) => (
+                    <option value={model._id} key={model._id}>
+                      {model.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No models available</option>
+                )}
               </select>
             </div>
           </div>
