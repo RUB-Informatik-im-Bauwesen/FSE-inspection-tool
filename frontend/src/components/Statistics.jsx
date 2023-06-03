@@ -32,14 +32,16 @@ const Statistics = ({accessToken, projects}) => {
   );
 
   useEffect(() => {
-    const url = `http://127.0.0.1:8000/get_models_by_project/${selectedProject._id}`;
-    axios
-      .get(url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((res) => {
-        setModels(res.data);
-      });
+    if(selectedProject){
+      const url = `http://127.0.0.1:8000/get_models_by_project/${selectedProject._id}`;
+      axios
+        .get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+          setModels(res.data);
+        });
+    }
   },[selectedProject])
 
   const options = {
