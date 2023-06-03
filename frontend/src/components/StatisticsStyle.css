@@ -28,3 +28,73 @@ select {
 p {
   margin: 5px 0;
 }
+
+.scrollable-container {
+  max-height: 830px; /* Adjust the height as per your requirement */
+  overflow-y: auto;
+}
+
+@media screen and (max-height: 900px){
+  .scrollable-container {
+    max-height: 773px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 855px){
+  .scrollable-container {
+    max-height: 722px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 810px){
+  .scrollable-container {
+    max-height: 675px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 750px){
+  .scrollable-container {
+    max-height: 590px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 745px){
+  .scrollable-container {
+    max-height: 615px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 720px){
+  .scrollable-container {
+    max-height: 595px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 700px){
+  .scrollable-container {
+    max-height: 545px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
+@media screen and (max-height: 600px){
+  .scrollable-container {
+    max-height: 475px; /* Adjust the height as per your requirement */
+    overflow-y: auto;
+  }
+
+}
+
