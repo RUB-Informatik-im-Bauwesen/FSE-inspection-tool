@@ -41,6 +41,8 @@ const Statistics = ({accessToken, projects}) => {
         .then((res) => {
           setModels(res.data);
         });
+    } else{
+      setModels("")
     }
   },[selectedProject])
 
@@ -96,7 +98,7 @@ const Statistics = ({accessToken, projects}) => {
 
   const metrics = [
     {
-      cardTitle: 'Accuracy Metrics',
+      cardTitle: 'mAP50',
       data: [
         {
           label: 'Accuracy Before',
@@ -109,7 +111,20 @@ const Statistics = ({accessToken, projects}) => {
       ],
     },
     {
-      cardTitle: 'Other Metrics',
+      cardTitle: 'mAP90',
+      data: [
+        {
+          label: 'Accuracy Before',
+          value: 0.75,
+        },
+        {
+          label: 'Accuracy Now',
+          value: 0.9,
+        },
+      ],
+    },
+    {
+      cardTitle: 'Recall',
       data: [
         {
           label: 'Metric 1',
@@ -123,7 +138,7 @@ const Statistics = ({accessToken, projects}) => {
       ],
     },
     {
-      cardTitle: 'Other Metrics',
+      cardTitle: 'Precision',
       data: [
         {
           label: 'Metric 1',
@@ -145,11 +160,15 @@ const Statistics = ({accessToken, projects}) => {
   };
 
   const handleModel1Change = (e) => {
-    setSelectedModel1(e.target.value);
+    const modelID = e.target.value;
+    const selectedModel = models.find((model) => model._id === modelID)
+    setSelectedModel1(selectedModel);
   };
 
   const handleModel2Change = (e) => {
-    setSelectedModel2(e.target.value);
+    const modelID = e.target.value;
+    const selectedModel = models.find((model) => model._id === modelID)
+    setSelectedModel2(selectedModel);
   };
 
   return (
@@ -177,7 +196,7 @@ const Statistics = ({accessToken, projects}) => {
             <div className="input-group">
               <select
                 className="form-select me-2"
-                value={selectedModel1}
+                value={selectedModel1 ? selectedModel1._id : ''}
                 onChange={handleModel1Change}
               >
                 <option value="">Select Model 1</option>
@@ -194,7 +213,7 @@ const Statistics = ({accessToken, projects}) => {
               <span className="input-group-text">&rarr;</span>
               <select
                 className="form-select ms-2"
-                value={selectedModel2}
+                value={selectedModel2 ? selectedModel2._id : ''}
                 onChange={handleModel2Change}
               >
                 <option value="">Select Model 2</option>
@@ -215,10 +234,10 @@ const Statistics = ({accessToken, projects}) => {
         <div className="row justify-content-center mb-4">
           <div className="col-lg-6 col-md-8">
             <div className="card bg-light">
+            <div className="card-header">
+                <h4 className="card-title">Graph</h4>
+              </div>
               <div className="card-body">
-                <h4 className="card-title mb-3" style={{ fontSize: '1.5rem' }}>
-                  Graphs
-                </h4>
                 <Line options={options} data={data} height={200} />
               </div>
             </div>
@@ -228,9 +247,12 @@ const Statistics = ({accessToken, projects}) => {
         <div className="row justify-content-center">
           <div className="col-lg-6 col-md-8">
             <div className="card bg-light">
+            <div className="card-header">
+                <h4 className="card-title">Metrics</h4>
+              </div>
               <div className="card-body d-flex flex-row flex-wrap overflow-auto" style={{ maxHeight: '300px' }}>
                 {metrics.map((metricGroup, groupIndex) => (
-                  <div key={groupIndex} className="card m-2" style={{ width: '150px' }}>
+                  <div key={groupIndex} className="card m-2" style={{ width: '130px' }}>
                     <div className="card-body">
                       <h5 className="card-title mb-3" style={{ fontSize: '1rem' }}>
                         {metricGroup.cardTitle}
