@@ -83,6 +83,10 @@ const Statistics = ({accessToken, projects}) => {
             setCSVDataModel1(res.data)
           } else{
             alert("There is no CSV for this model! Please upload one in the project!");
+            setmAP50_M1(0)
+            setmAP90_M1(0)
+            setRecall_M1(0)
+            setPrecision_M1(0)
           }
         }
       )
@@ -101,6 +105,10 @@ const Statistics = ({accessToken, projects}) => {
             setCSVDataModel2(res.data)
           } else{
             alert("There is no CSV for this model! Please upload one in the project!");
+            setmAP50_M2(0)
+            setmAP90_M2(0)
+            setRecall_M2(0)
+            setPrecision_M2(0)
           }
         }
       )
