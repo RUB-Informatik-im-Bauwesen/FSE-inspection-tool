@@ -17,6 +17,7 @@ import random
 import yaml
 import asyncio
 import concurrent.futures
+import csv
 
 #Active Learning
 import torch
@@ -619,3 +620,14 @@ async def annotate_images_cvat(project_id, annotationModel, user):
         source_file = os.path.join(source_folder, file)
         destination_file = os.path.join(dest_folder, file)
         shutil.move(source_file, destination_file)
+
+
+async def get_csv(pathModel):
+    path = pathModel.path
+    if os.path.exists(path):
+        with open(path, 'r') as file:
+            reader = csv.DictReader(file)
+            data = list(reader)
+        return data
+    else:
+        return False

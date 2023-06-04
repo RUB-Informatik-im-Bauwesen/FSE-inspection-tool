@@ -15,9 +15,12 @@ import { faker } from '@faker-js/faker';
 import "./StatisticsStyle.css"
 import axios from "axios"
 
+
 const Statistics = ({accessToken, projects}) => {
   const [selectedModel1, setSelectedModel1] = useState('');
+  const [csvDataModel1, setCSVDataModel1] = useState([])
   const [selectedModel2, setSelectedModel2] = useState('');
+  const [csvDataModel2, setCSVDataModel2] = useState([])
   const [selectedProject, setSelectedProject] = useState({});
   const [models, setModels] = useState({});
 
@@ -31,6 +34,7 @@ const Statistics = ({accessToken, projects}) => {
     Legend
   );
 
+  //When a project is selected
   useEffect(() => {
     if(selectedProject){
       const url = `http://127.0.0.1:8000/get_models_by_project/${selectedProject._id}`;
@@ -45,6 +49,55 @@ const Statistics = ({accessToken, projects}) => {
       setModels("")
     }
   },[selectedProject])
+
+  //When selectedModel1 changed
+  useEffect(() => {
+    if (selectedModel1) {
+      const pathToCsv = selectedModel1.path;
+      const normalizedPath = pathToCsv.replace(/\\/g, '/');
+      const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
+      console.log(desiredPath)
+      axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
+        (res) =>{
+          console.log(res.data)
+          if (res.data){
+            setCSVDataModel1(res.data)
+          } else{
+            alert("There is no CSV for this model! Please upload one in the project!");
+          }
+        }
+      )
+    }
+  }, [selectedModel1]);
+
+  //When selectedModel2 changed
+  useEffect(() => {
+    if (selectedModel2) {
+      const pathToCsv = selectedModel2.path;
+      const normalizedPath = pathToCsv.replace(/\\/g, '/');
+      const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
+      console.log(desiredPath)
+      axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
+        (res) =>{
+          if (res.data){
+            setCSVDataModel2(res.data)
+          } else{
+            alert("There is no CSV for this model! Please upload one in the project!");
+          }
+        }
+      )
+    }
+  },[selectedModel2])
+
+  const checkPathExists = async (path) => {
+    try {
+      const response = await fetch(path);
+      return response.ok;
+    } catch (error) {
+      console.error("An error occurred while checking path:", error);
+      return false;
+    }
+  };
 
   const options = {
     responsive: true,

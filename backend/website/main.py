@@ -4,8 +4,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
-from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation, TrainModel, AnnotationModel
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat
+from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation, TrainModel, AnnotationModel, pathModel
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat, get_csv
 import logging
 from typing import List, Dict
 from datetime import timedelta
@@ -216,3 +216,9 @@ async def train_model(project_id: str, trainmodel: TrainModel, user=Depends(mana
 async def annotate_selected_images(project_id: str,annotationModel:AnnotationModel, user=Depends(manager)):
     await annotate_images_cvat(project_id, annotationModel, user)
     return project_id
+
+#Statistics
+@app.post("/get_csv")
+async def get_csvs(path: pathModel):
+    boolean = await get_csv(path)
+    return boolean

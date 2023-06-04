@@ -75,3 +75,6 @@ class AnnotationModel(BaseModel):
     class_names: List[str]
     username: str
     password: str
+
+class pathModel(BaseModel):
+    path: str

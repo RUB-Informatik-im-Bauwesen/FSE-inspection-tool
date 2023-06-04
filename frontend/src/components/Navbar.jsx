@@ -15,7 +15,22 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
     SetClicked(!clicked)
   }
 
+  const get_projects_by_user2 = () => {
 
+    axios
+      .get("http://127.0.0.1:8000/get_all_projects_by_user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        SetProject(res.data)
+        setProjects(res.data)
+      }).catch((err) => {
+        console.log(err)
+      });
+    setTimeout(() => {
+      window.location.replace("http://127.0.0.1:5173/Statistics")
+    },500)
+  }
 
   const get_projects_by_user = () => {
 
@@ -46,7 +61,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
         <div className={isLoggedIn ? "display-on" : "display-off"}>
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
             <li><a onClick={get_projects_by_user}>Projects</a></li>
-            <li><a href='/Statistics'>Statistics</a></li>
+            <li><a onClick={get_projects_by_user2}>Statistics</a></li>
             <li><a href='/FAQ'>FAQ</a></li>
             <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
           </ul>
