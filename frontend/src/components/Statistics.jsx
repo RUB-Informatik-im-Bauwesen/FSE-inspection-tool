@@ -23,6 +23,14 @@ const Statistics = ({accessToken, projects}) => {
   const [csvDataModel2, setCSVDataModel2] = useState([])
   const [selectedProject, setSelectedProject] = useState({});
   const [models, setModels] = useState({});
+  const [mAP50_M1, setmAP50_M1] = useState(0)
+  const [mAP50_M2, setmAP50_M2] = useState(0)
+  const [mAP90_M1, setmAP90_M1] = useState(0)
+  const [mAP90_M2, setmAP90_M2] = useState(0)
+  const [Recall_M1, setRecall_M1] = useState(0)
+  const [Recall_M2, setRecall_M2] = useState(0)
+  const [precision_M1, setPrecision_M1] = useState(0)
+  const [precision_M2, setPrecision_M2] = useState(0)
 
   ChartJS.register(
     CategoryScale,
@@ -48,6 +56,18 @@ const Statistics = ({accessToken, projects}) => {
     } else{
       setModels("")
     }
+    setmAP50_M1(0)
+    setmAP50_M2(0)
+    setmAP90_M1(0)
+    setmAP90_M2(0)
+    setRecall_M1(0)
+    setRecall_M2(0)
+    setPrecision_M1(0)
+    setPrecision_M2(0)
+    setSelectedModel1('')
+    setSelectedModel2('')
+    setCSVDataModel1('')
+    setCSVDataModel2('')
   },[selectedProject])
 
   //When selectedModel1 changed
@@ -56,7 +76,6 @@ const Statistics = ({accessToken, projects}) => {
       const pathToCsv = selectedModel1.path;
       const normalizedPath = pathToCsv.replace(/\\/g, '/');
       const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
-      console.log(desiredPath)
       axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
         (res) =>{
           console.log(res.data)
@@ -76,7 +95,6 @@ const Statistics = ({accessToken, projects}) => {
       const pathToCsv = selectedModel2.path;
       const normalizedPath = pathToCsv.replace(/\\/g, '/');
       const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
-      console.log(desiredPath)
       axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
         (res) =>{
           if (res.data){
@@ -89,15 +107,42 @@ const Statistics = ({accessToken, projects}) => {
     }
   },[selectedModel2])
 
-  const checkPathExists = async (path) => {
-    try {
-      const response = await fetch(path);
-      return response.ok;
-    } catch (error) {
-      console.error("An error occurred while checking path:", error);
-      return false;
+  //CSV Data from model1
+  useEffect(() => {
+    if(csvDataModel1){
+      if(csvDataModel1[csvDataModel1.length-1]){
+        let keys = Object.keys(csvDataModel1[csvDataModel1.length-1])
+        console.log(keys[4])
+        let mAP50 = csvDataModel1[csvDataModel1.length-1][keys[6]]
+        setmAP50_M1(mAP50)
+        let mAP90 = csvDataModel1[csvDataModel1.length-1][keys[7]]
+        setmAP90_M1(mAP90)
+        let recall = csvDataModel1[csvDataModel1.length-1][keys[5]]
+        setRecall_M1(recall)
+        let precision = csvDataModel1[csvDataModel1.length-1][keys[4]]
+        setPrecision_M1(precision)
+      }
     }
-  };
+    }
+  ,[csvDataModel1])
+
+  //CSV Data from model2
+  useEffect(() => {
+    if(csvDataModel2){
+      if(csvDataModel2[csvDataModel2.length-1]){
+        let keys = Object.keys(csvDataModel2[csvDataModel2.length-1])
+        console.log(keys[6])
+        let mAP50 = csvDataModel2[csvDataModel2.length-1][keys[6]]
+        setmAP50_M2(mAP50)
+        let mAP90 = csvDataModel2[csvDataModel2.length-1][keys[7]]
+        setmAP90_M2(mAP90)
+        let recall = csvDataModel2[csvDataModel2.length-1][keys[5]]
+        setRecall_M2(recall)
+        let precision = csvDataModel2[csvDataModel2.length-1][keys[4]]
+        setPrecision_M2(precision)
+      }
+    }
+  },[csvDataModel2])
 
   const options = {
     responsive: true,
@@ -154,12 +199,12 @@ const Statistics = ({accessToken, projects}) => {
       cardTitle: 'mAP50',
       data: [
         {
-          label: 'Accuracy Before',
-          value: 0.75,
+          label: selectedModel1 ? selectedModel1.name : "None",
+          value: mAP50_M1 ? mAP50_M1 : 0,
         },
         {
-          label: 'Accuracy Now',
-          value: 0.9,
+          label: selectedModel2 ? selectedModel2.name : "None",
+          value: mAP50_M2 ? mAP50_M2 : 0,
         },
       ],
     },
@@ -167,12 +212,12 @@ const Statistics = ({accessToken, projects}) => {
       cardTitle: 'mAP90',
       data: [
         {
-          label: 'Accuracy Before',
-          value: 0.75,
+          label: selectedModel1 ? selectedModel1.name : "None",
+          value: mAP90_M1 ? mAP90_M1 : 0,
         },
         {
-          label: 'Accuracy Now',
-          value: 0.9,
+          label: selectedModel2 ? selectedModel2.name : "None",
+          value: mAP90_M2 ? mAP90_M2 : 0,
         },
       ],
     },
@@ -180,12 +225,12 @@ const Statistics = ({accessToken, projects}) => {
       cardTitle: 'Recall',
       data: [
         {
-          label: 'Metric 1',
-          value: 0.85,
+          label: selectedModel1 ? selectedModel1.name : "None",
+          value: Recall_M1 ? Recall_M1 : 0,
         },
         {
-          label: 'Metric 2',
-          value: 0.95,
+          label: selectedModel2 ? selectedModel2.name : "None",
+          value: Recall_M2 ? Recall_M2 : 0,
         },
         // Add more metrics here
       ],
@@ -194,12 +239,12 @@ const Statistics = ({accessToken, projects}) => {
       cardTitle: 'Precision',
       data: [
         {
-          label: 'Metric 1',
-          value: 0.85,
+          label: selectedModel1 ? selectedModel1.name : "None",
+          value: precision_M1 ? precision_M1 : 0,
         },
         {
-          label: 'Metric 2',
-          value: 0.95,
+          label: selectedModel2 ? selectedModel2.name : "None",
+          value: precision_M2 ? precision_M2 : 0,
         },
         // Add more metrics here
       ],
