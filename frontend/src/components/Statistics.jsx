@@ -23,14 +23,17 @@ const Statistics = ({accessToken, projects}) => {
   const [csvDataModel2, setCSVDataModel2] = useState([])
   const [selectedProject, setSelectedProject] = useState({});
   const [models, setModels] = useState({});
-  const [mAP50_M1, setmAP50_M1] = useState(0)
-  const [mAP50_M2, setmAP50_M2] = useState(0)
-  const [mAP90_M1, setmAP90_M1] = useState(0)
-  const [mAP90_M2, setmAP90_M2] = useState(0)
-  const [Recall_M1, setRecall_M1] = useState(0)
-  const [Recall_M2, setRecall_M2] = useState(0)
-  const [precision_M1, setPrecision_M1] = useState(0)
-  const [precision_M2, setPrecision_M2] = useState(0)
+  const [mAP50_M1, setmAP50_M1] = useState(0);
+  const [mAP50_M2, setmAP50_M2] = useState(0);
+  const [mAP90_M1, setmAP90_M1] = useState(0);
+  const [mAP90_M2, setmAP90_M2] = useState(0);
+  const [Recall_M1, setRecall_M1] = useState(0);
+  const [Recall_M2, setRecall_M2] = useState(0);
+  const [precision_M1, setPrecision_M1] = useState(0);
+  const [precision_M2, setPrecision_M2] = useState(0);
+  const [labelsForGraph, setLabels] = useState([]);
+  const [mAPM1Graph, setmAPGraphM1] = useState([]);
+  const [mAPM2Graph, setmAPGraphM2] = useState([]);
 
   ChartJS.register(
     CategoryScale,
@@ -68,6 +71,7 @@ const Statistics = ({accessToken, projects}) => {
     setSelectedModel2('')
     setCSVDataModel1('')
     setCSVDataModel2('')
+    setLabels([])
   },[selectedProject])
 
   //When selectedModel1 changed
@@ -87,6 +91,7 @@ const Statistics = ({accessToken, projects}) => {
             setmAP90_M1(0)
             setRecall_M1(0)
             setPrecision_M1(0)
+            setmAPGraphM1([])
           }
         }
       )
@@ -109,6 +114,7 @@ const Statistics = ({accessToken, projects}) => {
             setmAP90_M2(0)
             setRecall_M2(0)
             setPrecision_M2(0)
+            setmAPGraphM2([])
           }
         }
       )
@@ -120,15 +126,26 @@ const Statistics = ({accessToken, projects}) => {
     if(csvDataModel1){
       if(csvDataModel1[csvDataModel1.length-1]){
         let keys = Object.keys(csvDataModel1[csvDataModel1.length-1])
-        console.log(keys[4])
+        console.log(keys[0])
         let mAP50 = csvDataModel1[csvDataModel1.length-1][keys[6]]
         setmAP50_M1(mAP50)
+        let mAPGraphM1 = [];
+        for (let i = 0; i < csvDataModel1.length; i++) {
+          const entry = csvDataModel1[i];
+          const mAP50 = entry[keys[6]];
+          mAPGraphM1.push(mAP50);
+        }
+        setmAPGraphM1(mAPGraphM1);
         let mAP90 = csvDataModel1[csvDataModel1.length-1][keys[7]]
         setmAP90_M1(mAP90)
         let recall = csvDataModel1[csvDataModel1.length-1][keys[5]]
         setRecall_M1(recall)
         let precision = csvDataModel1[csvDataModel1.length-1][keys[4]]
         setPrecision_M1(precision)
+        if (csvDataModel1[csvDataModel1.length - 1][keys[0]]) {
+          const numEpochs = parseInt(csvDataModel1[csvDataModel1.length - 1][keys[0]], 10);
+          setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()));
+        }
       }
     }
     }
@@ -139,18 +156,32 @@ const Statistics = ({accessToken, projects}) => {
     if(csvDataModel2){
       if(csvDataModel2[csvDataModel2.length-1]){
         let keys = Object.keys(csvDataModel2[csvDataModel2.length-1])
-        console.log(keys[6])
         let mAP50 = csvDataModel2[csvDataModel2.length-1][keys[6]]
         setmAP50_M2(mAP50)
+        let mAPGraphM2 = [];
+        for (let i = 0; i < csvDataModel2.length; i++) {
+          const entry = csvDataModel2[i];
+          const mAP50 = entry[keys[6]];
+          mAPGraphM2.push(mAP50);
+        }
+        setmAPGraphM2(mAPGraphM2);
         let mAP90 = csvDataModel2[csvDataModel2.length-1][keys[7]]
         setmAP90_M2(mAP90)
         let recall = csvDataModel2[csvDataModel2.length-1][keys[5]]
         setRecall_M2(recall)
         let precision = csvDataModel2[csvDataModel2.length-1][keys[4]]
         setPrecision_M2(precision)
+        if (csvDataModel2[csvDataModel2.length - 1][keys[0]]) {
+          const numEpochs = parseInt(csvDataModel2[csvDataModel2.length - 1][keys[0]], 10);
+          setLabels(Array.from({ length: numEpochs +1  }, (_, index) => index.toString()));
+        }
       }
     }
   },[csvDataModel2])
+
+  useEffect(() => {
+    console.log(labelsForGraph)
+  },[labelsForGraph])
 
   const options = {
     responsive: true,
@@ -182,25 +213,24 @@ const Statistics = ({accessToken, projects}) => {
     },
   };
 
-  const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-
   const data = {
-    labels,
+    labels: labelsForGraph.length > 0 ? labelsForGraph : ["No data available"],
     datasets: [
       {
-        label: 'Dataset 1',
-        data: labels.map(() => faker.number.int({ min: -1000, max: 1000 })),
+        label:  selectedModel1 && selectedModel1.name !== "None" ? selectedModel1.name : "",
+        data: labelsForGraph.length > 0 ? mAPM1Graph : [],
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
       {
-        label: 'Dataset 2',
-        data: labels.map(() => faker.number.int({ min: -1000, max: 1000 })),
+        label: selectedModel2 && selectedModel2.name !== "None" ? selectedModel2.name : "",
+        data: labelsForGraph.length > 0 ? mAPM2Graph : [],
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },
     ],
   };
+
 
   const metrics = [
     {
