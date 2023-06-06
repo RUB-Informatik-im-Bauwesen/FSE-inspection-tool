@@ -8,6 +8,7 @@ import Login from "./components/Login"
 import ProjectList from './components/ProjectList'
 import ProjectSite from './components/ProjectSite'
 import Statistics from './components/Statistics'
+import FAQ from './components/FAQ'
 
 function App() {
 
@@ -77,6 +78,7 @@ function App() {
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
           <Route path="/Statistics" element={<Statistics accessToken={accessToken} projects={projects}/>}/>
+          <Route path="/FAQ" element={<FAQ/>}/>
         </Routes>
       </div>
     </BrowserRouter>

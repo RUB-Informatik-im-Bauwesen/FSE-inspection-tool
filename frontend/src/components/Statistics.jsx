@@ -203,11 +203,18 @@ const Statistics = ({accessToken, projects}) => {
       },
     },
     scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Epochs',
+        },
+      },
       y: {
-        ticks: {
-          font: {
-            size: 12, // Decrease y-axis label font size
-          },
+        display: true,
+        title: {
+          display: true,
+          text: 'mAP50',
         },
       },
     },

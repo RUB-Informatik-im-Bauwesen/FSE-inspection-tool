@@ -1,0 +1,27 @@
+.card {
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  cursor: pointer;
+  background-color: #f8f9fa;
+  padding: 15px;
+}
+
+.card-header:hover {
+  background-color: #e9ecef;
+}
+
+.card-title {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.card-body {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+}
