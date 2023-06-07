@@ -144,7 +144,9 @@ const Statistics = ({accessToken, projects}) => {
         setPrecision_M1(precision)
         if (csvDataModel1[csvDataModel1.length - 1][keys[0]]) {
           const numEpochs = parseInt(csvDataModel1[csvDataModel1.length - 1][keys[0]], 10);
-          setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()));
+          if(mAPGraphM1.length >= mAPM2Graph.length){
+            setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()));
+          }
         }
       }
     }
@@ -173,7 +175,9 @@ const Statistics = ({accessToken, projects}) => {
         setPrecision_M2(precision)
         if (csvDataModel2[csvDataModel2.length - 1][keys[0]]) {
           const numEpochs = parseInt(csvDataModel2[csvDataModel2.length - 1][keys[0]], 10);
-          setLabels(Array.from({ length: numEpochs +1  }, (_, index) => index.toString()));
+          if(mAPGraphM2.length >= mAPM1Graph.length){
+            setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()));
+          }
         }
       }
     }
@@ -196,7 +200,7 @@ const Statistics = ({accessToken, projects}) => {
       },
       title: {
         display: true,
-        text: 'Example',
+        text: 'mAP Comparison',
         font: {
           size: 18, // Decrease title font size
         },
@@ -224,19 +228,20 @@ const Statistics = ({accessToken, projects}) => {
     labels: labelsForGraph.length > 0 ? labelsForGraph : ["No data available"],
     datasets: [
       {
-        label:  selectedModel1 && selectedModel1.name !== "None" ? selectedModel1.name : "",
-        data: labelsForGraph.length > 0 ? mAPM1Graph : [],
+        label: selectedModel1 && selectedModel1.name !== "None" ? selectedModel1.name : "",
+        data: labelsForGraph.length > 0 ? mAPM1Graph.map((value, index) => (index <= labelsForGraph.length - 1 ? value : null)) : [],
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
       {
         label: selectedModel2 && selectedModel2.name !== "None" ? selectedModel2.name : "",
-        data: labelsForGraph.length > 0 ? mAPM2Graph : [],
+        data: labelsForGraph.length > 0 ? mAPM2Graph.map((value, index) => (index <= labelsForGraph.length - 1 ? value : null)) : [],
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },
     ],
   };
+
 
 
   const metrics = [
