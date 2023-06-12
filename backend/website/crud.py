@@ -162,6 +162,21 @@ async def fetch_images_by_projects(id):
         images.append(image)
     return images
 
+async def uploadCSV(project_id, file: UploadFile, user):
+    #Get selected model
+    model = await collection_models.find_one({"project_id": project_id, "selected":True})
+    if not model:
+        raise HTTPException(status_code=404, detail="No models found in the project.")
+    model_path = os.path.dirname(os.path.dirname(model["path"]))
+
+    contents = await file.read()
+
+    dest_path = os.path.join(model_path, file.filename)
+
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    return {"CSV uploaded!"}
 
 async def upload_model(model, user):
   document = dict(model, **{"username": user["username"]})

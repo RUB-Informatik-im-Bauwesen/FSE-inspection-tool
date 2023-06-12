@@ -14,6 +14,7 @@ const ProjectSite = ({ accessToken }) => {
   const [annotations, setAnnotations] = useState([]);
   const [models, setModels] = useState([]);
   const [activeTab, setActiveTab] = useState(''); // Track the active tab
+  const [csvUpload, setcsvUpload] = useState(false);
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenTraining, setIsModalOpenTraining] = useState(false);
@@ -57,6 +58,7 @@ const ProjectSite = ({ accessToken }) => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setcsvUpload(false) //To reset csv
   };
 
   const openModalAnnotation = () => {
@@ -98,6 +100,11 @@ const ProjectSite = ({ accessToken }) => {
         }
       });
   };
+
+  const uploadCSV = () => {
+    openModal()
+    setcsvUpload(true)
+  }
 
   const getModelsOfProject = () => {
     const url = `http://127.0.0.1:8000/get_models_by_project/${id}`;
@@ -173,6 +180,7 @@ const ProjectSite = ({ accessToken }) => {
       let desiredImage = ""
       let id_desiredImage = null
       let url = ""
+      const isCSVFile = file.name.endsWith('.csv');
       formData.append('file', file);
       switch(activeTab){
         case "images":
@@ -189,6 +197,19 @@ const ProjectSite = ({ accessToken }) => {
           break;
         case "models":
           url = `http://127.0.0.1:8000/upload_models_input/${id}`;
+
+          if(csvUpload){
+
+            if(!isCSVFile){
+              alert("It needs to be a csv file!")
+              url = ""
+              setcsvUpload(false)
+              break;
+            }
+
+            url = `http://127.0.0.1:8000/upload_csv/${id}`
+            setcsvUpload(false)
+          }
           break;
       }
         if(url){
@@ -264,7 +285,8 @@ const ProjectSite = ({ accessToken }) => {
           <Modal.Title>
             {activeTab === 'images' && 'Upload Images'}
             {activeTab === 'annotations' && 'Upload Annotations'}
-            {activeTab === 'models' && 'Upload Models'}
+            {activeTab === 'models' && !csvUpload && 'Upload Models'}
+            {activeTab === 'models' && csvUpload && 'Upload CSV'}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -381,6 +403,9 @@ const ProjectSite = ({ accessToken }) => {
               <button onClick={openModalTraining}>
                 Start Training
                 {isLoadingTraining && <div className="loading-circle"></div>}
+              </button>
+              <button onClick={uploadCSV}>
+                Upload CSV
               </button>
 
             </>
