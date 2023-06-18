@@ -6,6 +6,9 @@ import numpy as np
 import random
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import torch
+import cv2
+
 
 
 def variation_ratio(data):
@@ -150,4 +153,20 @@ async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, m
         await loop.run_in_executor(executor, run_training)
 
     return new_model_name
+
+async def render_images(model_path, image_paths, save_path):
+    model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path)
+
+    annotated_image_paths = []
+    for image_path in image_paths:
+        results = model(image_path)  # Perform inference on the image
+        results.save(save_dir="storage\Annotated_Images")  # Render the predicted bounding boxes on the image
+
+        # Save the rendered image to the specified path
+        save_image_path = "storage//Annotated_Images" + '//' + image_path.split('/')[-1]
+        annotated_image_paths.append(save_image_path)
+
+
+    return annotated_image_paths
+
 

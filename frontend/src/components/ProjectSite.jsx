@@ -13,6 +13,7 @@ const ProjectSite = ({ accessToken }) => {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [models, setModels] = useState([]);
+  const [boundingBoxesImages, setBoundingBoxImages] = useState([]);
   const [activeTab, setActiveTab] = useState(''); // Track the active tab
   const [csvUpload, setcsvUpload] = useState(false);
   const { id } = useParams();
@@ -167,6 +168,10 @@ const ProjectSite = ({ accessToken }) => {
     if (tab === "models"){
       getModelsOfProject();
     }
+
+    if(tab === "demo"){
+      console.log("Platzhalter")
+    }
   };
 
   const handleFileUpload = (event) => {
@@ -276,6 +281,21 @@ const ProjectSite = ({ accessToken }) => {
     }
   }
 
+  const predictImages = () =>{
+    const url = `http://127.0.0.1:8000/predict_images/${id}`
+    axios
+    .get(url, {
+      headers: {  Authorization: `Bearer ${accessToken}`},
+          })
+      .then((res) => {
+        setBoundingBoxImages(res.data)
+        console.log(res.data)
+       })
+      .catch((err) => {
+          console.log(err);
+       });
+  }
+
   return (
     <div className="project-site">
       <Modal
@@ -380,6 +400,12 @@ const ProjectSite = ({ accessToken }) => {
           >
             Models
           </button>
+          <button
+            className={activeTab === 'demo' ? 'active' : ''}
+            onClick={() => handleTabChange('demo')}
+          >
+            Demo
+          </button>
         </div>
         <div className="tab-buttons">
           {activeTab === 'images' && (
@@ -410,6 +436,14 @@ const ProjectSite = ({ accessToken }) => {
 
             </>
           )}
+          {activeTab === 'demo' && (
+            <>
+              <button onClick={predictImages}>
+                Predict
+              </button>
+
+            </>
+          )}
         </div>
       </div>
 
@@ -436,8 +470,14 @@ const ProjectSite = ({ accessToken }) => {
             {models.map((model, index) => (
               <ProjectSiteCard id={id} access_token={accessToken} key={index} data={model} setModelTrainingID={setModelTrainingID} type="models" />
             ))}
-    </div>
-  )}
+          </div>
+        )}
+        {activeTab === 'demo' && boundingBoxesImages && (
+          <div className="card-grid">
+            {boundingBoxesImages.map((predictImages, index) => (
+              <ProjectSiteCard id={id} access_token={accessToken} key={index} data={predictImages} type="demo" />
+            ))}
+          </div>)}
 </div>
 
     </div>

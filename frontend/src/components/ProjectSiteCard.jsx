@@ -67,6 +67,8 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
     imageSrc = '/txt.png'; // Replace with the actual image path for annotations
   } else if (type === 'models') {
     imageSrc = '/model.png'; // Replace with the actual image path for models
+  } else if(type ==='demo'){
+    imageSrc = data
   }
 
   const handleCheckboxChange = () => {

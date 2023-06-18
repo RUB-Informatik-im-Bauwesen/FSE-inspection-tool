@@ -9,7 +9,7 @@ from backend.website.models import User, Project, Image, Model, Annotation, Trai
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images
 from backend.utils.cvat_utils import create_and_upload_task
 import os
 import shutil
@@ -509,6 +509,27 @@ async def train_models(project_id, trainmodel, user):
                 print(f'Error deleting file: {file_path}\n{e}')
 
     return model
+
+async def get_annotated_images(project_id, user):
+    #Get Models and Images
+    model = await collection_models.find_one({"project_id": project_id, "selected":True})
+    if not model:
+        raise HTTPException(status_code=404, detail="No models found in the project.")
+    model_path = model["path"]
+
+    images = []
+    image_ids = []
+    cursor = collection_images.find({"project_id": project_id, "selected": True})
+    async for document in cursor:
+        path = document["path"]
+        images.append(path)
+        image_id = str(document["_id"])
+        image_ids.append(image_id)
+
+    save_path = "storage\Annotated_Images"
+    rendered_images = await render_images(model_path, images, save_path)
+
+    return rendered_images
 
 
 
