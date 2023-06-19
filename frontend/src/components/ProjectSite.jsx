@@ -283,20 +283,28 @@ const ProjectSite = ({ accessToken }) => {
   }
 
   const predictImages = () =>{
-    setLoadingPredict(true)
-    const url = `http://127.0.0.1:8000/predict_images/${id}`
-    axios
-    .get(url, {
-      headers: {  Authorization: `Bearer ${accessToken}`},
-          })
-      .then((res) => {
-        setBoundingBoxImages(res.data)
-        setLoadingPredict(false)
-        console.log(res.data)
-       })
-      .catch((err) => {
-          console.log(err);
-       });
+    const hasSelected = Object.values(models).some(model => model.selected === true);
+    const selectedModels = Object.values(models).filter(model => model.selected === true);
+    if(!hasSelected){
+      alert("Please select a model!")
+    }  else if(selectedModels.length > 1){
+      alert("Only select one model!")
+    } else{
+      setLoadingPredict(true)
+      const url = `http://127.0.0.1:8000/predict_images/${id}`
+      axios
+      .get(url, {
+        headers: {  Authorization: `Bearer ${accessToken}`},
+            })
+        .then((res) => {
+          setBoundingBoxImages(res.data)
+          setLoadingPredict(false)
+          console.log(res.data)
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }
   }
 
   return (
