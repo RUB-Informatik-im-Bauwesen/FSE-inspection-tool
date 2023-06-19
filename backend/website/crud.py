@@ -526,7 +526,7 @@ async def get_annotated_images(project_id, user):
         image_id = str(document["_id"])
         image_ids.append(image_id)
 
-    save_path = "storage\Annotated_Images"
+    save_path = "frontend\public\Annotated_Images"
     rendered_images = await render_images(model_path, images, save_path)
 
     return rendered_images

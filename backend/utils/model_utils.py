@@ -160,10 +160,10 @@ async def render_images(model_path, image_paths, save_path):
     annotated_image_paths = []
     for image_path in image_paths:
         results = model(image_path)  # Perform inference on the image
-        results.save(save_dir="storage\Annotated_Images")  # Render the predicted bounding boxes on the image
+        results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
 
         # Save the rendered image to the specified path
-        save_image_path = "storage//Annotated_Images" + '//' + image_path.split('/')[-1]
+        save_image_path = "/Annotated_Images" + '/' + image_path.split('/')[-1]
         annotated_image_paths.append(save_image_path)
 
 

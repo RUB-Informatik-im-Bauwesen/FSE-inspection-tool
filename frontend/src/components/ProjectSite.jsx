@@ -25,11 +25,12 @@ const ProjectSite = ({ accessToken }) => {
   const [imageSize, setImageSize] = useState('');
   const [epochLength, setEpochLength] = useState('');
   const [batchSize, setBatchSize] = useState('');
-  const [modelID, setModelID] = useState('')
+  const [modelID, setModelID] = useState('');
   const [isLoadingTraining, setIsLoadingTraining] = useState(false);
-  const [isLoadingRanking, setIsLoadingRanking] = useState(false)
-  const [isLoadingAnnotating, setLoadingAnnotating] = useState(false)
-  const [tagsAnnotations, setTagsAnnotations] = useState([])
+  const [isLoadingRanking, setIsLoadingRanking] = useState(false);
+  const [isLoadingAnnotating, setLoadingAnnotating] = useState(false);
+  const [isLoadingPredict, setLoadingPredict] = useState(false);
+  const [tagsAnnotations, setTagsAnnotations] = useState([]);
 
 
   function handleImageSizeChange(event) {
@@ -282,6 +283,7 @@ const ProjectSite = ({ accessToken }) => {
   }
 
   const predictImages = () =>{
+    setLoadingPredict(true)
     const url = `http://127.0.0.1:8000/predict_images/${id}`
     axios
     .get(url, {
@@ -289,6 +291,7 @@ const ProjectSite = ({ accessToken }) => {
           })
       .then((res) => {
         setBoundingBoxImages(res.data)
+        setLoadingPredict(false)
         console.log(res.data)
        })
       .catch((err) => {
@@ -440,6 +443,7 @@ const ProjectSite = ({ accessToken }) => {
             <>
               <button onClick={predictImages}>
                 Predict
+                {isLoadingPredict && <div className="loading-circle"></div>}
               </button>
 
             </>
