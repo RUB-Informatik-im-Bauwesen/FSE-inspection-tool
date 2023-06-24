@@ -1,0 +1,20 @@
+path: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset
+train: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset\\images\\train
+val: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset\\images\\val
+
+# Classes
+names:
+  0: Wandhydrant
+  1: Steigleitung
+  2: Loeschwasserleitung
+  3: Feuerloescher
+  4: Feuerloescher-Schild
+  5: Brandmelder
+  6: Rauchmelder
+  7: Sirene
+  8: Hausalarmschalter
+  9: Rauchabzugschalter
+  10: Notausgang-Schild
+  11: Sprinkler
+  12: Flucht- und Rettungsplan
+  13: Steckdose

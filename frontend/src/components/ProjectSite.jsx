@@ -30,6 +30,7 @@ const ProjectSite = ({ accessToken }) => {
   const [isLoadingRanking, setIsLoadingRanking] = useState(false);
   const [isLoadingAnnotating, setLoadingAnnotating] = useState(false);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
+  const [isLoadingValidation, setLoadingValidation] = useState(false);
   const [tagsAnnotations, setTagsAnnotations] = useState([]);
 
 
@@ -307,6 +308,30 @@ const ProjectSite = ({ accessToken }) => {
     }
   }
 
+  const validateModel = () => {
+    const hasSelected = Object.values(models).some(model => model.selected === true);
+    const selectedModels = Object.values(models).filter(model => model.selected === true);
+    if(!hasSelected){
+      alert("Please select a model!")
+    }  else if(selectedModels.length > 1){
+      alert("Only select one model!")
+    } else{
+      setLoadingValidation(true)
+      const url = `http://127.0.0.1:8000/validate_model/${id}`
+      axios
+      .get(url, {
+        headers: {  Authorization: `Bearer ${accessToken}`},
+            })
+        .then((res) => {
+          setLoadingValidation(false)
+          console.log(res.data)
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }
+  }
+
   return (
     <div className="project-site">
       <Modal
@@ -441,6 +466,10 @@ const ProjectSite = ({ accessToken }) => {
                 Start Training
                 {isLoadingTraining && <div className="loading-circle"></div>}
               </button>
+              <button onClick={validateModel}>
+                Validation
+                {isLoadingValidation && <div className="loading-circle"></div>}
+              </button>
               <button onClick={uploadCSV}>
                 Upload CSV
               </button>
@@ -490,7 +519,7 @@ const ProjectSite = ({ accessToken }) => {
               <ProjectSiteCard id={id} access_token={accessToken} key={index} data={predictImages} type="demo" />
             ))}
           </div>)}
-</div>
+        </div>
 
     </div>
   );

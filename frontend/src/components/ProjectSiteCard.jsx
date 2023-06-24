@@ -69,6 +69,8 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
     imageSrc = '/model.png'; // Replace with the actual image path for models
   } else if(type ==='demo'){
     imageSrc = data
+    const filename = data.split("/").pop();
+    data = {data:data, name:filename}
   }
 
   const handleCheckboxChange = () => {

@@ -129,6 +129,22 @@ def get_roi_matches(iou_matrices):
 
     return max_values, matches, min_match
 
+async def validate_model_yolo(model_path, yaml_path = "labels.yaml", image_size = 640):
+    project_path = os.path.dirname(os.path.dirname(model_path))
+
+    def run_validation():
+        subprocess.run(
+            ["python", "yolov5/val.py", "--img", str(image_size), "--data", yaml_path, "--weights", model_path, "--device", "0", "--project", project_path, "--name", "validationResults","--save-txt"],
+            check=True
+        )
+
+    # Run the blocking function in a separate thread using the thread pool executor
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        await loop.run_in_executor(executor, run_validation)
+
+    return project_path + "/validationResults"
+
 
 async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, models_id):
     model_path_new = model_path.split("/")
@@ -154,12 +170,15 @@ async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, m
 
     return new_model_name
 
+def load_model(path):
+    return torch.hub.load('ultralytics/yolov5', 'custom', path=path)
+
 async def render_images(model_path, image_paths, save_path):
-    model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path)
+    model = await asyncio.to_thread(load_model, model_path)
 
     annotated_image_paths = []
     for image_path in image_paths:
-        results = model(image_path)  # Perform inference on the image
+        results = await asyncio.to_thread(model,image_path)# Perform inference on the image
         results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
 
         # Save the rendered image to the specified path

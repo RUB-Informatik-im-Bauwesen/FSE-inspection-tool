@@ -9,7 +9,7 @@ from backend.website.models import User, Project, Image, Model, Annotation, Trai
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo
 from backend.utils.cvat_utils import create_and_upload_task
 import os
 import shutil
@@ -466,7 +466,13 @@ async def prepare_for_training(project_id, user):
 
     return images_for_return
 
-
+async def validate_model(project_id, user):
+    model = await collection_models.find_one({"project_id": project_id, "selected":True})
+    if not model:
+        raise HTTPException(status_code=404, detail="No models found in the project.")
+    model_path = model["path"]
+    path_to_results = await validate_model_yolo(model_path)
+    return path_to_results
 
 async def train_models(project_id, trainmodel, user):
     models_id = trainmodel.models_id
