@@ -673,3 +673,25 @@ async def get_csv(pathModel):
         return data
     else:
         return False
+
+async def get_valid_data(pathModel):
+    path = pathModel.path
+    if not os.path.exists(path):
+        return False
+
+    txt_files = [file for file in os.listdir(path) if file.endswith('.txt')]
+
+    if len(txt_files) == 1:
+        txt_file_path = os.path.join(path, txt_files[0])
+
+        with open(txt_file_path, 'r') as file:
+            lines = file.readlines()
+
+        metrics = []
+        for line in lines:
+            key, value = line.strip().split(': ')
+            metrics.append(str(round(float(value),3)))
+
+        return metrics
+    else:
+        return False

@@ -18,6 +18,7 @@ import axios from "axios"
 const StatisticsMultipleModels = ({accessToken, projects}) => {
   const [selectedModels, setSelectedModels] = useState([]);
   const [csvDataModel, setcsvDataModel] = useState([]);
+  const [validationDataModel, setvalidationDataModel] = useState([]);
   const [selectedProject, setSelectedProject] = useState([]);
   const [model, setModels] = useState([]);
   const [labelsForGraph, setLabels] = useState([]);
@@ -27,6 +28,7 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
   });
   const [metrics, setMetrics] = useState([]);
   const [deselectedBoolean, setDeselectedBoolean] = useState(false);
+  const [showTrainorValid, setShowTrainorValid] = useState("Train");
 
   ChartJS.register(
     CategoryScale,
@@ -37,6 +39,19 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
     Tooltip,
     Legend
   );
+
+    //When the train/valid tab changes
+    useEffect(() => {
+      setSelectedModels([]);
+      setcsvDataModel([]);
+      setLabels([]);
+      setvalidationDataModel([]);
+      setDataForGraph({
+        labels: "No data available",
+        datasets: [],
+      });
+      setMetrics([]);
+    },[showTrainorValid])
 
     //When a project is selected
     useEffect(() => {
@@ -55,51 +70,147 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
       setSelectedModels([]);
       setcsvDataModel([]);
       setLabels([]);
+      setvalidationDataModel([]);
     },[selectedProject])
 
     //When new models were selected or deselected
     useEffect(() => {
 
-      console.log("hello")
       if(selectedModels.length > 0 && !deselectedBoolean){
         const model = selectedModels[selectedModels.length-1]
         const pathToCsv = model.path;
         const normalizedPath = pathToCsv.replace(/\\/g, '/');
-        const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
-        axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
-        (res) =>{
-          if (res.data){
-            let keys = Object.keys(res.data[res.data.length-1])
-            const mAP50CSV = res.data[res.data.length-1][keys[6]]
-            let mAPForGraph = [];
-            for (let i = 0; i < res.data.length; i++) {
-              const entry = res.data[i];
-              const mAP50CSV = entry[keys[6]];
-              mAPForGraph.push(mAP50CSV);
-            }
-            const mAP90CSV = res.data[res.data.length-1][keys[7]]
-            const recallCSV = res.data[res.data.length-1][keys[5]]
-            const precisionCSV = res.data[res.data.length-1][keys[4]]
-            let labelsCSV;
-            if (res.data[res.data.length - 1][keys[0]]) {
-              const numEpochs = parseInt(res.data[res.data.length - 1][keys[0]], 10);
-              if(csvDataModel.every(model => mAPForGraph.length > model[4].length)){
-                setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()))
+        if(showTrainorValid == "Train"){
+          const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/results.csv";
+          axios.post(`http://127.0.0.1:8000/get_csv`,{path: desiredPath}).then(
+          (res) =>{
+            if (res.data){
+              let keys = Object.keys(res.data[res.data.length-1])
+              const mAP50CSV = res.data[res.data.length-1][keys[6]]
+              let mAPForGraph = [];
+              for (let i = 0; i < res.data.length; i++) {
+                const entry = res.data[i];
+                const mAP50CSV = entry[keys[6]];
+                mAPForGraph.push(mAP50CSV);
+              }
+              const mAP90CSV = res.data[res.data.length-1][keys[7]]
+              const recallCSV = res.data[res.data.length-1][keys[5]]
+              const precisionCSV = res.data[res.data.length-1][keys[4]]
+              let labelsCSV;
+              if (res.data[res.data.length - 1][keys[0]]) {
+                const numEpochs = parseInt(res.data[res.data.length - 1][keys[0]], 10);
+                if(csvDataModel.every(model => mAPForGraph.length > model[4].length)){
+                  setLabels(Array.from({ length: numEpochs+1  }, (_, index) => index.toString()))
+                }
+              }
+              setcsvDataModel([...csvDataModel,[mAP50CSV, mAP90CSV, recallCSV, precisionCSV, mAPForGraph, model._id]])
+              } else{
+              alert("There is no CSV for this model! Please upload one in the project!");
+              setSelectedModels((prevSelectedModels) =>
+                  prevSelectedModels.filter((selectedModel) => selectedModel._id !== model._id)
+                );
               }
             }
-            setcsvDataModel([...csvDataModel,[mAP50CSV, mAP90CSV, recallCSV, precisionCSV, mAPForGraph, model._id]])
-            } else{
-            alert("There is no CSV for this model! Please upload one in the project!");
-            }
-          }
-        )
+          )
+        }
+
+        if(showTrainorValid == "Valid"){
+          const desiredPath = normalizedPath.replace(/\/weights\/[^/]+$/, '') + "/validationResults";
+          axios.post(`http://127.0.0.1:8000/get_validation_data`,{path: desiredPath}).then(
+            (res) => {
+              if(res.data){
+                console.log("valid")
+                console.log(res.data)
+                let metricsValid = res.data
+                metricsValid.push(model._id)
+                setLabels(Object.values(selectedModels).map((model) => model.name));
+                setvalidationDataModel([...validationDataModel,metricsValid])
+              } else{
+                alert("There is no validation for that model! Please validate the model!");
+                setSelectedModels((prevSelectedModels) =>
+                  prevSelectedModels.filter((selectedModel) => selectedModel._id !== model._id)
+                );
+              }
+            })
+        }
       } else{
         setDeselectedBoolean(false);
       }
-
+      console.log("models")
       console.log(selectedModels)
     },[selectedModels])
 
+    //Validationmodels
+    useEffect(() => {
+      //Search for the mAP50 for each model in the validationDataModel
+      let matchingEntryGraph = [];
+      selectedModels.forEach((model) => {
+        const modelValidData = validationDataModel.find((validData) => validData[4] === model._id);
+        matchingEntryGraph.push(modelValidData[0]);
+      });
+      console.log(matchingEntryGraph)
+      //Create the Graph
+      setDataForGraph({
+        labels: labelsForGraph.length > 0 ? labelsForGraph : ["No data available"],
+        datasets: selectedModels && selectedModels.length > 0 ? [
+          {
+            label: 'Validation Data',
+            data: matchingEntryGraph,
+            borderColor: colorPalette[0],
+            backgroundColor: `rgba(${parseInt(colorPalette[0].match(/\d+/g)[0], 10)}, ${parseInt(colorPalette[0].match(/\d+/g)[1], 10)}, ${parseInt(colorPalette[0].match(/\d+/g)[2], 10)}, 0.5)`,
+          }
+        ] : [],
+      })
+
+
+      setMetrics([
+        {
+          cardTitle: 'mAP50',
+          data: selectedModels.map((model) => {
+            const matchingEntry = validationDataModel.find((entry) => entry[4] === model._id);
+            return {
+              label: model.name !== "None" ? model.name : "None",
+              value: matchingEntry ? matchingEntry[0] : 0,
+            };
+          }),
+        },
+        {
+          cardTitle: 'mAP90',
+          data: selectedModels.map((model) => {
+            const matchingEntry = validationDataModel.find((entry) => entry[4] === model._id);
+            return {
+              label: model.name !== "None" ? model.name : "None",
+              value: matchingEntry ? matchingEntry[1] : 0,
+            };
+          }),
+        },
+        {
+          cardTitle: 'Recall',
+          data: selectedModels.map((model) => {
+            const matchingEntry = validationDataModel.find((entry) => entry[4] === model._id);
+            return {
+              label: model.name !== "None" ? model.name : "None",
+              value: matchingEntry ? matchingEntry[2] : 0,
+            };
+          }),
+        },
+        {
+          cardTitle: 'Precision',
+          data: selectedModels.map((model) => {
+            const matchingEntry = validationDataModel.find((entry) => entry[4] === model._id);
+            return {
+              label: model.name !== "None" ? model.name : "None",
+              value: matchingEntry ? matchingEntry[3] : 0,
+            };
+          }),
+        },
+        // Add more metrics here
+      ])
+      console.log("valid2")
+      console.log(validationDataModel)
+    },[validationDataModel])
+
+    //CSVModel
     useEffect(() => {
       setDataForGraph({
         labels: labelsForGraph.length > 0 ? labelsForGraph : ["No data available"],
@@ -160,7 +271,6 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
         // Add more metrics here
       ])
 
-      console.log(csvDataModel)
     },[csvDataModel])
 
     useEffect(() => {
@@ -297,10 +407,24 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
 
           setDeselectedBoolean(true);
 
-          // Filter out the corresponding csvDataModel based on model id
+          // Filter out the corresponding csvDataModel or validationDataModel based on model id
+          if(showTrainorValid === "Train")
+          {
             setcsvDataModel((prevCsvDataModel) =>
-            prevCsvDataModel.filter((model) => model[5] !== selectedModel._id)
-          );
+              prevCsvDataModel.filter((model) => model[5] !== selectedModel._id)
+
+
+            );
+          }
+
+          if(showTrainorValid === "Valid")
+          {
+            setvalidationDataModel((prevValidModel) =>
+            prevValidModel.filter((model) => model[4] !== selectedModel._id));
+            setLabels((prevLabels) =>
+              prevLabels.filter((label) => label !== selectedModel.name)
+            );
+          }
 
         } else {
           // Model is not selected, add it to the selected models
@@ -340,7 +464,7 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
                     className="form-check-input"
                     type="checkbox"
                     value={model._id}
-                    defaultChecked={selectedModels.includes(model._id)}
+                    checked={selectedModels.some((modelItem) => modelItem._id === model._id)}
                     onChange={handleModelChange}
                   />
                   <label className="form-check-label">{model.name}</label>
@@ -349,6 +473,15 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
             </div>
           </div>
         </div>
+
+         {/* Train and Validation Buttons */}
+        <div className="row justify-content-center mt-4">
+          <div className="col-lg-6 col-md-8">
+              <button type="button" className={`btn btn-light ${showTrainorValid == "Train" ? 'active' : ''}`} onClick={() => setShowTrainorValid("Train") }>Train</button>
+              <button type="button" className={`btn btn-light ${showTrainorValid == "Valid" ? 'active' : ''}`} onClick={() => setShowTrainorValid("Valid")}>Validation</button>
+          </div>
+        </div>
+
 
 
         <div className="row justify-content-center mb-4">
