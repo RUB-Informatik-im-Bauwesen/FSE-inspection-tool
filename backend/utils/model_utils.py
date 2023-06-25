@@ -134,7 +134,7 @@ async def validate_model_yolo(model_path, yaml_path = "labels.yaml", image_size 
 
     def run_validation():
         subprocess.run(
-            ["python", "yolov5/val.py", "--img", str(image_size), "--data", yaml_path, "--weights", model_path, "--device", "0", "--project", project_path, "--name", "validationResults","--save-txt"],
+            ["python", "yolov5/val.py", "--img", str(image_size), "--data", yaml_path, "--weights", model_path, "--device", "0", "--exist-ok" ,"--project", project_path, "--name", "validationResults"],
             check=True
         )
 
