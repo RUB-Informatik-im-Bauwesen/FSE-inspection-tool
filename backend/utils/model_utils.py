@@ -9,7 +9,23 @@ from concurrent.futures import ThreadPoolExecutor
 import torch
 import cv2
 
+def calculate_blurriness_score(image_path):
+    # Load the image
+    image = cv2.imread(image_path)
 
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Calculate the Laplacian variance of the grayscale image
+    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+    threshhold = 40
+    weight = 1
+
+    if laplacian_var <= threshhold:
+        weight = 0.2
+
+    return weight
 
 def variation_ratio(data):
     ratios = []

@@ -9,7 +9,7 @@ from backend.website.models import User, Project, Image, Model, Annotation, Trai
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score
 from backend.utils.cvat_utils import create_and_upload_task
 import os
 import shutil
@@ -329,7 +329,10 @@ async def process_images(models, paths_to_images):
             min_values = np.array(min_values)
             variation_ratios = np.array(variation_ratios)
 
-            consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios))
+            #Calculate image quality score
+            quality_score = calculate_blurriness_score(img)
+
+            consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score
 
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 
