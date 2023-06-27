@@ -11,6 +11,7 @@ from bson.errors import InvalidId
 from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score
 from backend.utils.cvat_utils import create_and_upload_task
+from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
 import os
 import shutil
 import random
@@ -252,8 +253,15 @@ async def prepare_model_folder(id):
         os.makedirs(os.path.dirname(doc["path"]))
     return {"Success": "Created folders"}
 
-async def process_images(models, paths_to_images):
+async def process_images(models, paths_to_images, diversity_sampling):
     rankings_list = []
+    src_dir = "storage\Rare_images"
+    if(diversity_sampling == "true"):
+        #Get paths to rare images
+        images_rare = [os.path.join(src_dir + "\\", f) for f in os.listdir(src_dir) if
+                  f.endswith('.jpeg') or f.endswith('.jpg') or f.endswith('.JPG') or f.endswith('.png')]
+        #Get normalized distances for images to centroid
+        cluster_centroids, pca, max_distances_labels = await cluster_images_async(images_rare)
 
     if (len(models) > 1):
       for img in paths_to_images:
@@ -317,6 +325,9 @@ async def process_images(models, paths_to_images):
 
             class_matches = get_class_matches(test_min,labels_list)
 
+            #Get each "agreed" class
+            classes_of_objects = [max(set(sublist), key=sublist.count) for sublist in class_matches]
+
             #Calculate Consensus Score
             variation_ratios = variation_ratio(class_matches)
             variation_ratios = [[ratio] for ratio in variation_ratios]
@@ -333,6 +344,14 @@ async def process_images(models, paths_to_images):
             quality_score = calculate_blurriness_score(img)
 
             consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score
+
+            if(diversity_sampling == "true"):
+                #Calculate likelihood of image containing a rare class
+                likelihood_rare_class = await add_image_to_clusters_async(img,cluster_centroids,pca, max_distances_labels)
+                if any(num in classes_of_objects for num in [0,1,8,11]):
+                    likelihood_rare_class = 1.25
+
+                consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * ((quality_score * likelihood_rare_class)/2)
 
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 
@@ -352,7 +371,7 @@ async def process_images(models, paths_to_images):
 def load_model(path):
     return torch.hub.load('ultralytics/yolov5', 'custom', path=path)
 
-async def fetch_rankings_images_by_project(project_id):
+async def fetch_rankings_images_by_project(project_id, diversity_sampling):
 
     # Get image paths
     paths_to_images = []
@@ -373,7 +392,7 @@ async def fetch_rankings_images_by_project(project_id):
         model = await asyncio.to_thread(load_model, path)
         models.append(model)
 
-    rankings_list = await process_images(models, paths_to_images)
+    rankings_list = await process_images(models, paths_to_images, diversity_sampling)
 
     # Sort the rankings list by the uncertainty score in descending order
     if(len(models) == 1):
@@ -642,7 +661,11 @@ async def annotate_images_cvat(project_id, annotationModel, user):
     labels = labels = [{'name': class_name} for class_name in annotationModel.class_names]
 
     # Upload images to cvat
-    await create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
+    try:
+        await create_and_upload_task(server=server, api_version=api_version, auth=auth, image_files=[image[0] for image in images],                                labels=labels)
+    except Exception as e:
+        return False
+
 
     # Get a list of all files in the source folder
     files = os.listdir(source_folder)
@@ -665,6 +688,8 @@ async def annotate_images_cvat(project_id, annotationModel, user):
         source_file = os.path.join(source_folder, file)
         destination_file = os.path.join(dest_folder, file)
         shutil.move(source_file, destination_file)
+
+    return True
 
 
 async def get_csv(pathModel):

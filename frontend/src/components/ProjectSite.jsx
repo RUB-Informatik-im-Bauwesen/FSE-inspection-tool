@@ -32,6 +32,7 @@ const ProjectSite = ({ accessToken }) => {
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [isLoadingValidation, setLoadingValidation] = useState(false);
   const [tagsAnnotations, setTagsAnnotations] = useState([]);
+  const [diversitySamplingActive, setDiversitySamplingActive] = useState(false);
 
 
   function handleImageSizeChange(event) {
@@ -145,7 +146,7 @@ const ProjectSite = ({ accessToken }) => {
       alert("No Models uploaded!")
       setIsLoadingRanking(false)
     } else{
-      const url = `http://127.0.0.1:8000/get_rankings_of_images/${id}`;
+      const url = `http://127.0.0.1:8000/get_rankings_of_images/${id}/${diversitySamplingActive.toString()}`;
       axios
         .get(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -332,6 +333,11 @@ const ProjectSite = ({ accessToken }) => {
     }
   }
 
+  const handleCheckboxChange = (event) => {
+    const { checked } = event.target;
+    setDiversitySamplingActive(checked);
+  };
+
   return (
     <div className="project-site">
       <Modal
@@ -446,11 +452,15 @@ const ProjectSite = ({ accessToken }) => {
         <div className="tab-buttons">
           {activeTab === 'images' && (
             <>
-              <button className='addButton'  onClick={openModal}>Add Images</button>
               <button className='addButton'  onClick={rankImages}>
                 Rank Images
                 {isLoadingRanking && <div className="loading-circle"></div>}
               </button>
+              <button className='addButton'  onClick={openModal}>Add Images</button>
+              <div className="form-check form-switch">
+                <input className="form-check-input" type="checkbox" id="checkbox" onChange={handleCheckboxChange} />
+                <label className="form-check-label" htmlFor="checkbox">Diversity Sampling</label>
+              </div>
             </>
           )}
           {activeTab === 'annotations' && (

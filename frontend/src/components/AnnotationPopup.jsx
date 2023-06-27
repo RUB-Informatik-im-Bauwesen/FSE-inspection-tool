@@ -64,7 +64,14 @@ const ImageAnnotationModal = ({tagsAnnotations,setTagsAnnotations,setLoadingAnno
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
-        setLoadingAnnotation(false)
+        console.log(res.data)
+        if(res.data){
+          setLoadingAnnotation(false)
+        }
+        else{
+          alert("Login or CVAT Failed!")
+          setLoadingAnnotation(false)
+        }
       });
   }
 

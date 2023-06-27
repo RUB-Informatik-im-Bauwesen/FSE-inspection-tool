@@ -206,9 +206,9 @@ async def get_annotations_by_project(id: str):
 
 #Active Learning
 
-@app.get("/get_rankings_of_images/{project_id}")
-async def get_rankings_of_images(project_id: str, user=Depends(manager)):
-    images_with_rankings = await fetch_rankings_images_by_project(project_id)
+@app.get("/get_rankings_of_images/{project_id}/{diversity_sampling}")
+async def get_rankings_of_images(project_id: str, diversity_sampling: str, user=Depends(manager)):
+    images_with_rankings = await fetch_rankings_images_by_project(project_id, diversity_sampling)
     ranked_images = []
     for ranked_image in images_with_rankings:
         ranked_images.append(Image(**ranked_image))
@@ -224,8 +224,8 @@ async def train_model(project_id: str, trainmodel: TrainModel, user=Depends(mana
 
 @app.post("/annotate_on_cvat/{project_id}")
 async def annotate_selected_images(project_id: str,annotationModel:AnnotationModel, user=Depends(manager)):
-    await annotate_images_cvat(project_id, annotationModel, user)
-    return project_id
+    success = await annotate_images_cvat(project_id, annotationModel, user)
+    return project_id if success else success
 
 #Statistics
 @app.post("/get_csv")
