@@ -173,7 +173,7 @@ const ProjectSite = ({ accessToken }) => {
     }
 
     if(tab === "demo"){
-      console.log("Platzhalter")
+      getModelsOfProject();
     }
   };
 
@@ -238,6 +238,17 @@ const ProjectSite = ({ accessToken }) => {
   }
 
   const handleSubmitUploadTraining = () => {
+    //Check if models or annotations even exist
+    if(!models){
+      alert("There are no models!")
+      return
+    }
+
+    if(!annotations){
+      alert("There are no annotations!")
+      return
+    }
+    //Error handlings
     const classNames = tags.map(tag => tag.text)
     const hasSelected = Object.values(models).some(model => model.selected === true);
     const selectedImages = images.some(image => image.selected === true)
@@ -285,6 +296,12 @@ const ProjectSite = ({ accessToken }) => {
   }
 
   const predictImages = () =>{
+    //Check if models or annotations even exist
+    if(!models){
+      alert("There are no models!")
+      return
+    }
+    //Error Handling
     const hasSelected = Object.values(models).some(model => model.selected === true);
     const selectedModels = Object.values(models).filter(model => model.selected === true);
     if(!hasSelected){
