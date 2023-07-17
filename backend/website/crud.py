@@ -254,6 +254,9 @@ async def prepare_model_folder(id):
     return {"Success": "Created folders"}
 
 async def process_images(models, paths_to_images, diversity_sampling):
+
+    class_weighting = {"0":0.828, "1":1.17,"2":1,"3":1.18,"4":1,"5":1.08,"6":1.14,"7":1.14,"8":1.18,"9":1.13,"10":1.1,"11":1.18,"12":1.14,"13":1.12}
+
     rankings_list = []
     src_dir = "storage\Rare_images"
     if(diversity_sampling == "true"):
@@ -328,6 +331,13 @@ async def process_images(models, paths_to_images, diversity_sampling):
             #Get each "agreed" class
             classes_of_objects = [max(set(sublist), key=sublist.count) for sublist in class_matches]
 
+            #Calculate Class weighting weight
+            class_weights = [class_weighting[str(class_num)] for class_num in classes_of_objects]
+
+            # Calculate the average weight
+            average_class_weight = sum(class_weights) / len(class_weights)
+
+
             #Calculate Consensus Score
             variation_ratios = variation_ratio(class_matches)
             variation_ratios = [[ratio] for ratio in variation_ratios]
@@ -343,7 +353,7 @@ async def process_images(models, paths_to_images, diversity_sampling):
             #Calculate image quality score
             quality_score = calculate_blurriness_score(img)
 
-            consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score
+            consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score * average_class_weight
 
             if(diversity_sampling == "true"):
                 #Calculate likelihood of image containing a rare class
@@ -351,7 +361,8 @@ async def process_images(models, paths_to_images, diversity_sampling):
                 if any(num in classes_of_objects for num in [0,1,8,11]):
                     likelihood_rare_class = 1.25
 
-                consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * ((quality_score * likelihood_rare_class)/2)
+                average_class_diversity_weight = (average_class_weight + likelihood_rare_class)/2
+                consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score * average_class_diversity_weight
 
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 

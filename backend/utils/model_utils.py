@@ -23,7 +23,7 @@ def calculate_blurriness_score(image_path):
     weight = 1
 
     if laplacian_var <= threshhold:
-        weight = 0.2
+        weight = 0.25
 
     return weight
 
