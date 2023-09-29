@@ -255,7 +255,7 @@ async def prepare_model_folder(id):
 
 async def process_images(models, paths_to_images, diversity_sampling):
 
-    class_weighting = {"0":0.828, "1":1.17,"2":1,"3":1.18,"4":1,"5":1.08,"6":1.14,"7":1.14,"8":1.18,"9":1.13,"10":1.1,"11":1.18,"12":1.14,"13":1.12}
+    class_weighting = {"0":1.18, "1":1.17,"2":1,"3":0.828,"4":1,"5":1.08,"6":1.14,"7":1.14,"8":1.18,"9":1.13,"10":1.1,"11":1.18,"12":1.14,"13":1.12}
 
     rankings_list = []
     src_dir = "storage\Rare_images"
@@ -296,7 +296,12 @@ async def process_images(models, paths_to_images, diversity_sampling):
 
             if any(not sublist for sublist in boxes_list):
 
-                consensus_score = 1
+                #Calculate image quality score
+                quality_score = calculate_blurriness_score(img)
+                quality_score_weight = 1
+                if quality_score < 0.3:
+                    quality_score_weight = 0.01
+                consensus_score = 1 * quality_score_weight
                 result = [results_list[0].pandas().xywhn[0], consensus_score, img]
                 rankings_list.append(result)
 
@@ -353,7 +358,7 @@ async def process_images(models, paths_to_images, diversity_sampling):
             #Calculate image quality score
             quality_score = calculate_blurriness_score(img)
 
-            consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score * average_class_weight
+            consensus_score = (1 - np.mean(np.multiply(min_values,variation_ratios))) * quality_score * average_class_weight
 
             if(diversity_sampling == "true"):
                 #Calculate likelihood of image containing a rare class
@@ -362,7 +367,7 @@ async def process_images(models, paths_to_images, diversity_sampling):
                     likelihood_rare_class = 1.25
 
                 average_class_diversity_weight = (average_class_weight + likelihood_rare_class)/2
-                consensus_score = 1 - np.mean(np.multiply(min_values,variation_ratios)) * quality_score * average_class_diversity_weight
+                consensus_score = (1 - np.mean(np.multiply(min_values,variation_ratios))) * quality_score * average_class_diversity_weight
 
             result = [results_list[0].pandas().xywhn[0] ,consensus_score, img]
 
@@ -410,6 +415,9 @@ async def fetch_rankings_images_by_project(project_id, diversity_sampling):
         rankings_list.sort(key=lambda x: x[1], reverse=False)
     else:
         rankings_list.sort(key=lambda x: x[1], reverse=True)
+
+    # Random Try
+    #random.shuffle(rankings_list)
 
     # Create a new list of lists with the image name and rank
     ranked_images = {}

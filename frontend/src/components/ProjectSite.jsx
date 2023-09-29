@@ -197,7 +197,7 @@ const ProjectSite = ({ accessToken }) => {
         case "annotations":
           desiredImage = images.find(image => image.name.split('.')[0] === file.name.split('.')[0]);
           if(!desiredImage){
-            alert("One or more images not in this project! Please check again if all txt files have a corresponding image!")
+            //alert("One or more images not in this project! Please check again if all txt files have a corresponding image!")
             break;
           }
           id_desiredImage = desiredImage._id
@@ -220,7 +220,7 @@ const ProjectSite = ({ accessToken }) => {
           }
           break;
       }
-        if(url){
+      if(url){
           axios
             .post(url, formData, {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': file.type }

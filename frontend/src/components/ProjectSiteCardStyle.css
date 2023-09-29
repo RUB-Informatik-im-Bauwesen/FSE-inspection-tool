@@ -6,53 +6,61 @@
   height: 300px;
   width: 300px;
   border-radius: 10px;
-  background-color:#F0F0F0;
+  background-color: #F0F0F0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   margin-top: 25px;
   margin-bottom: 10px;
   margin-left: 10px;
-  position: relative; /* Add this to position the trash icon and checkbox */
+  position: relative;
   transition: background-color 0.3s;
 }
 
 .project-site-card.with-checkbox {
-  padding-top: 20px; /* Add padding to accommodate the checkbox and trash icon */
+  padding-top: 20px;
 }
 
 .project-site-card.checked {
-  background-color: #ED1D24; /* Change background color when checkbox is checked */
+  background-color: #ED1D24;
 }
 
 .project-site-card .icons-container {
   position: absolute;
   top: 10px;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align icons to the top */
   width: 100%;
-  justify-content: space-between;
 }
 
-.project-site-card .trash-icon {
+.project-site-card .icons-container .icon-group {
+  display: flex;
+  flex-direction: column; /* Stack icons vertically */
+  align-items: center;
+  width: 30px;
+}
+
+.project-site-card .trash-icon,
+.project-site-card .download-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
-  margin-left: 3px;
+  margin: 3px 3px; /* Adjust margin for spacing between icons */
   background-color: gray;
   border-radius: 50%;
   cursor: pointer;
 }
 
-.project-site-card .trash-icon i {
+.project-site-card .trash-icon i,
+.project-site-card .download-icon i {
   color: #ffffff;
 }
 
 .project-site-card .checkbox {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 10px; /* Keep the checkbox in the upper right corner */
 }
 
 .project-site-card img {

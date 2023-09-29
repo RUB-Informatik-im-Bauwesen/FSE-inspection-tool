@@ -128,6 +128,10 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
       })
   }
 
+  const download_item = () => {
+
+  }
+
   return (
     <div className={`project-site-card ${type !== 'images' ? 'with-trash-icon' : ''} ${isChecked ? 'checked' : ''}`}>
       <div className="icons-container">
@@ -139,6 +143,13 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
            }}} className='trash-icon' variant="secondary">
           <i className="fas fa-trash" />
         </Button>
+        </span>
+        <span className="download-icon">
+          <Button onClick={() => {
+            download_item()
+          }} className='download-icon' variant='secondary'>
+            <i className="fas fa-download" />
+          </Button>
         </span>
         {type === 'images'  && (
           <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChange} />

@@ -19,11 +19,11 @@ def calculate_blurriness_score(image_path):
     # Calculate the Laplacian variance of the grayscale image
     laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-    threshhold = 40
+    threshhold = 80
     weight = 1
 
     if laplacian_var <= threshhold:
-        weight = 0.25
+        weight = 1
 
     return weight
 
