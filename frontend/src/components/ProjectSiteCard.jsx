@@ -57,6 +57,19 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
           }
         )
+    } else if (type === "demo"){
+      const url = `http://127.0.0.1:8000/get_images_by_project/${id}`
+      axios.get(url, {
+        headers: { Authorization: `Bearer ${access_token}` },
+        }).then((res) => {
+          if (res.data && res.data.length > 0){
+            dataNew = res.data.find((item) => item._id === data._id);
+            if (dataNew) {
+              setImageID(dataNew._id)
+            }
+            }
+          }
+        )
     }
   },[data])
 
@@ -128,8 +141,60 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
       })
   }
 
-  const download_item = () => {
+  const download_item = (type) => {
+    let url;
+    switch(type){
+      case "images":
+        url = `http://127.0.0.1:8000/download_image_new/${imageID}`;
+        break;
+      case "demo":
+        url = `http://127.0.0.1:8000/download_image_new/${imageID}`;
+        break;
+      case "annotations":
+        url = `http://127.0.0.1:8000/download_annotation_new/${annotationID}`;
+        break;
+      case "models":
+        url = `http://127.0.0.1:8000/download_model_new/${modelID}`;
+        break;
+    }
+    console.log(url)
+    axios.get(url,{
+      headers: { Authorization: `Bearer ${access_token}`},
+      responseType : 'blob',
+      }).then((res) => { // Create a Blob URL for the file
+        console.log(res);
 
+        const blob = new Blob([res.data], { type: res.headers['content-type'] });
+
+        // Create a FileReader to read the blob as a data URL
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Use reader.result as your data URL
+          console.log(reader.result);
+
+          // Here you can handle the data URL as needed
+          // For example, you can display an image in the browser or trigger a download
+          const a = document.createElement('a');
+          a.href = reader.result;
+          if (type === 'images') {
+            a.download = `image.${res.headers['content-type'].split('/')[1]}`;
+          } else if (type === 'annotations') {
+            a.download = `annotation.txt`;
+          } else if (type === 'models') {
+            a.download = `model.pt`;
+          }
+
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        };
+
+        // Read the blob as a data URL
+        reader.readAsDataURL(blob);
+    }
+      ).catch((err) => {
+        console.log(err)
+      })
   }
 
   return (
@@ -146,7 +211,7 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
         </span>
         <span className="download-icon">
           <Button onClick={() => {
-            download_item()
+            download_item(type)
           }} className='download-icon' variant='secondary'>
             <i className="fas fa-download" />
           </Button>
