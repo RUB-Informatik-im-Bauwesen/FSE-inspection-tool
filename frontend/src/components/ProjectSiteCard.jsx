@@ -15,7 +15,7 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
 
   useEffect(() => {
     if(type === "images"){
-      const url = `http://127.0.0.1:8000/get_images_by_project/${id}`
+      /*const url = `http://127.0.0.1:8000/get_images_by_project/${id}`
       axios.get(url, {
         headers: { Authorization: `Bearer ${access_token}` },
         }).then((res) => {
@@ -27,9 +27,11 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
             }
           }
-        )
+        )*/
+        setIsChecked(data.selected);
+        setImageID(data._id);
     } else if (type === 'annotations') {
-      const url = `http://127.0.0.1:8000/get_annotations_by_project/${id}`
+     /* const url = `http://127.0.0.1:8000/get_annotations_by_project/${id}`
       axios.get(url, {
         headers: { Authorization: `Bearer ${access_token}` },
         }).then((res) => {
@@ -40,8 +42,10 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
             }
           }
-        )
+        )*/
+        setAnnotationID(data._id)
     } else if (type === 'models') {
+      /*
       const url = `http://127.0.0.1:8000/get_models_by_project/${id}`
       axios.get(url, {
         headers: { Authorization: `Bearer ${access_token}` },
@@ -56,7 +60,8 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
             }
           }
-        )
+        )*/
+        setModelID(data._id)
     }
   },[data])
 

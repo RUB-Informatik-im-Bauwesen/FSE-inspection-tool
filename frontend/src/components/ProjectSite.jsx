@@ -21,7 +21,20 @@ const ProjectSite = ({ accessToken }) => {
   const [isModalOpenTraining, setIsModalOpenTraining] = useState(false);
   const [isModalOpenAnnotation, setIsModalOpenAnnotation] = useState(false);
   const [files, setFiles] = useState(null);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState([{ id: 0, text: 'Wandhydrant' },
+  { id: 1, text: 'Steigleitung' },
+  { id: 2, text: 'Loeschwasserleitung' },
+  { id: 3, text: 'Feuerloescher' },
+  { id: 4, text: 'Feuerloescher-Schild' },
+  { id: 5, text: 'Brandmelder' },
+  { id: 6, text: 'Rauchmelder' },
+  { id: 7, text: 'Sirene' },
+  { id: 8, text: 'Hausalarmschalter' },
+  { id: 9, text: 'Rauchabzugschalter' },
+  { id: 10, text: 'Notausgang-Schild' },
+  { id: 11, text: 'Sprinkler' },
+  { id: 12, text: 'Flucht- und Rettungsplan' },
+  { id: 13, text: 'Steckdose' },]);
   const [imageSize, setImageSize] = useState('');
   const [epochLength, setEpochLength] = useState('');
   const [batchSize, setBatchSize] = useState('');
@@ -31,7 +44,20 @@ const ProjectSite = ({ accessToken }) => {
   const [isLoadingAnnotating, setLoadingAnnotating] = useState(false);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [isLoadingValidation, setLoadingValidation] = useState(false);
-  const [tagsAnnotations, setTagsAnnotations] = useState([]);
+  const [tagsAnnotations, setTagsAnnotations] = useState([{ id: 0, text: 'Wandhydrant' },
+  { id: 1, text: 'Steigleitung' },
+  { id: 2, text: 'Loeschwasserleitung' },
+  { id: 3, text: 'Feuerloescher' },
+  { id: 4, text: 'Feuerloescher-Schild' },
+  { id: 5, text: 'Brandmelder' },
+  { id: 6, text: 'Rauchmelder' },
+  { id: 7, text: 'Sirene' },
+  { id: 8, text: 'Hausalarmschalter' },
+  { id: 9, text: 'Rauchabzugschalter' },
+  { id: 10, text: 'Notausgang-Schild' },
+  { id: 11, text: 'Sprinkler' },
+  { id: 12, text: 'Flucht- und Rettungsplan' },
+  { id: 13, text: 'Steckdose' },]);
   const [diversitySamplingActive, setDiversitySamplingActive] = useState(false);
 
 
@@ -98,7 +124,7 @@ const ProjectSite = ({ accessToken }) => {
       .then((res) => {
         if (res.data && res.data.length > 0) {
           setImages(res.data);
-          console.log(res.data)
+          console.log("hello2");
         } else{
           setImages("")
         }
