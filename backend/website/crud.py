@@ -208,7 +208,29 @@ async def download_image(id, user):
     return FileResponse(file_path, media_type=mime_type, filename=file_path.name, headers={"Content-Disposition": f"attachment; filename={document['name']}"})
 
 
+async def download_predicted_image(pathToFile, user):
 
+    # Assuming pathToFile.path contains the existing path
+    existing_path = pathToFile.path
+
+    # Adding "frontend/public/" to the beginning of the path
+    new_path = "frontend/public/" + existing_path
+
+    # Now, new_path contains the updated path
+    file_path = Path(new_path)
+    # Check if the file exists
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Determine the MIME type based on the file extension
+    mime_type, _ = mimetypes.guess_type(file_path)
+
+    # Default to application/octet-stream if the MIME type cannot be determined
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+
+
+    return FileResponse(file_path, media_type=mime_type, filename=file_path.name, headers={"Content-Disposition": f"attachment; filename={file_path.name}"})
 
 
 async def uploadCSV(project_id, file: UploadFile, user):

@@ -57,19 +57,6 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
           }
         )
-    } else if (type === "demo"){
-      const url = `http://127.0.0.1:8000/get_images_by_project/${id}`
-      axios.get(url, {
-        headers: { Authorization: `Bearer ${access_token}` },
-        }).then((res) => {
-          if (res.data && res.data.length > 0){
-            dataNew = res.data.find((item) => item._id === data._id);
-            if (dataNew) {
-              setImageID(dataNew._id)
-            }
-            }
-          }
-        )
     }
   },[data])
 
@@ -143,12 +130,14 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
 
   const download_item = (type) => {
     let url;
+    let dataSource;
     switch(type){
       case "images":
         url = `http://127.0.0.1:8000/download_image_new/${imageID}`;
         break;
       case "demo":
-        url = `http://127.0.0.1:8000/download_image_new/${imageID}`;
+        url = `http://127.0.0.1:8000/download_predicted_image/`;
+        dataSource = {path: imageSrc}
         break;
       case "annotations":
         url = `http://127.0.0.1:8000/download_annotation_new/${annotationID}`;
@@ -158,10 +147,19 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
         break;
     }
     console.log(url)
-    axios.get(url,{
-      headers: { Authorization: `Bearer ${access_token}`},
-      responseType : 'blob',
-      }).then((res) => { // Create a Blob URL for the file
+    const axiosConfig = {
+      headers: { Authorization: `Bearer ${access_token}` },
+      responseType: 'blob',
+      method: 'get',  // Use 'get' as the default method
+    };
+
+    // Conditionally add dataSource to the request
+    if (dataSource) {
+      axiosConfig.data = dataSource;
+      axiosConfig.method = 'post';  // Change method to 'get'
+    }
+
+    axios(url,axiosConfig).then((res) => { // Create a Blob URL for the file
         console.log(res);
 
         const blob = new Blob([res.data], { type: res.headers['content-type'] });
@@ -182,6 +180,8 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             a.download = `annotation.txt`;
           } else if (type === 'models') {
             a.download = `model.pt`;
+          } else if (type == "demo"){
+            a.download = `image.${res.headers['content-type'].split('/')[1]}`;
           }
 
           document.body.appendChild(a);
