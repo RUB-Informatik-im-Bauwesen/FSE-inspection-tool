@@ -62,6 +62,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
           <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
             <li><a onClick={get_projects_by_user}>Projects</a></li>
             <li><a onClick={get_projects_by_user2}>Statistics</a></li>
+            <li><a href ='/KIDienst'>KI Dienste</a></li>
             <li><a href='/FAQ'>FAQ</a></li>
             <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
           </ul>

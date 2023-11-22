@@ -10,6 +10,7 @@ import ProjectSite from './components/ProjectSite'
 import Statistics from './components/Statistics'
 import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
+import KIDienste from './components/KIDienste'
 
 function App() {
 
@@ -79,6 +80,7 @@ function App() {
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
           <Route path="/Statistics" element={<StatisticsMultipleModels accessToken={accessToken} projects={projects}/>}/>
+          <Route path="/KIDienst" element={<KIDienste/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
         </Routes>
       </div>
