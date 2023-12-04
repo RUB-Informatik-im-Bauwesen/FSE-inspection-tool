@@ -1,0 +1,79 @@
+{
+    "info": {
+        "description": "Result of Service-206",
+        "version": "0.0.2"
+    },
+    "result": {
+        "types": [
+            "manufacturer tag",
+            "inspection tag"
+        ],
+        "objects": [
+            {
+                "type": "inspection tag",
+                "class_id": 1,
+                "guid": 542348234,
+                "comment": "inspection tag was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.37257495522499084,
+                    "y_center": 0.5577877163887024,
+                    "width": 0.051146384328603745,
+                    "height": 0.0406746044754982
+                },
+                "input image name": "20210803_100703.jpg"
+            },
+            {
+                "type": "inspection tag",
+                "class_id": 1,
+                "guid": 542348234,
+                "comment": "inspection tag was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.31900352239608765,
+                    "y_center": 0.549727201461792,
+                    "width": 0.04453262686729431,
+                    "height": 0.0394345223903656
+                },
+                "input image name": "20210803_100703.jpg"
+            },
+            {
+                "type": "inspection tag",
+                "class_id": 1,
+                "guid": 542348234,
+                "comment": "inspection tag was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.2795414328575134,
+                    "y_center": 0.5424107313156128,
+                    "width": 0.029982363805174828,
+                    "height": 0.0372023805975914
+                },
+                "input image name": "20210803_100703.jpg"
+            },
+            {
+                "type": "manufacturer tag",
+                "class_id": 0,
+                "guid": 542348234,
+                "comment": "manufacturer tag was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.3302469253540039,
+                    "y_center": 0.5017361044883728,
+                    "width": 0.14814814925193787,
+                    "height": 0.0595238097012043
+                },
+                "input image name": "20210803_100703.jpg"
+            },
+            {
+                "type": "inspection tag",
+                "class_id": 1,
+                "guid": 542348234,
+                "comment": "inspection tag was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.2616842985153198,
+                    "y_center": 0.5333581566810608,
+                    "width": 0.013668430037796497,
+                    "height": 0.0379464291036129
+                },
+                "input image name": "20210803_100703.jpg"
+            }
+        ]
+    }
+}

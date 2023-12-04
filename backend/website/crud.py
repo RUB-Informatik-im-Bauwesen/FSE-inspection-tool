@@ -4,16 +4,18 @@ from fastapi_login import LoginManager
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models
 from backend.website.models import User, Project, Image, Model, Annotation, TrainModel, AnnotationModel
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov7
 from backend.utils.cvat_utils import create_and_upload_task
 from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
 import os
+import io
+import zipfile
 import shutil
 import random
 import yaml
@@ -120,6 +122,17 @@ async def upload_image_input(id, file: UploadFile, user):
 
     return {"filename": file.filename}
 
+async def writeToPublic_KI_Dienste(file: UploadFile):
+    contents = await file.read()
+
+    dest_path = f"frontend/public/{file.filename}"
+
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    return {"filename": file.filename}
+
+
 
 async def upload_image(image, user):
     document = dict(image, **{"username": user["username"]})
@@ -179,22 +192,34 @@ async def fetch_images_by_projects(id):
         images.append(image)
     return images
 
+def is_valid_object_id(s):
+    try:
+        ObjectId(s)
+        return True
+    except InvalidId:
+        return False
 
 async def download_image(id, user):
-    try:
-        document = await collection_images.find_one({"_id": ObjectId(id)})
-    except InvalidId:
-        raise HTTPException(
-            status_code=422, detail="Id not in the right format")
-    if not document:
-        raise HTTPException(status_code=404, detail="ID not found")
-    if user["username"] != document["username"]:
-        raise HTTPException(status_code=403, detail="Unauthorized")
 
-    file_path = Path(document["path"])
-    # Check if the file exists
-    if not file_path.is_file():
-        raise HTTPException(status_code=404, detail="File not found")
+
+
+    if(is_valid_object_id(id)):
+        try:
+            document = await collection_images.find_one({"_id": ObjectId(id)})
+        except InvalidId:
+            raise HTTPException(
+                status_code=422, detail="Id not in the right format")
+        if not document:
+            raise HTTPException(status_code=404, detail="ID not found")
+        if user["username"] != document["username"]:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+
+        file_path = Path(document["path"])
+        # Check if the file exists
+        if not file_path.is_file():
+            raise HTTPException(status_code=404, detail="File not found")
+    else:
+        file_path = Path(f"frontend/public/Annotated_Images/{id}")
 
     # Determine the MIME type based on the file extension
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -205,7 +230,7 @@ async def download_image(id, user):
 
 
 
-    return FileResponse(file_path, media_type=mime_type, filename=file_path.name, headers={"Content-Disposition": f"attachment; filename={document['name']}"})
+    return FileResponse(file_path, media_type=mime_type, filename=file_path.name, headers={"Content-Disposition": f"attachment; filename={file_path.name}"})
 
 
 async def download_predicted_image(pathToFile, user):
@@ -907,3 +932,91 @@ async def get_valid_data(pathModel):
         return metrics
     else:
         return False
+
+
+#KIDienste
+
+async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
+
+    # Adding "frontend/public/" to the beginning of the path
+    base_path = "frontend/public/"
+    new_path = base_path + imageName
+
+    # Now, new_path contains the updated path
+    file_path = Path(new_path)
+
+    # Get the directory contents
+    directory_contents = os.listdir(base_path)
+
+    # Find the file with a matching name
+    matching_files = [file for file in directory_contents if file.startswith(imageName)]
+
+    if not matching_files:
+        raise HTTPException(status_code=404, detail="Image not found!")
+
+    # Assume the first matching file is the correct one
+    matching_file = matching_files[0]
+
+    # Get the file extension
+    _, file_extension = os.path.splitext(matching_file)
+
+    # Create the final file path with the correct extension
+    final_file_path = file_path.with_suffix(file_extension)
+
+    # Convert the Path object to a string
+    # Assuming final_file_path is a Path object
+    final_path = [str(final_file_path).replace('\\', '/')]
+
+    save_path = ""
+
+        # Define a dictionary to map keywords to model paths
+    keyword_paths = {
+        "Wartungsinformationen": "storage\\Visual_Annotation_Tool\\Detektion_Wartungsinformationen_Yolov7\\best.pt",
+        "Prüfplakettenaufkleber": "storage\\Visual_Annotation_Tool\\Detektion_Prüfplakettenaufkleber_Yolov7\\best.pt",
+        "Brandschutzanlagen": "storage\\Visual_Annotation_Tool\\Detektion_Brandschutzanlagen_Yolov5\\best.pt",
+        "Sicherheitsschilder": "storage\\Visual_Annotation_Tool\\Detektion_Sicherheitsschilder_Yolov7\\best.pt",
+    }
+
+    # Get the keyword from Dienst (assuming it's a string)
+    keyword = Dienst.strip()
+
+    # Use the keyword to get the corresponding model path
+    model_path =keyword_paths.get(keyword)
+
+    if model_path is None:
+        raise HTTPException(status_code=404, detail="Model not found!")
+
+    if keyword != "Brandschutzanlagen":
+        rendered_image = await render_images_yolov7(model_path, final_path, save_path)
+    else:
+        rendered_image = await render_images(model_path, final_path, save_path)
+
+    return rendered_image
+
+async def download_zipped(imageName, user):
+    # Assuming imageName has the file name with its extension (e.g., "example.jpg")
+    file_path_image = Path(f"frontend/public/Visual_Annotation_Tool_Images/Images/{imageName}")
+
+    # Change the extension to .json
+    json_file = file_path_image.with_suffix(".json")
+
+    # Create a BytesIO object to store the zip file in memory
+    zip_buffer = io.BytesIO()
+
+    # Create a zip file containing the image and JSON
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zipf:
+        zipf.write(file_path_image, arcname="image.jpg")
+        zipf.write(json_file, arcname="data.json")
+        zipf.close()
+
+    # Set the pointer to the beginning of the buffer
+    zip_buffer.seek(0)
+
+    # Determine the MIME type for the zip file
+    mime_type = "application/zip"
+
+    return StreamingResponse(
+        iter([zip_buffer.getvalue()]),
+        media_type=mime_type,
+        headers={"Content-Disposition": "attachment; filename=download.zip"}
+    )

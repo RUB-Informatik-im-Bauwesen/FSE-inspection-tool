@@ -80,7 +80,7 @@ function App() {
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
           <Route path="/Statistics" element={<StatisticsMultipleModels accessToken={accessToken} projects={projects}/>}/>
-          <Route path="/KIDienst" element={<KIDienste/>}/>
+          <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
         </Routes>
       </div>

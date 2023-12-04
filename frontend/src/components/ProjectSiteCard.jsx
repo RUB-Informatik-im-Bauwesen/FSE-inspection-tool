@@ -61,6 +61,7 @@ const ProjectSiteCard = ({id, access_token, data, type, setModelTrainingID }) =>
             }
           }
         )*/
+        setIsChecked(data.selected)
         setModelID(data._id)
     }
   },[data])

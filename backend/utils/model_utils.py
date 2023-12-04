@@ -189,7 +189,9 @@ async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, m
 def load_model(path):
     return torch.hub.load('ultralytics/yolov5', 'custom', path=path)
 
+
 async def render_images(model_path, image_paths, save_path):
+    from yolov5.detect import run2
     model = await asyncio.to_thread(load_model, model_path)
 
     annotated_image_paths = []
@@ -203,5 +205,21 @@ async def render_images(model_path, image_paths, save_path):
 
 
     return annotated_image_paths
+
+async def render_images_yolov7(model_path, image_paths, save_path):
+    #model = await asyncio.to_thread(load_yolov7_model, model_path)
+    from yolov7.run import run
+    annotated_image_paths = []
+    for image_path in image_paths:
+        results = await asyncio.to_thread(run,source=image_path, weights = model_path)# Perform inference on the image
+        #results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
+
+        # Save the rendered image to the specified path
+        save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_path.split('/')[-1]
+        annotated_image_paths.append(save_image_path)
+
+
+    return annotated_image_paths
+
 
 

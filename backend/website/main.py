@@ -5,7 +5,7 @@ from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation, TrainModel, AnnotationModel, pathModel
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat, get_csv, uploadCSV, get_annotated_images, validate_model, get_valid_data, download_models, download_image, download_annotations, download_predicted_image
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat, get_csv, uploadCSV, get_annotated_images, validate_model, get_valid_data, download_models, download_image, download_annotations, download_predicted_image, writeToPublic_KI_Dienste, get_predicted_image_KI_Dienst, download_zipped
 import logging
 from typing import List, Dict
 from datetime import timedelta
@@ -102,6 +102,11 @@ async def upload_images(image: NewImage, user=Depends(manager)):
 @app.post("/upload_images_input/{id}")
 async def upload_images_input(id: str, file: UploadFile, user=Depends(manager)):
     contents = await upload_image_input(id=id, file=file, user=user)
+    return contents
+
+@app.post("/upload_image_KI_Dienste")
+async def upload_images_KI_Dienst(file: UploadFile):
+    contents = await writeToPublic_KI_Dienste(file=file)
     return contents
 
 
@@ -301,3 +306,15 @@ async def validate_models(id: str, user=Depends(manager)):
 async def get_validation_data(path: pathModel):
     validData = await get_valid_data(path)
     return validData
+
+#KIDienste
+
+@app.get("/predict_image_KI_Dienste/{Dienst}/{imageName}")
+async def predict_image_KI_Dienste(Dienst:str, imageName:str, user=Depends(manager)):
+    predicted_image = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
+    return predicted_image
+
+@app.get("/download_image_json/{imageName}")
+async def download_image_json(imageName: str, user=Depends(manager)):
+    downloaded_zip = await download_zipped(imageName, user)
+    return downloaded_zip
