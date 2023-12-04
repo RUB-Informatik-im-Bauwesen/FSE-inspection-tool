@@ -1,0 +1,19 @@
+path: C:/Users/Ayman/Desktop/training/ALOD---Active-Learning-with-Object-Detection/Src/train_dataset
+train: C:/Users/Ayman/Desktop/training/ALOD---Active-Learning-with-Object-Detection/Src/train_dataset/images/train
+val: C:/Users/Ayman/Desktop/training/ALOD---Active-Learning-with-Object-Detection/Src/train_dataset/images/val
+
+# Classes
+names:
+  1: Wandhydrant
+  2: Steigleitung
+  3: Feuerloescher
+  4: Feuerloescher-Schild
+  5: Brandmelder
+  6: Rauchmelder
+  7: Sirene
+  8: Hausalarmschalter
+  9: Rauchabzugschalter
+  10: Notausgang-Schild
+  11: Sprinkler
+  12: Flucht- und Rettungsplan
+  13: Steckdosen

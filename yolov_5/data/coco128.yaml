@@ -1,0 +1,7 @@
+path: ../ALOD---Active-Learning-with-Object-Detection/Src/train_dataset
+train: ../ALOD---Active-Learning-with-Object-Detection/Src/train_dataset/images/train
+val: ../ALOD---Active-Learning-with-Object-Detection/Src/train_dataset/images/val
+
+# Classes
+names:
+  0: car
