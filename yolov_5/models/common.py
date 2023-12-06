@@ -24,13 +24,13 @@ import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
 
-from yolov5.utils import TryExcept
-from yolov5.utils.dataloaders import exif_transpose, letterbox
-from yolov5.utils.general import (LOGGER, ROOT, Profile, check_requirements, check_suffix, check_version, colorstr,
+from utils import TryExcept
+from utils.dataloaders import exif_transpose, letterbox
+from utils.general import (LOGGER, ROOT, Profile, check_requirements, check_suffix, check_version, colorstr,
                            increment_path, is_jupyter, make_divisible, non_max_suppression, scale_boxes, xywh2xyxy,
                            xyxy2xywh, yaml_load)
-from yolov5.utils.plots import Annotator, colors, save_one_box
-from yolov5.utils.torch_utils import copy_attr, smart_inference_mode
+from utils.plots import Annotator, colors, save_one_box
+from utils.torch_utils import copy_attr, smart_inference_mode
 
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation
@@ -791,7 +791,7 @@ class Detections:
         self._run(show=True, labels=labels)  # show results
 
     def save(self, labels=True, save_dir='runs/detect/exp', exist_ok=False):
-        save_dir = increment_path(save_dir, exist_ok, mkdir=True)  # increment save_dir
+        #save_dir = increment_path(save_dir, exist_ok, mkdir=True)  # increment save_dir
         self._run(save=True, labels=labels, save_dir=save_dir)  # save results
 
     def crop(self, save=True, save_dir='runs/detect/exp', exist_ok=False):

@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import torch
 import cv2
 
+
 def calculate_blurriness_score(image_path):
     # Load the image
     image = cv2.imread(image_path)
@@ -150,7 +151,7 @@ async def validate_model_yolo(model_path, yaml_path = "labels.yaml", image_size 
 
     def run_validation():
         subprocess.run(
-            ["python", "yolov5/val.py", "--img", str(image_size), "--data", yaml_path, "--weights", model_path, "--device", "0", "--exist-ok" ,"--project", project_path, "--name", "validationResults"],
+            ["python", "yolov_5/val.py", "--img", str(image_size), "--data", yaml_path, "--weights", model_path, "--device", "0", "--exist-ok" ,"--project", project_path, "--name", "validationResults"],
             check=True
         )
 
@@ -173,7 +174,7 @@ async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, m
     # Define the blocking function to be executed in a separate thread
     def run_training():
         subprocess.run(
-            ["python", "yolov5/train.py", "--img", str(image_size), "--batch", str(batch_size),
+            ["python", "yolov_5/train.py", "--img", str(image_size), "--batch", str(batch_size),
             "--epochs", str(epoch_len), "--data", yaml_path, "--weights", weights_path,
             "--project", "storage/Models/", "--name", new_model_name, "--device", "0"],
             check=True
@@ -191,7 +192,6 @@ def load_model(path):
 
 
 async def render_images(model_path, image_paths, save_path):
-    from yolov5.detect import run2
     model = await asyncio.to_thread(load_model, model_path)
 
     annotated_image_paths = []
@@ -208,7 +208,7 @@ async def render_images(model_path, image_paths, save_path):
 
 async def render_images_yolov7(model_path, image_paths, save_path):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
-    from yolov7.run import run
+    from yolov_7.run import run
     annotated_image_paths = []
     for image_path in image_paths:
         results = await asyncio.to_thread(run,source=image_path, weights = model_path)# Perform inference on the image

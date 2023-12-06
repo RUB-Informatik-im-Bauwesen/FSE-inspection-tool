@@ -1,5 +1,7 @@
 app/
-storage/
+storage/Annotations
+storage/Models
+storage/Projects
 app/Lib/site-packages/six.py
 backend/utils/__pycache__/model_utils.cpython-39.pyc
 backend/website/__pycache__/crud.cpython-39.pyc

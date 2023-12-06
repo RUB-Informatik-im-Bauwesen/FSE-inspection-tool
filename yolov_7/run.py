@@ -25,13 +25,13 @@ DATA_ROOT = APP_ROOT / 'data'
 IMG_FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
 VID_FORMATS = ['mp4', 'avi', 'mov', 'mkv', 'flv']
 
-from yolov7.models.experimental import attempt_load
+from yolov_7.models.experimental import attempt_load
 
-from yolov7.utils.datasets import img_formats, vid_formats, LoadImages, LoadStreams
-from yolov7.utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
+from yolov_7.utils.datasets import img_formats, vid_formats, LoadImages, LoadStreams
+from yolov_7.utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
-from yolov7.utils.plots import plot_one_box
-from yolov7.utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
+from yolov_7.utils.plots import plot_one_box
+from yolov_7.utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
 
 @torch.no_grad()
