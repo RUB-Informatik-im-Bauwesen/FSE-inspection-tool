@@ -1,1 +1,6 @@
-data/obj_train_data/20210803_095515.jpg
+data/obj_train_data/20210803_095805.jpg
+data/obj_train_data/20210803_095822.jpg
+data/obj_train_data/20210803_095912.jpg
+data/obj_train_data/20210803_100024.jpg
+data/obj_train_data/20210803_100120.jpg
+data/obj_train_data/20210803_100139.jpg

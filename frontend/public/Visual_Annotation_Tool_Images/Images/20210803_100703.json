@@ -5,8 +5,8 @@
     },
     "result": {
         "types": [
-            "inspection tag",
-            "manufacturer tag"
+            "manufacturer tag",
+            "inspection tag"
         ],
         "objects": [
             {

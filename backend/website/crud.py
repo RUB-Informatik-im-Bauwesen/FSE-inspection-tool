@@ -987,7 +987,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
         raise HTTPException(status_code=404, detail="Model not found!")
 
     if keyword != "Brandschutzanlagen":
-        rendered_image = await render_images_yolov7(model_path, final_path, save_path)
+        rendered_image = await render_images_yolov7(model_path, final_path, keyword)
     else:
         rendered_image = await render_images(model_path, final_path, save_path)
 

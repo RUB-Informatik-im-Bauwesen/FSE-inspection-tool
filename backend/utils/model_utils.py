@@ -8,6 +8,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import torch
 import cv2
+import importlib
 
 
 def calculate_blurriness_score(image_path):
@@ -206,12 +207,22 @@ async def render_images(model_path, image_paths, save_path):
 
     return annotated_image_paths
 
-async def render_images_yolov7(model_path, image_paths, save_path):
+async def render_images_yolov7(model_path, image_paths, model_type):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
-    from yolov_7.run import run
+
+    import_dict = {
+    "Wartungsinformationen": "yolov_7.run_wartung",
+    "Prüfplakettenaufkleber": "yolov_7.run",
+    "Sicherheitsschilder": "yolov_7.run_sicherheit",
+    }
+
+    import_statement = import_dict.get(model_type, "Invalid model_type")
+
+    module = importlib.import_module(import_statement)
+
     annotated_image_paths = []
     for image_path in image_paths:
-        results = await asyncio.to_thread(run,source=image_path, weights = model_path)# Perform inference on the image
+        results = await asyncio.to_thread(module.run,source=image_path, weights = model_path)# Perform inference on the image
         #results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
 
         # Save the rendered image to the specified path

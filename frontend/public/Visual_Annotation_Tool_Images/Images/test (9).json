@@ -1,0 +1,40 @@
+{
+    "info": {
+        "description": "Result of Service-205",
+        "version": "0.0.2"
+    },
+    "result": {
+        "types": [
+            "Brandmelder-Schild",
+            "Feuerloescher-Schild"
+        ],
+        "objects": [
+            {
+                "type": "Feuerloescher-Schild",
+                "class_id": 3,
+                "guid": 542348234,
+                "comment": "Feuerloescher-Schild was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.48895400762557983,
+                    "y_center": 0.0584210529923439,
+                    "width": 0.08701533079147339,
+                    "height": 0.08807017654180527
+                },
+                "input image name": "test (9).jpg"
+            },
+            {
+                "type": "Brandmelder-Schild",
+                "class_id": 0,
+                "guid": 542348234,
+                "comment": "Brandmelder-Schild was successfully detected.",
+                "bounding_box": {
+                    "x_center": 0.4880523085594177,
+                    "y_center": 0.05701754242181778,
+                    "width": 0.08611361682415009,
+                    "height": 0.09157894551753998
+                },
+                "input image name": "test (9).jpg"
+            }
+        ]
+    }
+}

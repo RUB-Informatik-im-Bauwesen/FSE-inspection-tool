@@ -3,10 +3,6 @@ frontend/public/Annotated_Images
 storage/Annotations
 storage/Models
 storage/Projects
-storage/Validationset/images
-storage/Validationset/labels
-storage/Rare_images
-storage/Visual_Annotation_Tool
 app/Lib/site-packages/six.py
 backend/utils/__pycache__/model_utils.cpython-39.pyc
 backend/website/__pycache__/crud.cpython-39.pyc
