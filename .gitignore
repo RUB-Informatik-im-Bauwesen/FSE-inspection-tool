@@ -1,8 +1,13 @@
 app/
 frontend/public/Annotated_Images
+frontend/public/Visual_Annotation_Tool_Images
 storage/Annotations
 storage/Models
 storage/Projects
+storage/Validationset/images
+storage/Validationset/labels
+storage/Rare_images
+storage/Visual_Annotation_Tool
 app/Lib/site-packages/six.py
 backend/utils/__pycache__/model_utils.cpython-39.pyc
 backend/website/__pycache__/crud.cpython-39.pyc
@@ -555,3 +560,52 @@ frontend/public/20210803_111832.jpg
 frontend/public/Annotated_Images/20210803_095754.jpg
 frontend/public/Annotated_Images/20210803_095805.jpg
 frontend/public/Annotated_Images/20210803_100024.jpg
+frontend/public/Annotated_Images/20210803_095805.jpg
+frontend/public/Annotated_Images/20210803_095822.jpg
+frontend/public/Annotated_Images/20210803_095912.jpg
+frontend/public/Annotated_Images/20210803_100024.jpg
+frontend/public/Annotated_Images/20210803_100120.jpg
+frontend/public/Annotated_Images/20210803_100139.jpg
+frontend/public/Visual_Annotation_Tool_Images/Feuerleiter-Schild_0_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Feuerloescher-Schild_0_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Notausgang-Schild_0_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_095559.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100656.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100656.json
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100703.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100703.json
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_102312.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_102312.json
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_103426.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_103426.json
+frontend/public/Visual_Annotation_Tool_Images/Images/20210810_130255.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210810_130255.json
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_0_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_0_20210803_102312.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_0_20210803_103426.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_1_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_1_20210803_102312.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_1_20210803_103426.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_2_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_2_20210803_102312.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_2_20210803_103426.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_3_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_3_20210803_102312.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_3_20210803_103426.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_4_20210803_103426.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/manufacturer tag_0_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/manufacturer tag_0_20210803_102312.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/manufacturer tag_0_20210803_103426.jpg_results.jpg
+frontend/public/Annotated_Images/20210803_095805.jpg
+frontend/public/Annotated_Images/20210803_095822.jpg
+frontend/public/Annotated_Images/20210803_095912.jpg
+frontend/public/Annotated_Images/20210803_100024.jpg
+frontend/public/Annotated_Images/20210803_100120.jpg
+frontend/public/Annotated_Images/20210803_100139.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100703.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/20210803_100703.json
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_0_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_1_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_2_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/inspection tag_3_20210803_100703.jpg_results.jpg
+frontend/public/Visual_Annotation_Tool_Images/Images/cropped_images/manufacturer tag_0_20210803_100703.jpg_results.jpg

@@ -25,13 +25,13 @@ DATA_ROOT = APP_ROOT / 'data'
 IMG_FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
 VID_FORMATS = ['mp4', 'avi', 'mov', 'mkv', 'flv']
 
-from yolov7.models.experimental import attempt_load
+from models.experimental import attempt_load
 
-from yolov7.utils.datasets import img_formats, vid_formats, LoadImages, LoadStreams
-from yolov7.utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
+from utils.datasets import img_formats, vid_formats, LoadImages, LoadStreams
+from utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
-from yolov7.utils.plots import plot_one_box
-from yolov7.utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
+from utils.plots import plot_one_box
+from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
 
 @torch.no_grad()
@@ -202,6 +202,13 @@ def run(
                         }
 
                         json_data_list.append(data_dict)
+
+                    save_path = save_dir / f'{p.stem}.jpg'
+                    im0 = annotator.result()
+                    cv2.imwrite(str(save_path), im0)
+                    saved_image_paths.append(save_path)
+
+                    saved_image_paths.append(save_path)
 
                 for (*xyxy, conf, cls) in det:
                     xyxy = [int(x) for x in xyxy]  # Convert to integers

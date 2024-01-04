@@ -207,6 +207,21 @@ async def render_images(model_path, image_paths, save_path):
 
     return annotated_image_paths
 
+async def render_images_annotation_tool(model_path, image_paths, save_path):
+
+    module = importlib.import_module("yolov_5.run_Brandschutz")
+
+    annotated_image_paths = []
+    for image_path in image_paths:
+        await asyncio.to_thread(module.run,source=image_path, weights = model_path) # Perform inference on the image
+
+        # Save the rendered image to the specified path
+        save_image_path = "/Annotated_Images" + '/' + image_path.split('/')[-1]
+        annotated_image_paths.append(save_image_path)
+
+
+    return annotated_image_paths
+
 async def render_images_yolov7(model_path, image_paths, model_type):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
 
