@@ -1,6 +1,4 @@
 app/
-frontend/public/Annotated_Images
-frontend/public/Visual_Annotation_Tool_Images
 storage/Annotations
 storage/Models
 storage/Projects
