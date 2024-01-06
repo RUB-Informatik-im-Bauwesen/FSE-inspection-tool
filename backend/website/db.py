@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-client = AsyncIOMotorClient("mongodb://localhost:2", username="root", password="example")
+client = AsyncIOMotorClient("mongodb://localhost:27017", username="root", password="example")
 
 db = client.test
 

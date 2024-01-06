@@ -1,4 +1,5 @@
 app/
+venv/
 storage/Annotations
 storage/Models
 storage/Projects
