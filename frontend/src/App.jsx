@@ -12,6 +12,7 @@ import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
 import KIDienste from './components/KIDienste'
 
+
 function App() {
 
   const[isLoggedIn, SetIsLoggedIn] = useState(false);
@@ -83,6 +84,7 @@ function App() {
           <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
         </Routes>
+        <img src={"Logo/Logo.png"} alt={"Informatik im Bauwesen"} className="logo" />
       </div>
     </BrowserRouter>
   )

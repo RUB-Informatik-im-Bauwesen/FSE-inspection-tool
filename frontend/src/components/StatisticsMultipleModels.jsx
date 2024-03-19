@@ -486,7 +486,7 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
 
         <div className="row justify-content-center mb-4">
           <div className="col-lg-6 col-md-8">
-            <div className="card bg-light">
+
             <div className="card-header">
                 <h4 className="card-title">Graph</h4>
               </div>
@@ -494,12 +494,12 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
               <div className="card-body">
               </div>
             </div>
-          </div>
+
         </div>
 
         <div className="row justify-content-center">
           <div className="col-lg-6 col-md-8">
-            <div className="card bg-light">
+            
             <div className="card-header">
                 <h4 className="card-title">Metrics</h4>
               </div>
@@ -525,7 +525,7 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
                 ))}
               </div>
             </div>
-          </div>
+
         </div>
 
       </div>

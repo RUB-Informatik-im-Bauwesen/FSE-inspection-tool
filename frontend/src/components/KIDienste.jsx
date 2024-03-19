@@ -164,7 +164,7 @@ const KIDienste = ({ accessToken }) => {
 
       <div className="title-text-container">
         <h1 >Visual Fire Inspection Tool</h1>
-        <p >Welcome to Visual Fire Inspection Tool! Please select your ML Service for your fire safety inspection.</p>
+        <p >Welcome to Visual Fire Inspection Tool! What can I inspect for you? 😃</p>
       </div>
 
       <div className="card-container">

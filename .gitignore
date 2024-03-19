@@ -1,6 +1,7 @@
 app/
 venv/
 storage/Annotations
+frontend/public/
 storage/Models
 storage/Projects
 storage/Validationset/images
