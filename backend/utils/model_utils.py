@@ -216,7 +216,7 @@ async def render_images_annotation_tool(model_path, image_paths, save_path):
         await asyncio.to_thread(module.run,source=image_path, weights = model_path) # Perform inference on the image
 
         # Save the rendered image to the specified path
-        save_image_path = "/Annotated_Images" + '/' + image_path.split('/')[-1]
+        save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_path.split('/')[-1]
         annotated_image_paths.append(save_image_path)
 
 
