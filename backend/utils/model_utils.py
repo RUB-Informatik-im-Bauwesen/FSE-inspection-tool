@@ -176,7 +176,7 @@ async def train_model(model_path,image_size, epoch_len, batch_size, yaml_path, m
     def run_training():
         subprocess.run(
             ["python", "yolov_5/train.py", "--img", str(image_size), "--batch", str(batch_size),
-            "--epochs", str(epoch_len), "--data", yaml_path, "--weights", weights_path,
+            "--epochs", str(epoch_len), "--data", yaml_path.replace("\\","/"), "--weights", weights_path,
             "--project", "storage/Models/", "--name", new_model_name, "--device", "0"],
             check=True
         )
@@ -237,7 +237,7 @@ async def render_images_yolov7(model_path, image_paths, model_type):
 
     annotated_image_paths = []
     for image_path in image_paths:
-        results = await asyncio.to_thread(module.run,source=image_path, weights = model_path)# Perform inference on the image
+        results = await asyncio.to_thread(module.run,source=image_path, weights = model_path,device="cpu")# Perform inference on the image
         #results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
 
         # Save the rendered image to the specified path

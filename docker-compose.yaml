@@ -1,7 +1,32 @@
 version: "3"
 
 services:
+
+  web:
+    container_name: fastapiwork
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    networks:
+      - cvat_cvat
+    restart: always
+    volumes:
+    - ./frontend/public:/code/frontend/public
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+
   mongo:
+    container_name: mongowork
     image: mongo
     restart: always
     environment:
@@ -9,4 +34,25 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=example
     ports:
-      - "27017:27017"
+      - "3:27017"
+    networks:
+      - cvat_cvat
+
+  frontend:
+    container_name: frontendwork
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "5173:5173"
+    networks:
+      - cvat_cvat
+    restart: always
+    volumes:
+      - ./frontend/public:/code/public
+
+networks:
+  cvat_cvat:
+    external: true
+  app-network:
+    driver: bridge

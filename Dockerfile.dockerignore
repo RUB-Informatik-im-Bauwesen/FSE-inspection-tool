@@ -1,0 +1,4 @@
+node_modules
+storage/Annotations/*
+storage/Models/*
+storage/Projects/*

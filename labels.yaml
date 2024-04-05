@@ -1,6 +1,6 @@
-path: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset
-train: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset\\images\\train
-val: C:\\Users\\Ayman\\Desktop\\FBI\\Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset\\storage\\Validationset\\images\\val
+path: /code/storage/Validationset
+train: /code/storage/Validationset/images/train
+val: /code/storage/Validationset/images/val
 
 # Classes
 names:

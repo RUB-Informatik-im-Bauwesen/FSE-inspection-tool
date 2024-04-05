@@ -15,7 +15,7 @@ async def wait_for_job_completion(job_id, jobs_endpoint, auth):
 
 async def wait_for_annotations_completion(task_id, auth):
     while True:
-        response = requests.get(f"http://localhost:8080/api/tasks/{task_id}/annotations", auth=auth)
+        response = requests.get(f"http://cvatserver:8080/api/tasks/{task_id}/annotations", auth=auth)
         annotations_status = response.json()["status"]
         if annotations_status == "completed":
             break
@@ -30,18 +30,17 @@ async def create_and_upload_task(server, api_version, auth, image_files, labels,
     jobs_endpoint = f"{server}/{api_version}/jobs"
 
     create_task_data = {
-        "name": "test",
-        "owner": 1,
-        "assignee": 2,
+        "name": "string2",
+        "owner_id": 1,
+        "bug_tracker": "string",
         "overlap": 0,
-        "segment_size": 500,
-        "z_order": False,
-        "image_quality": 75,
+        "segment_size": 0,
         "labels": labels
     }
 
     # create task
     response = requests.post(tasks_endpoint, json=create_task_data, auth=auth)
+    print(response)
     task_id = response.json()['id']
     task = response.json()
     print(task)
@@ -55,19 +54,20 @@ async def create_and_upload_task(server, api_version, auth, image_files, labels,
     print("Image uploaded to task with response: ", response.text)
 
     # Wait for completion
-    task_jobid_endpoint = f"{tasks_endpoint}/{task_id}/jobs"
+    task_jobid_endpoint = f"{tasks_endpoint}/{task_id}"
     while True:
         response = requests.get(task_jobid_endpoint, auth=auth)
         response.raise_for_status()
-        job = response.json()["results"]
-        if job:
-            print("Job ID received")
+        job = response.json()["status"]
+        print(job)
+        if job == "completed":
+            print("Task finished")
             break
         await asyncio.sleep(1)
 
     # Upload annotations if present
     if annotations_path:
-        url = f"http://localhost:8080/api/tasks/{task['id']}/annotations?format=COCO+1.0"
+        url = f"http://cvatserver:8080/api/tasks/{task['id']}/annotations?format=COCO+1.0"
         with open(annotations_path, 'rb') as f:
             annotations_data = {
                 'annotation_file': f
@@ -79,14 +79,14 @@ async def create_and_upload_task(server, api_version, auth, image_files, labels,
             else:
                 print(f'Error uploading annotations: {annotations_response.content}')
 
-    print("Waiting for annotations...")
-    await wait_for_job_completion(job[0]["id"], jobs_endpoint, auth)
+    #print("Waiting for annotations...")
+    #await wait_for_job_completion(job[0]["id"], jobs_endpoint, auth)
 
     print("Annotations finished... Now downloading")
 
     # Download Annotations
     fileformat = 'YOLO+1.1'
-    task_dataset_endpoint = f"http://localhost:8080/api/tasks/{task_id}/annotations?format={fileformat}"
+    task_dataset_endpoint = f"http://cvatserver:8080/api/tasks/{task_id}/annotations?format={fileformat}"
     while True:
         response = requests.get(task_dataset_endpoint, auth=auth)
         response.raise_for_status()

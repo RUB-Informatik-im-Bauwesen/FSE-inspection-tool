@@ -45,7 +45,7 @@ async def create_project(project, user):
     if check_name:
         raise HTTPException(status_code=409, detail="Choose a different name!")
     # specify the path where you want to create the new folder
-    path = "storage\\Projects"
+    path = "storage/Projects"
     # cwd = os.getcwd()
     # path = os.path.join(cwd,path)
     # specify the name of the new folder
@@ -385,10 +385,10 @@ async def process_images(models, paths_to_images, diversity_sampling):
                        "7": 1.14, "8": 1.18, "9": 1.13, "10": 1.1, "11": 1.18, "12": 1.14, "13": 1.12}
 
     rankings_list = []
-    src_dir = "storage\Rare_images"
+    src_dir = "storage/Rare_images"
     if (diversity_sampling == "true"):
         # Get paths to rare images
-        images_rare = [os.path.join(src_dir + "\\", f) for f in os.listdir(src_dir) if
+        images_rare = [os.path.join(src_dir + "/", f) for f in os.listdir(src_dir) if
                        f.endswith('.jpeg') or f.endswith('.jpg') or f.endswith('.JPG') or f.endswith('.png')]
         # Get normalized distances for images to centroid
         cluster_centroids, pca, max_distances_labels = await cluster_images_async(images_rare)
@@ -586,14 +586,14 @@ async def prepare_for_training(project_id, user):
 
     project = await collection_projects.find_one({"_id": ObjectId(project_id)})
     # specify the path where you want to create the new folder
-    path = "storage\\Projects\\"
+    path = "storage/Projects/"
     # specify the name of the new folder
     folder_name = user["username"] + "_" + project["name"]
-    train_dir = path + folder_name + "\\" + "images" + "\\" + \
+    train_dir = path + folder_name + "/" + "images" + "/" + \
         "train"  # os.path.join(path, folder_name, "images", "train")
-    val_dir = path + folder_name + "\\" + "images" + "\\" + "val"
-    train_label_dir = path + folder_name + "\\" + "labels" + "\\" + "train"
-    val_label_dir = path + folder_name + "\\" + "labels" + "\\" + "val"
+    val_dir = path + folder_name + "/" + "images" + "/" + "val"
+    train_label_dir = path + folder_name + "/" + "labels" + "/" + "train"
+    val_label_dir = path + folder_name + "/" + "labels" + "/" + "val"
     train_ratio = 0.8  # ratio of images to use for training
 
     # Get list of selected images and get list of annotations from selected images
@@ -655,7 +655,7 @@ async def validate_model(project_id, user):
     if not model:
         raise HTTPException(
             status_code=404, detail="No models found in the project.")
-    model_path = model["path"]
+    model_path = model["path"].replace("//","/")
     path_to_results = await validate_model_yolo(model_path)
     return path_to_results
 
@@ -675,7 +675,7 @@ async def train_models(project_id, trainmodel, user):
     project = await collection_projects.find_one({"_id": ObjectId(project_id)})
     project = dict(project)
     names_dict = {i: class_names[i] for i in range(len(class_names))}
-    path_to_project = os.getcwd() + "\\" + project["path"]
+    path_to_project = os.getcwd() + "/" + project["path"]
     data = {
         "path": path_to_project,
         "train": "images/train",
@@ -683,10 +683,10 @@ async def train_models(project_id, trainmodel, user):
         "names": names_dict
     }
 
-    with open(project["path"] + "\\data.yaml", "w") as file:
+    with open(project["path"] + "/data.yaml", "w") as file:
         yaml.dump(data, file, allow_unicode=True)
 
-    new_model = await train_model(model_path, image_size, epoch_len, batch_size, project["path"] + "\\data.yaml", models_id)
+    new_model = await train_model(model_path, image_size, epoch_len, batch_size, project["path"] + "/data.yaml", models_id)
 
     model = {"name": "best" + "_" + new_model.split("_")[1] + ".pt", "file_type": "application/octet-stream",
              "path": "storage/Models/" + new_model + "/weights/best.pt", "selected": False, "project_id": project_id}
@@ -855,7 +855,7 @@ async def annotate_images_cvat(project_id, annotationModel, user):
         file_path = os.path.join(source_folder, file)
         os.remove(file_path)
 
-    server = "http://localhost:8080"
+    server = "http://cvatserver:8080"
     api_version = "api"
     auth = (annotationModel.username, annotationModel.password)
     images = []
@@ -865,8 +865,8 @@ async def annotate_images_cvat(project_id, annotationModel, user):
         path = document["path"]
         image_id = document["_id"]
         images.append([path, image_id])
-    labels = labels = [{'name': class_name}
-                       for class_name in annotationModel.class_names]
+    labels = [{'name': class_name} for idx, class_name in enumerate(annotationModel.class_names)]
+
 
     # Upload images to cvat
     try:
@@ -971,10 +971,10 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
 
         # Define a dictionary to map keywords to model paths
     keyword_paths = {
-        "Wartungsinformationen": "storage\\Visual_Annotation_Tool\\Detektion_Wartungsinformationen_Yolov7\\best.pt",
-        "Prüfplakettenaufkleber": "storage\\Visual_Annotation_Tool\\Detektion_Prüfplakettenaufkleber_Yolov7\\best.pt",
-        "Brandschutzanlagen": "storage\\Visual_Annotation_Tool\\Detektion_Brandschutzanlagen_Yolov5\\best.pt",
-        "Sicherheitsschilder": "storage\\Visual_Annotation_Tool\\Detektion_Sicherheitsschilder_Yolov7\\best.pt",
+        "Wartungsinformationen": "storage/Visual_Annotation_Tool/Detektion_Wartungsinformationen_Yolov7/best.pt",
+        "Prüfplakettenaufkleber": "storage/Visual_Annotation_Tool/Detektion_Prüfplakettenaufkleber_Yolov7/best.pt",
+        "Brandschutzanlagen": "storage/Visual_Annotation_Tool/Detektion_Brandschutzanlagen_Yolov5/best.pt",
+        "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov7/best.pt",
     }
 
     # Get the keyword from Dienst (assuming it's a string)
