@@ -3,6 +3,7 @@ version: "3"
 services:
 
   web:
+    image: hydropic/visual_fire_inspection_tool_backend:v1.0
     container_name: fastapiwork
     build:
       context: .
@@ -39,6 +40,7 @@ services:
       - cvat_cvat
 
   frontend:
+    image: hydropic/visual_fire_inspection_tool_frontend:v1.0
     container_name: frontendwork
     build:
       context: .
