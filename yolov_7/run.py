@@ -70,7 +70,7 @@ def run(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
     # Directories
-    save_dir = Path("frontend\public\Visual_Annotation_Tool_Images\Images")  # increment run
+    save_dir = Path("frontend/public/Visual_Annotation_Tool_Images/Images")  # increment run
     (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
     # Add this line to define the directory for saving cropped images

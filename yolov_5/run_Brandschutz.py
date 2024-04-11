@@ -110,7 +110,7 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = Path("frontend\public\Visual_Annotation_Tool_Images\Images")  # increment run
+    save_dir = Path("frontend/public/Visual_Annotation_Tool_Images/Images")  # increment run
     (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)
 
     # Load model
@@ -240,7 +240,7 @@ def run(
                     cv2.imshow(str(p), im0)
                     cv2.waitKey(1)  # 1 millisecond
 
-        
+
 
         # Save results (image with detections)
         if save_img:

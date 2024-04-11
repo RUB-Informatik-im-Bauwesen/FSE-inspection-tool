@@ -79,6 +79,7 @@ const KIDienste = ({ accessToken }) => {
   const handleFileUpload = (event) => {
     const files = event.target.files;
     setFiles(files)
+    console.log(files)
   }
 
   const openModal = () => {
@@ -90,7 +91,6 @@ const KIDienste = ({ accessToken }) => {
   };
 
   const handleSubmitUpload = () => {
-      setImageUpload(files[0].name)
       const formData = new FormData();
       formData.append('file', files[0]);
       let url = `http://127.0.0.1:8000/upload_image_KI_Dienste`;
@@ -98,14 +98,13 @@ const KIDienste = ({ accessToken }) => {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': files.type }
             })
             .then((res) => {
-
+              setImageUpload(files[0].name)
             })
             .catch((err) => {
               console.log(err);
             });
 
-
-
+    console.log(imageUpload)
     closeModal()
   }
 
