@@ -19,13 +19,21 @@ Schritt 3 (Virtual Environment erstellen):
   2. Dann aktiviere die Virtual Environment mittels “venv\Scripts\Activate.ps1”
   3. Dann führe “pip install -r requirements.txt” aus
 
-Schritt 4 (Backend starten):
+Schritt 4 (Downloaden von Modellen und Bildern):
+  1. Downloade von diesem Link (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) die Validation Bilder und ersetz den Ordner in Storage
+  2. Downloade die Models für das Visual Annotatiol Tool von diesem Link (https://drive.google.com/file/d/1vcIlMRK7yZg0_sooOtaNWitnj1suudHJ/view?usp=sharing) und und ersetz den Ordner in Storage
+  3. Downloade die Rare Images von diesem Link (https://drive.google.com/file/d/1jgORHgpLZ_uT1sp0gbRu2Gpfae_wyDKU/view?usp=sharing) und ersetz den Ordner in Storage
+
+
+Schritt 5 (Backend starten):
   1. Starte die Backend indem folgender Kommand ausgeführt wird: “uvicorn backend.website.main:app –reload”
 
-Schritt 5 (Frontend starten):
+Schritt 6 (Frontend starten):
   1. Starte eine neue Powershell und führe den Kommand “cd frontend” aus
   2. Führe dann “npm install” aus
   3. Letztendlich führe “npm run dev” aus
+
+
 
 
 --------------------------------------------------------------------------------------------------------------
