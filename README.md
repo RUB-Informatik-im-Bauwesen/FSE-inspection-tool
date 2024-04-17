@@ -1,5 +1,9 @@
 # Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset
 
+SKIP IF DOCKER IS INSTALLED
+
+-------------------------------------------------------------------------------------------------------------
+
 Schritt 1 (Klonen des Git Repository):
 
 URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset (github.com)
@@ -22,3 +26,20 @@ Schritt 5 (Frontend starten):
   1. Starte eine neue Powershell und führe den Kommand “cd frontend” aus
   2. Führe dann “npm install” aus
   3. Letztendlich führe “npm run dev” aus
+
+
+--------------------------------------------------------------------------------------------------------------
+
+IF DOCKER IS INSTALLED
+
+Schritt 1 (Klonen des Git Repository):
+
+URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset (github.com)
+
+Schritt 2:
+
+Docker compose up -d
+
+Schritt 3:
+
+Enjoy!
