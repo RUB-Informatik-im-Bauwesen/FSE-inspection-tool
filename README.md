@@ -49,5 +49,7 @@ Schritt 2:
 Docker compose up -d
 
 Schritt 3:
+Acess Localhost at: http://127.0.0.1:5173/
 
+Schritt 4:
 Enjoy!
