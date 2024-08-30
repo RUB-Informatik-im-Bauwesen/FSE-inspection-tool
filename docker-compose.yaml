@@ -1,4 +1,3 @@
-version: "3"
 
 services:
 
@@ -13,10 +12,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - cvat_cvat
+      - app-network
     restart: always
     volumes:
     - ./frontend/public:/code/frontend/public
+    - ./backend:/code/backend
     deploy:
       resources:
         reservations:
@@ -37,7 +37,7 @@ services:
     ports:
       - "3:27017"
     networks:
-      - cvat_cvat
+      - app-network
 
   frontend:
     image: hydropic/visual_fire_inspection_tool_frontend:v1.2
@@ -48,7 +48,7 @@ services:
     ports:
       - "5173:5173"
     networks:
-      - cvat_cvat
+      - app-network
     restart: always
     volumes:
       - ./frontend/public:/code/public
