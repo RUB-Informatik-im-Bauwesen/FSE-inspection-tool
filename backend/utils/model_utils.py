@@ -9,7 +9,8 @@ from concurrent.futures import ThreadPoolExecutor
 import torch
 import cv2
 import importlib
-
+import json
+from ultralytics import YOLO
 
 def calculate_blurriness_score(image_path):
     # Load the image
@@ -221,7 +222,7 @@ async def render_images_annotation_tool(model_path, image_paths, save_path):
 
 
     return annotated_image_paths
-
+"""
 async def render_images_yolov7(model_path, image_paths, model_type):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
 
@@ -237,7 +238,7 @@ async def render_images_yolov7(model_path, image_paths, model_type):
 
     annotated_image_paths = []
     for image_path in image_paths:
-        results = await asyncio.to_thread(module.run,source=image_path, weights = model_path,device="cpu")# Perform inference on the image
+        results = await asyncio.to_thread(module.run,source=image_path, weights = model_path,device="gpu")# Perform inference on the image
         #results.save(save_dir="frontend//public//Annotated_Images")  # Render the predicted bounding boxes on the image
 
         # Save the rendered image to the specified path
@@ -246,6 +247,45 @@ async def render_images_yolov7(model_path, image_paths, model_type):
 
 
     return annotated_image_paths
+"""
+async def render_images_yolov8(model_path, image_paths, model_type):
+    #model = await asyncio.to_thread(load_yolov7_model, model_path)
+    model = YOLO(model_path)
+    results = model(image_paths[0])
+    print(results)
+    results[0].save(filename="frontend//public//Annotated_Images//anno.jpg")  # Render the predicted bounding boxes on the image
+    save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_paths[0].split('/')[-1]
+    annotated_image_paths = []
+    annotated_image_paths.append("Annotated_Images//anno.jpg")
+
+    # Assuming results[0].boxes contains the bounding box information
+    data_dict = []
+    class_names = results[0].names  # Extract class names from results
+    for box in results[0].boxes:
+        xywh = box.xywh.tolist()  # Convert tensor to list
+        cls = int(box.cls)  # Extract class index
+        class_name = class_names[cls]  # Get class name using index
+        data_dict.append({
+            'type': class_name,
+            'guid': 542348234,
+            'comment': f'{class_name}',
+            'bounding_box': {
+                'x_center': xywh[0][0],
+                'y_center': xywh[0][1],
+                'width': xywh[0][2],
+                'height': xywh[0][3]
+            },
+            'input image name': os.path.basename(image_paths[0])
+        })
+    
+    # Save the data dictionary as a JSON file
+    json_save_path = "frontend//public//Annotated_Images//anno.json"
+    os.makedirs(os.path.dirname(json_save_path), exist_ok=True)
+    with open(json_save_path, 'w') as json_file:
+        json.dump(data_dict, json_file, indent=4)
+    
+    return annotated_image_paths
+
 
 
 
