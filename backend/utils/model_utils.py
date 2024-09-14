@@ -6,6 +6,7 @@ import numpy as np
 import random
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from backend.website.db import collection_jsons
 import torch
 import cv2
 import importlib
@@ -277,7 +278,8 @@ async def render_images_yolov8(model_path, image_paths, model_type):
             },
             'input image name': os.path.basename(image_paths[0])
         })
-    
+    print("ADDING TO DB")
+    await collection_jsons.insert_one({"data_json": data_dict})
     # Save the data dictionary as a JSON file
     json_save_path = "frontend//public//Annotated_Images//anno.json"
     os.makedirs(os.path.dirname(json_save_path), exist_ok=True)

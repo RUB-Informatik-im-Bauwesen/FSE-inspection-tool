@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-client = AsyncIOMotorClient("mongodb://mongowork", username="root", password="example")
+client = AsyncIOMotorClient("mongodb://mongowork1", username="root", password="example")
 
 db = client.test
 
@@ -10,3 +10,4 @@ collection_images = db.images
 collection_models = db.models
 collection_annotations = db.annotations
 collection_rankings = db.rankings
+collection_jsons = db.jsons
