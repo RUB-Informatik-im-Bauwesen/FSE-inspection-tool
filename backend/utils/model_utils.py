@@ -2,6 +2,8 @@ import os
 import subprocess
 import pandas as pd
 import shutil
+import base64
+from datetime import datetime
 import numpy as np
 import random
 import asyncio
@@ -278,8 +280,16 @@ async def render_images_yolov8(model_path, image_paths, model_type):
             },
             'input image name': os.path.basename(image_paths[0])
         })
-    print("ADDING TO DB")
-    await collection_jsons.insert_one({"data_json": data_dict})
+    # Read the image file and encode it in base64
+    with open("frontend//public//Annotated_Images//anno.jpg", "rb") as image_file:
+        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    document = {
+        "data_json": data_dict,
+        "encoded_image": encoded_image,
+        "timestamp": datetime.now().isoformat()
+    }
+    await collection_jsons.insert_one(document)
     # Save the data dictionary as a JSON file
     json_save_path = "frontend//public//Annotated_Images//anno.json"
     os.makedirs(os.path.dirname(json_save_path), exist_ok=True)
