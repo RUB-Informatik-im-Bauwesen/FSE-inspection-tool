@@ -78,3 +78,24 @@ class AnnotationModel(BaseModel):
 
 class pathModel(BaseModel):
     path: str
+
+class NewJSONDocument(BaseModel):
+    id: str
+    user: str
+    data_json: list
+    encoded_image: str
+    date: str
+    timestamp: str
+
+class JSONDocument(NewJSONDocument):
+    id: PydanticObjectId = Field(..., alias="_id")
+
+class ContextData(BaseModel):
+    image: str
+
+class NewPrompt(BaseModel):
+    text: str
+    context: Optional[ContextData] = None
+
+class Prompt(NewPrompt):
+    id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")

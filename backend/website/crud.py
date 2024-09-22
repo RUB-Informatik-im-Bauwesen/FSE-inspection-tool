@@ -5,14 +5,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
-from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models
-from backend.website.models import User, Project, Image, Model, Annotation, TrainModel, AnnotationModel
+from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models, collection_jsons
+from backend.website.models import User, Project, Image, Model, Annotation, TrainModel, AnnotationModel, JSONDocument, Prompt
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov8, render_images_annotation_tool
 from backend.utils.cvat_utils import create_and_upload_task
 from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
+from backend.utils.llm_utils import get_answer
 import os
 import io
 import zipfile
@@ -986,7 +987,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     if model_path is None:
         raise HTTPException(status_code=404, detail="Model not found!")
     
-    rendered_image = await render_images_yolov8(model_path, final_path, keyword)
+    rendered_image = await render_images_yolov8(model_path, final_path, keyword, user)
 
     return rendered_image 
 """
@@ -1024,3 +1025,26 @@ async def download_zipped(imageName, user):
         media_type=mime_type,
         headers={"Content-Disposition": "attachment; filename=download.zip"}
     )
+
+async def fetch_jsons():
+    jsons = []
+    cursor = collection_jsons.find({"user": "test"})
+    async for document in cursor:
+        model = JSONDocument(**document)
+        jsons.append(model)
+    return jsons
+
+async def get_response_llm(prompt, api_key):
+    # Initialize the Dialogue class with the API key
+    prompt_answer = get_answer(prompt, api_key)
+    """
+    # Add the prompt to the dialogue
+    dialogue.add_prompt(real_prompt)
+    
+    dialogue.get_answer(-1)
+    
+    # Retrieve the answer from the dialogues list
+    _, prompt_answer = dialogue.dialogues[-1]
+    """
+    # Return the answer in the expected format
+    return {"response": prompt_answer}

@@ -135,6 +135,9 @@ const KIDienste = ({ accessToken }) => {
         });
 
   }
+  const navigateToViewJsons = () => {
+    window.location.replace("http://127.0.0.1:5173/view-jsons");
+  };
 
   return (
 
@@ -164,6 +167,10 @@ const KIDienste = ({ accessToken }) => {
       <div className="title-text-container">
         <h1 >Visual Fire Inspection Tool</h1>
         <p >Welcome to Visual Fire Inspection Tool! What can I inspect for you? 😃</p>
+      </div>
+
+      <div className="top-right-button">
+        <button onClick={navigateToViewJsons} className="btn btn-primary">View all inspections</button>
       </div>
 
       <div className="card-container">

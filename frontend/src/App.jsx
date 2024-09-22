@@ -11,7 +11,7 @@ import Statistics from './components/Statistics'
 import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
 import KIDienste from './components/KIDienste'
-
+import ViewJsons from './components/ViewJsons'
 
 function App() {
 
@@ -83,6 +83,7 @@ function App() {
           <Route path="/Statistics" element={<StatisticsMultipleModels accessToken={accessToken} projects={projects}/>}/>
           <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
+          <Route path="/view-jsons" element={<ViewJsons accessToken={accessToken}/>} />
         </Routes>
         <img src={"Logo/Logo.png"} alt={"Informatik im Bauwesen"} className="logo" />
       </div>

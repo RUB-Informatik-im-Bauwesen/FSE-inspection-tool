@@ -251,7 +251,7 @@ async def render_images_yolov7(model_path, image_paths, model_type):
 
     return annotated_image_paths
 """
-async def render_images_yolov8(model_path, image_paths, model_type):
+async def render_images_yolov8(model_path, image_paths, model_type, user):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
     model = YOLO(model_path)
     results = model(image_paths[0])
@@ -283,11 +283,14 @@ async def render_images_yolov8(model_path, image_paths, model_type):
     # Read the image file and encode it in base64
     with open("frontend//public//Annotated_Images//anno.jpg", "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-
+    formatted_date = datetime.now().strftime("%d.%m.%Y")
+    formatted_timestamp = datetime.now().strftime("%H:%M:%S")
     document = {
+        "user": user["username"],
         "data_json": data_dict,
         "encoded_image": encoded_image,
-        "timestamp": datetime.now().isoformat()
+        "date": formatted_date,
+        "timestamp": formatted_timestamp
     }
     await collection_jsons.insert_one(document)
     # Save the data dictionary as a JSON file
