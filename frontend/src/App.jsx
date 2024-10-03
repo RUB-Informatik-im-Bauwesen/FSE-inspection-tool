@@ -12,6 +12,7 @@ import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
 import KIDienste from './components/KIDienste'
 import ViewJsons from './components/ViewJsons'
+import GPT from './components/GPT'
 
 function App() {
 
@@ -84,6 +85,7 @@ function App() {
           <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
           <Route path="/view-jsons" element={<ViewJsons accessToken={accessToken}/>} />
+          <Route path="/chat" element={<GPT accessToken={accessToken}/>} />
         </Routes>
         <img src={"Logo/Logo.png"} alt={"Informatik im Bauwesen"} className="logo" />
       </div>

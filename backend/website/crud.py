@@ -13,7 +13,7 @@ from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov8, render_images_annotation_tool
 from backend.utils.cvat_utils import create_and_upload_task
 from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
-from backend.utils.llm_utils import get_answer
+from backend.utils.llm_utils import get_answer, get_answer_no_image
 import os
 import io
 import zipfile
@@ -1036,7 +1036,11 @@ async def fetch_jsons():
 
 async def get_response_llm(prompt, api_key):
     # Initialize the Dialogue class with the API key
-    prompt_answer = get_answer(prompt, api_key)
+    if prompt.context and prompt.context.image:
+        prompt_answer = get_answer(prompt, api_key)
+    else:
+        prompt_answer = get_answer_no_image(prompt, api_key)
+    
     """
     # Add the prompt to the dialogue
     dialogue.add_prompt(real_prompt)
