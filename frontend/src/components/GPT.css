@@ -7,7 +7,7 @@
 
 .chat-container {
   width: 100%;
-  max-width: 800px; /* Increased max-width */
+  max-width: 600px; /* Increased max-width */
   height: 600px; /* Increased height */
   border: 1px solid #ccc;
   border-radius: 8px;

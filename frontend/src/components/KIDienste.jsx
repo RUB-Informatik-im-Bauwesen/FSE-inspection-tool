@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import GPT from "./GPT";
 import './KIDiensteStyle.css';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -14,6 +15,7 @@ const KIDienste = ({ accessToken }) => {
   const [imageResult, setImageResult] = useState("");
   const [selectedMLService, setSelectedMLService] = useState(null);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
+  const [imageBase64, setImageBase64] = useState("");
 
 
   const download_item = () => {
@@ -98,7 +100,9 @@ const KIDienste = ({ accessToken }) => {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': files.type }
             })
             .then((res) => {
+              const { filename, image_base64 } = res.data;
               setImageUpload(files[0].name)
+              setImageBase64(image_base64);
             })
             .catch((err) => {
               console.log(err);
@@ -136,75 +140,81 @@ const KIDienste = ({ accessToken }) => {
 
   }
   const navigateToViewJsons = () => {
-    window.location.replace("http://127.0.0.1:5173/view-jsons");
+    window.location.replace("http://localhost:5173/view-jsons");
   };
 
   return (
 
 
     <div className="visual-fire-inspection-tool-container">
-          <Modal
-        show={isModalOpen}
-      >
-        <Modal.Header>
-          <Modal.Title>
-            Upload Images
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <input type="file" onChange={handleFileUpload} />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeModal}>
-            Cancel
-          </Button>
-          <Button variant="danger"  onClick={()=> handleSubmitUpload()}>
-            Submit
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <div className="header-center">
+        <Modal show={isModalOpen}>
+          <Modal.Header>
+            <Modal.Title>
+              Upload Images
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input type="file" onChange={handleFileUpload} />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button variant="danger"  onClick={()=> handleSubmitUpload()}>
+              Submit
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      <div className="title-text-container">
-        <h1 >Visual Fire Inspection Tool</h1>
-        <p >Welcome to Visual Fire Inspection Tool! What can I inspect for you? 😃</p>
-      </div>
-
-      <div className="top-right-button">
-        <button onClick={navigateToViewJsons} className="btn btn-primary">View all inspections</button>
-      </div>
-
-      <div className="card-container">
-        <div className="card" > {/* Adding Bootstrap class 'card-deck' */}
-          <img src={imageUpload} alt="No Image Uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
-          <div className="card-body">
-            <button onClick={openModal} className="card-button btn btn-secondary">Upload Image</button>
-            <button className="card-button btn btn-secondary">Create Image</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
-          </div>
+        <div className="title-text-container">
+          <h1 >Visual Fire Inspection Tool</h1>
+          <p >Welcome to Visual Fire Inspection Tool! What can I inspect for you? 😃</p>
         </div>
 
-        {/* Buttons placed between the cards */}
-        <div className="buttons-between-cards">
-        <Dropdown onSelect={handleMLServiceSelect}>
-          <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
-          {selectedMLService ? selectedMLService : "Choose ML Service"}
-          </Dropdown.Toggle>
-            <Dropdown.Menu>
-            <Dropdown.Item eventKey="Wartungsinformationen">Detektion Wartungsinformationen</Dropdown.Item>
-            <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
-            <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
-            <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
-            {/* Add more Dropdown.Items as needed */}
-            </Dropdown.Menu>
-        </Dropdown>
-          <button onClick={predict_image} className="bottom-button btn btn-primary">Start! {isLoadingPredict && <div className="loading-circle"></div>} </button> {/* Adding Bootstrap classes 'btn' and 'btn-danger' */}
+        <div className="top-right-button">
+            <button onClick={navigateToViewJsons} className="btn btn-primary">View all inspections</button>
         </div>
+      </div>
+      <div className="below-header-center">
+        <div className="left-side">
+          <div className="card-container">
+            <div className="card" > {/* Adding Bootstrap class 'card-deck' */}
+              <img src={imageUpload} alt="No Image Uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
+              <div className="card-body">
+                <button onClick={openModal} className="card-button btn btn-secondary">Upload Image</button>
+                <button className="card-button btn btn-secondary">Create Image</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+              </div>
+            </div>
 
-        <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
-          <img src={imageResult} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
-          <div className="card-body">
-            <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
-            <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+            {/* Buttons placed between the cards */}
+            <div className="buttons-between-cards">
+            <Dropdown onSelect={handleMLServiceSelect}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
+              {selectedMLService ? selectedMLService : "Choose ML Service"}
+              </Dropdown.Toggle>
+                <Dropdown.Menu>
+                <Dropdown.Item eventKey="Wartungsinformationen">Detektion Wartungsinformationen</Dropdown.Item>
+                <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
+                <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
+                <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
+                {/* Add more Dropdown.Items as needed */}
+                </Dropdown.Menu>
+            </Dropdown>
+              <button onClick={predict_image} className="bottom-button btn btn-primary">Start! {isLoadingPredict && <div className="loading-circle"></div>} </button> {/* Adding Bootstrap classes 'btn' and 'btn-danger' */}
+            </div>
+
+            <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
+              <img src={imageResult} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
+              <div className="card-body">
+                <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
+                <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+              </div>
+            </div>
           </div>
+        </div>
+        <div className="right-side">
+          <GPT imageBase64={imageBase64}/>
         </div>
       </div>
     </div>

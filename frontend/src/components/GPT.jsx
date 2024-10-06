@@ -2,31 +2,27 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./GPT.css"; // Assuming you have a CSS file for styling
 
-const GPT = () => {
+const GPT = ({ imageBase64 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [image, setImage] = useState(null);
-  const [imageBase64, setImageBase64] = useState("");
+  const [includeImage, setIncludeImage] = useState(true); // State for the toggle
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageBase64(reader.result.split(",")[1]); // Remove the data URL prefix
-    };
-    reader.readAsDataURL(file);
+  const handleToggleChange = () => {
+    setIncludeImage(!includeImage);
   };
 
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
 
-    const userMessage = { sender: "user", text: input, image: imageBase64 ? `data:image/png;base64,${imageBase64}` : null };
+    const userMessage = {
+      sender: "user",
+      text: input,
+      image: includeImage && imageBase64 ? `data:image/png;base64,${imageBase64}` : null,
+    };
     setMessages([...messages, userMessage]);
 
     // Print input and imageBase64 for debugging
@@ -35,16 +31,16 @@ const GPT = () => {
 
     const payload = {
       text: input,
-      context: imageBase64 ? { image: imageBase64 } : null
+      context: includeImage && imageBase64 ? { image: imageBase64 } : null,
     };
 
     try {
       const response = await fetch("http://localhost:8000/get_response_from_llm", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       const aiMessage = { sender: "ai", text: data.response };
@@ -54,31 +50,6 @@ const GPT = () => {
     }
 
     setInput("");
-    setImage(null);
-    setImageBase64("");
-  };
-
-  const handleUploadImage = async () => {
-    if (!image) return;
-
-    const formData = new FormData();
-    formData.append("image", image);
-
-    try {
-      const response = await axios.post("/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      const uploadedImageName = response.data.imageName; // Assuming the server returns the image name
-      setImageBase64(uploadedImageName);
-      const aiMessage = { sender: "ai", text: response.data.reply };
-      setMessages([...messages, aiMessage]);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-
-    setImage(null);
   };
 
   return (
@@ -100,9 +71,15 @@ const GPT = () => {
         />
         <button onClick={handleSendMessage}>Send</button>
       </div>
-      <div className="upload-container">
-        <input type="file" onChange={handleImageChange} />
-        <button onClick={handleUploadImage}>Upload Image</button>
+      <div className="toggle-container">
+        <label>
+          <input
+            type="checkbox"
+            checked={includeImage}
+            onChange={handleToggleChange}
+          />
+          Include Image
+        </label>
       </div>
     </div>
   );

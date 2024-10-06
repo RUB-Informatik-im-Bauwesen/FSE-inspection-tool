@@ -1,12 +1,28 @@
 /* KIDiensteStyle.css */
 
 .visual-fire-inspection-tool-container {
-  text-align: center;
+  align-items: center; /* Center horizontally */
   padding: 20px;
   max-width: 100vw;
   overflow-x: auto;
 }
 
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  width: 100%;
+  margin-bottom: 20px; /* Add some space below the center content */
+}
+.below-header-center{
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  width: 100%;
+  margin-bottom: 20px; /* Add some space below the center content */
+}
 .title-text-container {
   display: flex;
   flex-direction: column;
@@ -133,7 +149,15 @@
     max-height: 90vh;
     overflow-y: auto;
   }
-
+  
+  .left-side {
+    flex: 1;
+    margin-right: 20px;
+  }
+  .right-side {
+    flex: 1;
+    max-width: 400px; /* Adjust the width as needed */
+}
 
 
 }

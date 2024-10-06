@@ -18,7 +18,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
   const get_projects_by_user2 = () => {
 
     axios
-      .get("http://127.0.0.1:8000/get_all_projects_by_user", {
+      .get("http://localhost:8000/get_all_projects_by_user", {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
@@ -28,14 +28,14 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
         console.log(err)
       });
     setTimeout(() => {
-      window.location.replace("http://127.0.0.1:5173/Statistics")
+      window.location.replace("http://localhost:5173/Statistics")
     },500)
   }
 
   const get_projects_by_user = () => {
 
     axios
-      .get("http://127.0.0.1:8000/get_all_projects_by_user", {
+      .get("http://localhost:8000/get_all_projects_by_user", {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res) => {
@@ -45,7 +45,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
         console.log(err)
       });
     setTimeout(() => {
-      window.location.replace("http://127.0.0.1:5173/Projects")
+      window.location.replace("http://localhost:5173/Projects")
     },500)
   }
 

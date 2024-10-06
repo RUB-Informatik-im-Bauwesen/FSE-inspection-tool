@@ -327,5 +327,5 @@ async def get_collection_jsons():
 @app.post("/get_response_from_llm")
 async def get_response_from_llm(prompt: NewPrompt):
     print(prompt)
-    response = await get_response_llm(prompt, "key") #requires API key
+    response = await get_response_llm(prompt, "") #requires API key
     return response

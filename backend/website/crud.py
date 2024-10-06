@@ -25,7 +25,7 @@ import concurrent.futures
 import csv
 import mimetypes
 from pathlib import Path
-
+import base64
 # Active Learning
 import torch
 import pandas as pd
@@ -130,8 +130,9 @@ async def writeToPublic_KI_Dienste(file: UploadFile):
 
     with open(dest_path, "wb") as f:
         f.write(contents)
+    image_base64 = base64.b64encode(contents).decode('utf-8')
 
-    return {"filename": file.filename}
+    return {"filename": file.filename, "image_base64": image_base64}
 
 
 
