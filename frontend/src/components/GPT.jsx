@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 import "./GPT.css"; // Assuming you have a CSS file for styling
 
 const GPT = ({ imageBase64 }) => {
@@ -57,7 +58,7 @@ const GPT = ({ imageBase64 }) => {
       <div className="chat-container">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.sender}`}>
-            {message.text}
+            <ReactMarkdown>{message.text}</ReactMarkdown>
             {message.image && <img src={message.image} alt="User uploaded" className="uploaded-image" />}
           </div>
         ))}
