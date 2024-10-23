@@ -92,7 +92,7 @@ const IfcViewer = () => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
+      <input type="file" accept=".ifc" onChange={handleFileChange} />
       <div id="container" ref={containerRef} style={{ width: '100%', height: '100vh' }}></div>
     </div>
   );
