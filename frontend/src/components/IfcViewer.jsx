@@ -11,6 +11,7 @@ const IfcViewer = () => {
   const fragmentIfcLoaderRef = useRef(null);
   const containerRef = useRef(null);
   const fragmentsRef = useRef(null);
+  const initializedRef = useRef(false); // Track initialization state
 
   const initializeWorld = (container) => {
     const components = new OBC.Components();
@@ -89,7 +90,11 @@ const IfcViewer = () => {
       }
     }
   };
-
+  // Initialize the world when the component is first rendered
+  if (!initializedRef.current && containerRef.current) {
+    initializeWorld(containerRef.current);
+    initializedRef.current = true; // Mark as initialized
+  }
   return (
     <div>
       <input type="file" accept=".ifc" onChange={handleFileChange} />

@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import "./NavbarStyles.css"
 import img from '/fire_extinguisher.png'
 import axios from 'axios'
 
-const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
+const Navbar = ({ username, accessToken, isLoggedIn, onLogout, setProjects }) => {
 
   const [clicked, SetClicked] = useState(false)
   const [loggedIn, SetLoggedIn] = useState(false)
@@ -29,7 +29,7 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
       });
     setTimeout(() => {
       window.location.replace("http://localhost:5173/Statistics")
-    },500)
+    }, 500)
   }
 
   const get_projects_by_user = () => {
@@ -46,41 +46,42 @@ const Navbar = ({username, accessToken, isLoggedIn, onLogout, setProjects}) =>{
       });
     setTimeout(() => {
       window.location.replace("http://localhost:5173/Projects")
-    },500)
+    }, 500)
   }
 
-    return (
-      <nav>
+  return (
+    <nav>
 
-        <a href='/Projects'>
-          <img src={img}/>
+      <a href='/Projects'>
+        <img src={img} />
 
-        </a>
-        <h1>Visual Fire Inspection Tool</h1>
+      </a>
+      <h1>Visual Fire Inspection Tool</h1>
 
-        <div className={isLoggedIn ? "display-on" : "display-off"}>
-          <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a onClick={get_projects_by_user}>Models</a></li>
-            <li><a onClick={get_projects_by_user2}>Evaluation</a></li>
-            <li><a href ='/KIDienst'>FSE Services</a></li>
-            <li><a href='/FAQ'>FAQ</a></li>
-            <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
-          </ul>
-        </div>
+      <div className={isLoggedIn ? "display-on" : "display-off"}>
+        <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
+          <li><a onClick={get_projects_by_user}>Models</a></li>
+          <li><a onClick={get_projects_by_user2}>Evaluation</a></li>
+          <li><a href='/KIDienst'>FSE Services</a></li>
+          <li><a href='/FAQ'>FAQ</a></li>
+          <li><a href='/ifc-viewer'>IFC Viewer</a></li>
+          <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
+        </ul>
+      </div>
 
-        <div className={isLoggedIn ? "display-off" : "display-on"}>
-          <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-            <li><a href='/'>Login</a></li>
-            <li><a href='/FAQ'>FAQ</a></li>
-          </ul>
-        </div>
+      <div className={isLoggedIn ? "display-off" : "display-on"}>
+        <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
+          <li><a href='/'>Login</a></li>
+          <li><a href='/FAQ'>FAQ</a></li>
+        </ul>
+      </div>
 
-        <div id='mobile'>
-          <i id='bar' className={clicked ? 'fas fa-times' : 'fas fa-bars'} onClick={handleClick}></i>
-        </div>
+      <div id='mobile'>
+        <i id='bar' className={clicked ? 'fas fa-times' : 'fas fa-bars'} onClick={handleClick}></i>
+      </div>
 
-      </nav>
-    )
-  }
+    </nav>
+  )
+}
 
 export default Navbar
