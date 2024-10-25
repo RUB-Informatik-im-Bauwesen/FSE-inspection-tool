@@ -1,0 +1,31 @@
+.ifc-viewer {
+    position: relative;
+}
+
+.toggle-panel-button {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.zoom-on-click-button {
+    margin-left: 10px;
+}
+
+.side-panel {
+    position: fixed;
+    right: -25%;
+    /* Hidden by default */
+    width: 25%;
+    height: 100%;
+    background-color: #ffffff;
+    transition: right 0.1s ease;
+    z-index: 999;
+    padding: 20px;
+    outline: 2px solid #000000;
+    /* Add outline */
+}
+
+.side-panel.open {
+    right: 0;
+    /* Show the panel */
+}
