@@ -4,20 +4,23 @@ import * as WEBIFC from "web-ifc";
 import * as BUI from "@thatopen/ui";
 import * as OBC from "@thatopen/components";
 import * as OBCF from "@thatopen/components-front";
+import * as OBF from "@thatopen/fragments";
 import Stats from "stats.js";
-import './IfcViewer.css'; // Import the CSS file for styling
+import './IfcViewer.css';
 
 const IfcViewer = () => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false); // State to manage panel visibility
-  const [zoomOnClick, setZoomOnClick] = useState(false); // State to manage panel visibility
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [propertySets, setPropertySets] = useState([]);
+  const [zoomOnClick, setZoomOnClick] = useState(false);
   const fileInputRef = useRef(null);
   const fileRef = useRef(null);
   const worldRef = useRef(null);
   const fragmentIfcLoaderRef = useRef(null);
   const containerRef = useRef(null);
   const fragmentsRef = useRef(null);
-  const initializedRef = useRef(false); // Track initialization state
+  const initializedRef = useRef(false);
   const CameraControlRef = useRef(null);
+  const modelIDRef = useRef(null);
 
   const initializeWorld = (container) => {
     const components = new OBC.Components();
@@ -27,7 +30,7 @@ const IfcViewer = () => {
     world.scene = new OBC.SimpleScene(components);
     world.renderer = new OBCF.PostproductionRenderer(components, container);
     world.camera = new OBC.SimpleCamera(components);
-    CameraControlRef.current = world.camera.controls
+    CameraControlRef.current = world.camera.controls;
     components.init();
 
     world.renderer.postproduction.enabled = true;
@@ -38,7 +41,7 @@ const IfcViewer = () => {
     const grid = grids.create(world);
     world.scene.three.background = null;
     world.renderer.postproduction.customEffects.excludedMeshes.push(grid.three);
-    // highlighter
+
     const highlighter = components.get(OBCF.Highlighter);
     highlighter.setup({ world });
     highlighter.zoomToSelection = zoomOnClick;
@@ -48,36 +51,59 @@ const IfcViewer = () => {
     outliner.enabled = true;
 
     outliner.create(
-      "example",
-      new THREE.MeshBasicMaterial({
-        color: 0xbcf124,
-        transparent: true,
-        opacity: 0.1,
-      }),
+        "example",
+        new THREE.MeshBasicMaterial({
+            color: 0xbcf124,
+            transparent: true,
+            opacity: 0.1,
+        })
     );
 
-    highlighter.events.select.onHighlight.add((data) => {
-      outliner.clear("example");
-      outliner.add("example", data);
-    });
+    highlighter.events.select.onHighlight.add(async (data) => {
+      console.log("Highlighted data:", data);
+      const ids = [];
+      for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+              const idSet = data[key]; 
+              if (idSet instanceof Set) {
+                  ids.push(...idSet);
+              }
+          }
+      }
+      if (ids.length > 0) {
+          const expressID = ids[0];
+          console.log("Clicked object ID:", expressID);
+          const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroup instance
+          const frag_grp_ids = []
+          for (const key of fragmentGroups.keys()) { // get all fragmentsgroup keys and push them to frag_ids
+            frag_grp_ids.push(key);
+          }
+          console.log("frag_ids: ",frag_grp_ids)
+          console.log("fragmentGroups: ",fragmentGroups)
+          const fragmentGroup = fragmentGroups.get(frag_grp_ids[0]); // Get the first fragmentGroup
+          console.log("fragmentGroup: ",fragmentGroup)
+          console.log("fragmentGroup class: ",fragmentGroups.constructor.name)
+          if (fragmentGroup) {
+              const fragmentProperties = await fragmentGroup.getProperties(expressID);
+              console.log("Fragment properties:", fragmentProperties); 
+              console.log("isArray:", Array.isArray(fragmentProperties))
+              setPropertySets(fragmentProperties); // Update state with the properties
+          } else {
+              console.error("FragmentsGroup instance not found.");
+          }
+      } else {
+          console.error("No IDs found in the highlighted data.");
+      }
+  });
 
-    highlighter.events.select.onClear.add(() => {
-      outliner.clear("example");
-    });
-    // IFCLoader
     const fragments = components.get(OBC.FragmentsManager);
+    console.log("Fragments: ",fragments)
     fragmentsRef.current = fragments;
     const fragmentIfcLoader = components.get(OBC.IfcLoader);
     fragmentIfcLoader.settings.wasm = {
-      path: "https://unpkg.com/web-ifc@0.0.57/",
-      absolute: true,
+        path: "https://unpkg.com/web-ifc@0.0.57/",
+        absolute: true,
     };
-    const excludedCats = [
-      WEBIFC.IFCTENDONANCHOR,
-      WEBIFC.IFCREINFORCINGBAR,
-      WEBIFC.IFCREINFORCINGELEMENT,
-    ];
-
 
     const stats = new Stats();
     stats.dom.style.zIndex = "unset";
@@ -93,7 +119,7 @@ const IfcViewer = () => {
       console.log("Loading file:", file);
       const data = await file.arrayBuffer();
       const buffer = new Uint8Array(data);
-      console.log("Buffer length:", buffer.length); // Log buffer length
+      console.log("Buffer length:", buffer.length);
       if (buffer.length === 0) {
         throw new Error("Empty buffer");
       }
@@ -101,6 +127,8 @@ const IfcViewer = () => {
       model.name = "example";
       worldRef.current.scene.three.add(model);
       console.log("Model loaded successfully:", model);
+      modelIDRef.current = model.modelID;
+      console.log("Model ID:", modelIDRef.current);
     } catch (error) {
       console.error("Error loading IFC model:", error);
     }
@@ -119,21 +147,19 @@ const IfcViewer = () => {
       }
 
       if (worldRef.current && fragmentIfcLoaderRef.current) {
-        //fragmentsRef.current.dispose(); // Dispose fragments before initializing a new ifc
         loadIfc(selectedFile, fragmentIfcLoaderRef.current);
       }
     }
   };
+
   const birdsView = () => {
     if (CameraControlRef.current) {
       const camera = CameraControlRef.current._camera;
-      const target = new THREE.Vector3(0, 0, 0); // Assuming you want to look at the origin
-      const altitude = 100; // Adjust this value to set the height of the bird's-eye view
+      const target = new THREE.Vector3(0, 0, 0);
+      const altitude = 100;
 
-      // Set the camera position to a high altitude
       camera.position.set(target.x, target.y + altitude, target.z);
 
-      // Point the camera downwards
       CameraControlRef.current.setLookAt(
         camera.position.x,
         camera.position.y,
@@ -141,15 +167,16 @@ const IfcViewer = () => {
         target.x,
         target.y,
         target.z,
-        true // Enable smooth transition
+        true 
       );
     }
   };
-  // Initialize the world when the component is first rendered
+
   if (!initializedRef.current && containerRef.current) {
     initializeWorld(containerRef.current);
-    initializedRef.current = true; // Mark as initialized
+    initializedRef.current = true;
   }
+
   return (
     <div className="ifc-viewer">
       <input
@@ -172,8 +199,14 @@ const IfcViewer = () => {
         BirdUp
       </button>
       <div className={`side-panel ${isPanelOpen ? 'open' : ''}`}>
-        <h2>Side Panel</h2>
-        <p>Content goes here...</p>
+          <h2>Properties</h2>
+          <ul>
+            {Object.keys(propertySets).map((key, index) => (
+              <li key={index}>
+                <strong>{key}:</strong> {propertySets[key]?.value}
+              </li>
+            ))}
+          </ul>
       </div>
       <div id="container" ref={containerRef} style={{ width: '100%', height: '100vh' }}></div>
     </div>
