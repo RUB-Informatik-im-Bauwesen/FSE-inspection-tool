@@ -87,6 +87,7 @@ const IfcViewer = () => {
               const fragmentProperties = await fragmentGroup.getProperties(expressID);
               console.log("Fragment properties:", fragmentProperties); 
               console.log("isArray:", Array.isArray(fragmentProperties))
+              fragmentProperties.className = fragmentProperties.constructor.name;
               setPropertySets(fragmentProperties); // Update state with the properties
           } else {
               console.error("FragmentsGroup instance not found.");
@@ -201,9 +202,9 @@ const IfcViewer = () => {
       <div className={`side-panel ${isPanelOpen ? 'open' : ''}`}>
           <h2>Properties</h2>
           <ul>
-            {Object.keys(propertySets).map((key, index) => (
+          {Object.keys(propertySets).map((key, index) => (
               <li key={index}>
-                <strong>{key}:</strong> {propertySets[key]?.value}
+                <strong>{key}:</strong> {propertySets[key]?.value || propertySets[key]}
               </li>
             ))}
           </ul>
