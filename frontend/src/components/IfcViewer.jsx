@@ -10,8 +10,8 @@ import './IfcViewer.css';
 
 const IfcViewer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isOBJPanelOpen, setIsOBJPanelOpen] = useState(false);
   const [propertySets, setPropertySets] = useState([]);
-  const [zoomOnClick, setZoomOnClick] = useState(false);
   const fileInputRef = useRef(null);
   const fileRef = useRef(null);
   const worldRef = useRef(null);
@@ -44,7 +44,7 @@ const IfcViewer = () => {
 
     const highlighter = components.get(OBCF.Highlighter);
     highlighter.setup({ world });
-    highlighter.zoomToSelection = zoomOnClick;
+    highlighter.zoomToSelection = false;
 
     const outliner = components.get(OBCF.Outliner);
     outliner.world = world;
@@ -193,13 +193,13 @@ const IfcViewer = () => {
       <button className="toggle-panel-button" onClick={() => setIsPanelOpen(!isPanelOpen)}>
         {isPanelOpen ? 'Close Panel' : 'Open Panel'}
       </button>
-      <button className="zoom-on-click-button" onClick={() => setZoomOnClick(!zoomOnClick)}>
-        {zoomOnClick ? 'Zoom on click: On' : 'Zoom on click: Off'}
+      <button className="toggle-panel-button" onClick={() => setIsOBJPanelOpen(!isOBJPanelOpen)}>
+        {isOBJPanelOpen ? 'Close Object explorer' : 'Open Object explorer'}
       </button>
       <button className="zoom-on-click-button" onClick={() => birdsView()}>
         BirdUp
       </button>
-      <div className={`side-panel ${isPanelOpen ? 'open' : ''}`}>
+      <div className={`side-panel right ${isPanelOpen ? 'open' : ''}`}>
           <h2>Properties</h2>
           <ul>
           {Object.keys(propertySets).map((key, index) => (
@@ -207,6 +207,14 @@ const IfcViewer = () => {
                 <strong>{key}:</strong> {propertySets[key]?.value || propertySets[key]}
               </li>
             ))}
+          </ul>
+      </div>
+      <div className={`side-panel left ${isOBJPanelOpen ? 'open' : ''}`}>
+          <h2>object explorer</h2>
+          <ul>
+          object...
+          object...
+          object...
           </ul>
       </div>
       <div id="container" ref={containerRef} style={{ width: '100%', height: '100vh' }}></div>
