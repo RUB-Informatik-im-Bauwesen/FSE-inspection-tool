@@ -13,19 +13,35 @@
 
 .side-panel {
     position: fixed;
-    right: -25%;
+    /*left: -25%;*/
+    /*right: -25%;*/
     /* Hidden by default */
     width: 25%;
     height: 100%;
     background-color: #ffffff;
-    transition: right 0.1s ease;
+    /*transition: right 0.1s ease;*/
     z-index: 999;
     padding: 20px;
     outline: 2px solid #000000;
     /* Add outline */
 }
 
-.side-panel.open {
+.side-panel.right {
+    right: -25%;
+    transition: right 0.1s ease;
+    /* Show the panel */
+}
+.side-panel.right.open {
     right: 0;
+    /* Show the panel */
+}
+.side-panel.left {
+    left: -25%;
+    transition: left 0.1s ease;
+    overflow-y: scroll;
+    /* Show the panel */
+}
+.side-panel.left.open {
+    left: 0;
     /* Show the panel */
 }

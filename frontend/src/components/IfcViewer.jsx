@@ -7,16 +7,20 @@ import * as OBCF from "@thatopen/components-front";
 import * as OBF from "@thatopen/fragments";
 import Stats from "stats.js";
 import './IfcViewer.css';
+import { Collapse } from 'react-collapse';
 
 const IfcViewer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isOBJPanelOpen, setIsOBJPanelOpen] = useState(false);
   const [propertySets, setPropertySets] = useState([]);
+  const [OBJpropertyDict, setOBJPropertyDict] = useState({});
+  const [expandedKeys, setExpandedKeys] = useState({}); // Zustand für erweiterte Schlüssel
   const fileInputRef = useRef(null);
   const fileRef = useRef(null);
   const worldRef = useRef(null);
   const fragmentIfcLoaderRef = useRef(null);
   const containerRef = useRef(null);
+  const highlighterRef = useRef(null);
   const fragmentsRef = useRef(null);
   const initializedRef = useRef(false);
   const CameraControlRef = useRef(null);
@@ -45,6 +49,7 @@ const IfcViewer = () => {
     const highlighter = components.get(OBCF.Highlighter);
     highlighter.setup({ world });
     highlighter.zoomToSelection = false;
+    highlighterRef.current = highlighter;
 
     const outliner = components.get(OBCF.Outliner);
     outliner.world = world;
@@ -59,19 +64,14 @@ const IfcViewer = () => {
         })
     );
 
-    highlighter.events.select.onHighlight.add(async (data) => {
+    highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS
+      console.log("highlight events:", highlighter.events);
       console.log("Highlighted data:", data);
-      const ids = [];
-      for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-              const idSet = data[key]; 
-              if (idSet instanceof Set) {
-                  ids.push(...idSet);
-              }
-          }
-      }
+      
+      const ids = getKeys(data);
       if (ids.length > 0) {
-          const expressID = ids[0];
+          console.log("IDs found in the highlighted data:", ids);
+          const expressID = ids[0]; // get expressID from the ids
           console.log("Clicked object ID:", expressID);
           const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroup instance
           const frag_grp_ids = []
@@ -89,13 +89,25 @@ const IfcViewer = () => {
               console.log("isArray:", Array.isArray(fragmentProperties))
               fragmentProperties.className = fragmentProperties.constructor.name;
               setPropertySets(fragmentProperties); // Update state with the properties
+              const type = fragmentProperties.type
+              console.log("Type: ",type)
+              fragmentGroup.getAllPropertiesOfType(type).then((properties) => {
+                if (properties) {
+                  for (const id in properties) {
+                    const property = properties[id];
+                    //console.log(`ID: ${id}, Name: ${property.name}, Type: ${property.type}`);
+                  }
+                } else {
+                  console.log(`No properties of type ${type} found.`);
+                }
+              });
           } else {
               console.error("FragmentsGroup instance not found.");
           }
       } else {
           console.error("No IDs found in the highlighted data.");
       }
-  });
+    });
 
     const fragments = components.get(OBC.FragmentsManager);
     console.log("Fragments: ",fragments)
@@ -114,7 +126,76 @@ const IfcViewer = () => {
     worldRef.current = world;
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
   };
-
+  const getKeys = (data) => {
+    const ids = [];
+    for (const key in data) { // get all ids from a dict like object (fragmentgroup)
+      if (data.hasOwnProperty(key)) {
+          const idSet = data[key]; 
+          if (idSet instanceof Set) {
+              ids.push(...idSet);
+          }
+      }
+    }
+    return ids;
+  };
+  const getObjectPropertyDict = async () => {
+    const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
+    const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
+  
+    const promises = fragmentGroups.map(async (group) => {
+      const propertyDictionary = {}; // key correspond to the property className, value is name, id, type
+      const propTypes_unique = group.getAllPropertiesTypes();
+  
+      const typePromises = propTypes_unique.map(async (type) => {
+        const properties = await group.getAllPropertiesOfType(type);
+        if (properties) {
+          for (const id in properties) {
+            const property = properties[id];
+            if (!hasInheritedFromIfcBuildingElement(property)) {
+              continue; // Skip the current iteration if the property has never inherited from IfcBuildingElement
+            }
+            if (!property.Name) {
+              continue; // Skip the current iteration if the property does not have a Name
+            }
+            const className = Object.getPrototypeOf(property).constructor.name;
+            if (!propertyDictionary[className]) {
+              propertyDictionary[className] = {};
+            }
+            propertyDictionary[className][id] = {
+              name: property.Name.value,
+              id: id,
+              type: property.type,
+            };
+          }
+        } else {
+          console.log(`No properties of type ${type} found.`);
+        }
+      });
+  
+      await Promise.all(typePromises);
+      groupsDictionary[group.uuid] = propertyDictionary;
+    });
+  
+    await Promise.all(promises);
+    setOBJPropertyDict(groupsDictionary);
+    console.log("OBJpropertyDict: ", groupsDictionary);
+    console.log("groupsDictionary: ", groupsDictionary);
+  };
+  const highlightGroup = (group) =>{ // highlight a group of fragments
+    const id = group.getAllPropertiesIDs() // get all IDs of the fragments in the group
+    const fragMap = group.getFragmentMap(id) 
+    highlighterRef.current.highlightByID("select",fragMap) // highlight the fragments of the group
+  };
+  const hasInheritedFromIfcBuildingElement = (obj) => {
+    let proto = Object.getPrototypeOf(obj);
+    while (proto) {
+      if (proto.constructor.name === 'IfcBuildingElement') {
+        return true;
+      }
+      proto = Object.getPrototypeOf(proto);
+    }
+    return false;
+  };
   const loadIfc = async (file, loader) => {
     try {
       console.log("Loading file:", file);
@@ -130,6 +211,7 @@ const IfcViewer = () => {
       console.log("Model loaded successfully:", model);
       modelIDRef.current = model.modelID;
       console.log("Model ID:", modelIDRef.current);
+      getObjectPropertyDict();
     } catch (error) {
       console.error("Error loading IFC model:", error);
     }
@@ -151,6 +233,47 @@ const IfcViewer = () => {
         loadIfc(selectedFile, fragmentIfcLoaderRef.current);
       }
     }
+  };
+
+  const toggleExpand = (key) => {
+    setExpandedKeys((prevExpandedKeys) => ({
+      ...prevExpandedKeys,
+      [key]: !prevExpandedKeys[key],
+    }));
+  };
+
+  const renderOBJPropertyDict = (dict) => {
+    return (
+      <ul>
+        {Object.keys(dict).map((groupUUID) => (
+          <li key={groupUUID}>
+            <strong onClick={() => toggleExpand(groupUUID)} style={{ cursor: 'pointer' }}>
+              {groupUUID}
+            </strong>
+            <Collapse isOpened={expandedKeys[groupUUID]}>
+              <ul>
+                {Object.keys(dict[groupUUID]).map((className) => (
+                  <li key={className}>
+                    <strong onClick={() => toggleExpand(`${groupUUID}-${className}`)} style={{ cursor: 'pointer' }}>
+                      {className}
+                    </strong>
+                    <Collapse isOpened={expandedKeys[`${groupUUID}-${className}`]}>
+                      <ul>
+                        {Object.keys(dict[groupUUID][className]).map((id) => (
+                          <li key={id}>
+                            {dict[groupUUID][className][id].name}
+                          </li>
+                        ))}
+                      </ul>
+                    </Collapse>
+                  </li>
+                ))}
+              </ul>
+            </Collapse>
+          </li>
+        ))}
+      </ul>
+    );
   };
 
   const birdsView = () => {
@@ -196,6 +319,9 @@ const IfcViewer = () => {
       <button className="toggle-panel-button" onClick={() => setIsOBJPanelOpen(!isOBJPanelOpen)}>
         {isOBJPanelOpen ? 'Close Object explorer' : 'Open Object explorer'}
       </button>
+      <button className="toggle-panel-button" onClick={() => getObjectPropertyDict()}>
+        {'test'}
+      </button>
       <button className="zoom-on-click-button" onClick={() => birdsView()}>
         BirdUp
       </button>
@@ -210,12 +336,8 @@ const IfcViewer = () => {
           </ul>
       </div>
       <div className={`side-panel left ${isOBJPanelOpen ? 'open' : ''}`}>
-          <h2>object explorer</h2>
-          <ul>
-          object...
-          object...
-          object...
-          </ul>
+        <h2>Object Explorer</h2>
+        {renderOBJPropertyDict(OBJpropertyDict)}
       </div>
       <div id="container" ref={containerRef} style={{ width: '100%', height: '100vh' }}></div>
     </div>
