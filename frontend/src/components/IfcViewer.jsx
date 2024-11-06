@@ -63,26 +63,40 @@ const IfcViewer = () => {
             opacity: 0.1,
         })
     );
-
-    highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS
-      console.log("highlight events:", highlighter.events);
-      console.log("Highlighted data:", data);
-      
+    const getKeys = (data) => {
+      const ids = [];
+      for (const key in data) { // get all ids from a dict like object (fragmentgroup)
+        if (data.hasOwnProperty(key)) {
+            const idSet = data[key]; 
+            if (idSet instanceof Set) {
+                ids.push(...idSet);
+            }
+        }
+      }
+      return ids;
+    };
+    highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS //TODO: GET COORDINATES OF FRAGMENTS
+      let modelID = null;
+      let fragmentsSet = null; 
+      for (const fragmentID in data) {
+        console.log("Fragment ID:", fragmentID);
+        const fragment = fragmentsRef.current.list.get(fragmentID);
+        if (!fragment) {
+            console.error("Fragment not found.");
+            continue;
+        }
+        modelID = fragment.group?.uuid;
+        fragmentsSet = data[fragmentID];
+        console.log("Model ID:", modelID);
+      }
+      console.log("data:", data);
       const ids = getKeys(data);
-      if (ids.length > 0) {
-          console.log("IDs found in the highlighted data:", ids);
-          const expressID = ids[0]; // get expressID from the ids
-          console.log("Clicked object ID:", expressID);
-          const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroup instance
-          const frag_grp_ids = []
-          for (const key of fragmentGroups.keys()) { // get all fragmentsgroup keys and push them to frag_ids
-            frag_grp_ids.push(key);
-          }
-          console.log("frag_ids: ",frag_grp_ids)
-          console.log("fragmentGroups: ",fragmentGroups)
-          const fragmentGroup = fragmentGroups.get(frag_grp_ids[0]); // Get the first fragmentGroup
-          console.log("fragmentGroup: ",fragmentGroup)
-          console.log("fragmentGroup class: ",fragmentGroups.constructor.name)
+      if (fragmentsSet) {
+          const [expressID] = fragmentsSet.values(); // get expressID from the ids
+          console.log("fragmentID:", fragmentsSet);
+          console.log("Express ID:", expressID);
+          const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+          const fragmentGroup = fragmentGroups.get(modelID); // Get the corresponding fragmentGroup that has been clicked
           if (fragmentGroup) {
               const fragmentProperties = await fragmentGroup.getProperties(expressID);
               console.log("Fragment properties:", fragmentProperties); 
@@ -126,19 +140,8 @@ const IfcViewer = () => {
     worldRef.current = world;
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
   };
-  const getKeys = (data) => {
-    const ids = [];
-    for (const key in data) { // get all ids from a dict like object (fragmentgroup)
-      if (data.hasOwnProperty(key)) {
-          const idSet = data[key]; 
-          if (idSet instanceof Set) {
-              ids.push(...idSet);
-          }
-      }
-    }
-    return ids;
-  };
-  const getObjectPropertyDict = async () => {
+
+  const getObjectPropertyDict = async () => { // TODO: HIGHLIGHT CLICKED GROUP
     const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
   
