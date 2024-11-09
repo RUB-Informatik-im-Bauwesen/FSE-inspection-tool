@@ -163,11 +163,13 @@ const IfcViewer = () => {
   
       const typePromises = propTypes_unique.map(async (type) => {
         const properties = await group.getAllPropertiesOfType(type);
+        console.log("PROPERTIES: ",properties)
         console.log("GROUP: ",group)
         if (properties) {
           for (const id in properties) {
             const property = properties[id];
-            if (!hasInheritedFromIfcBuildingElement(property)) {
+            console.log("PROPERTY: ",property)
+            if (!hasInheritedFromPhysical(property)) {
               continue; // Skip the current iteration if the property has never inherited from IfcBuildingElement
             }
             if (!property.Name) {
@@ -203,10 +205,10 @@ const IfcViewer = () => {
     const fragMap = group.getFragmentMap(id) 
     highlighterRef.current.highlightByID("select",fragMap) // highlight the fragments of the group
   };
-  const hasInheritedFromIfcBuildingElement = (obj) => {
+  const hasInheritedFromPhysical = (obj) => {
     let proto = Object.getPrototypeOf(obj);
     while (proto) {
-      if (proto.constructor.name === 'IfcBuildingElement') {
+      if (proto.constructor.name === 'IfcBuildingElement' || proto.constructor.name === 'IfcPhysicalComplexQuantity') {
         return true;
       }
       proto = Object.getPrototypeOf(proto);
