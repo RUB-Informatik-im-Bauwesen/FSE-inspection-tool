@@ -79,7 +79,6 @@ const IfcViewer = () => {
       let modelID = null;
       let fragmentsSet = null; 
       console.log("Data:", data);
-      let position = new THREE.Vector3();
 
       for (const fragmentID in data) {
         console.log("Fragment ID:", fragmentID);
@@ -88,19 +87,9 @@ const IfcViewer = () => {
             console.error("Fragment not found.");
             continue;
         }
-        fragment.mesh.getWorldPosition(position);
-        console.log(`World Position of fragment ${fragmentID}:`, position);
-        console.log("AMONGUSFRAGMENT:", fragment);
-        console.log("FRAGMENTWORLDPOSITION:", fragment.mesh.getWorldPosition(position));
-        position.applyMatrix4(fragmentsRef.current.baseCoordinationMatrix);
         modelID = fragment.group?.uuid;
         fragmentsSet = data[fragmentID];
-        console.log("Model ID:", modelID);
-        console.log("fragments baseCoordinationMatrix:", fragmentsRef.current.baseCoordinationMatrix);
-        console.log("Position:", position.clone());
-        
       }
-      console.log("Final Position:", position.clone());
       console.log("data:", data);
       const ids = getKeys(data);
       if (fragmentsSet) {
@@ -236,7 +225,37 @@ const IfcViewer = () => {
       console.error("Error loading IFC model:", error);
     }
   };
-
+  const renderPropertySets = (propertySets) => {
+    const renderValue = (value) => {
+      if (typeof value === 'object' && value !== null) {
+        if ('value' in value) {
+          return value.value;
+        } else {
+          return (
+            <ul>
+              {Object.entries(value).map(([key, val], index) => (
+                <li key={index}>
+                  <strong>{key}:</strong> {renderValue(val)}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+      } else {
+        return value;
+      }
+    };
+  
+    return (
+      <ul>
+        {Object.entries(propertySets).map(([key, value], index) => (
+          <li key={index}>
+            <strong>{key}:</strong> {renderValue(value)}
+          </li>
+        ))}
+      </ul>
+    );
+  };
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -346,14 +365,8 @@ const IfcViewer = () => {
         BirdUp
       </button>
       <div className={`side-panel right ${isPanelOpen ? 'open' : ''}`}>
-          <h2>Properties</h2>
-          <ul>
-          {Object.keys(propertySets).map((key, index) => (
-              <li key={index}>
-                <strong>{key}:</strong> {propertySets[key]?.value || propertySets[key]}
-              </li>
-            ))}
-          </ul>
+        <h2>Properties</h2>
+        {renderPropertySets(propertySets)}
       </div>
       <div className={`side-panel left ${isOBJPanelOpen ? 'open' : ''}`}>
         <h2>Object Explorer</h2>
