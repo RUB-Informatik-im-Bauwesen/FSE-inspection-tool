@@ -78,6 +78,9 @@ const IfcViewer = () => {
     highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS //TODO: GET COORDINATES OF FRAGMENTS
       let modelID = null;
       let fragmentsSet = null; 
+      console.log("Data:", data);
+      let position = new THREE.Vector3();
+
       for (const fragmentID in data) {
         console.log("Fragment ID:", fragmentID);
         const fragment = fragmentsRef.current.list.get(fragmentID);
@@ -85,10 +88,19 @@ const IfcViewer = () => {
             console.error("Fragment not found.");
             continue;
         }
+        fragment.mesh.getWorldPosition(position);
+        console.log(`World Position of fragment ${fragmentID}:`, position);
+        console.log("AMONGUSFRAGMENT:", fragment);
+        console.log("FRAGMENTWORLDPOSITION:", fragment.mesh.getWorldPosition(position));
+        position.applyMatrix4(fragmentsRef.current.baseCoordinationMatrix);
         modelID = fragment.group?.uuid;
         fragmentsSet = data[fragmentID];
         console.log("Model ID:", modelID);
+        console.log("fragments baseCoordinationMatrix:", fragmentsRef.current.baseCoordinationMatrix);
+        console.log("Position:", position.clone());
+        
       }
+      console.log("Final Position:", position.clone());
       console.log("data:", data);
       const ids = getKeys(data);
       if (fragmentsSet) {
@@ -144,13 +156,14 @@ const IfcViewer = () => {
   const getObjectPropertyDict = async () => { // TODO: HIGHLIGHT CLICKED GROUP
     const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
-  
+    console.log("fragmentsmanager: ",fragmentsRef.current)
     const promises = fragmentGroups.map(async (group) => {
       const propertyDictionary = {}; // key correspond to the property className, value is name, id, type
       const propTypes_unique = group.getAllPropertiesTypes();
   
       const typePromises = propTypes_unique.map(async (type) => {
         const properties = await group.getAllPropertiesOfType(type);
+        console.log("GROUP: ",group)
         if (properties) {
           for (const id in properties) {
             const property = properties[id];
@@ -176,7 +189,8 @@ const IfcViewer = () => {
       });
   
       await Promise.all(typePromises);
-      groupsDictionary[group.uuid] = propertyDictionary;
+      console.log("GROUP: ", group);
+      groupsDictionary[group.name] = propertyDictionary;
     });
   
     await Promise.all(promises);
@@ -209,11 +223,12 @@ const IfcViewer = () => {
         throw new Error("Empty buffer");
       }
       const model = await loader.load(buffer);
-      model.name = "example";
+      model.name = file.name;
       worldRef.current.scene.three.add(model);
       console.log("Model loaded successfully:", model);
       modelIDRef.current = model.modelID;
       console.log("Model ID:", modelIDRef.current);
+      console.log("FILENAME: ",file.name);
       getObjectPropertyDict();
     } catch (error) {
       console.error("Error loading IFC model:", error);
