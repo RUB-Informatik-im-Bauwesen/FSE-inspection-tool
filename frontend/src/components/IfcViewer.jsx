@@ -160,11 +160,67 @@ const IfcViewer = () => {
   
     return properties;
   };
+  const resolvePropertyRelationships = async() => {
+    const fragmentGroups = Array.from(fragmentsRef.current.groups.values());
+    const promises = fragmentGroups.map(async (group) => {
+      if (group.hasProcessedProperties) {
+        return;
+      }
+
+      const localProperties = group.getLocalProperties();
+    
+      // Filter properties to include only IfcRelDefinesByProperties
+      const ifcRelDefinesByProperties = Object.values(localProperties).filter(
+        (property) => property.type === 4186316022
+      );
+      for (const property of ifcRelDefinesByProperties) {
+        const relatingPropertyDefinitionID = property.RelatingPropertyDefinition.value;
+        const relatingPropertyDefinition = await group.getProperties(relatingPropertyDefinitionID);
+        const relatingPropertyDefinitionName = relatingPropertyDefinition.Name.value;
+
+        for (const relatedObject of property.RelatedObjects) {
+          const relatedObjectID = relatedObject.value;
+          const relatedObjectProperties = await group.getProperties(relatedObjectID);
+    
+          // Append relatingPropertyDefinition to relatedObjectProperties
+          relatedObjectProperties[relatingPropertyDefinitionName] = relatingPropertyDefinition;
+        }
+      }
+      // Set the flag to indicate that the group has been processed
+      group.hasProcessedProperties = true;
+    });
+    await Promise.all(promises);
+  };
+
   const getTest = async() => {
     console.log("Fragmentsmanager: ", Array.from(fragmentsRef.current.groups.values()));
     const temp = Array.from(fragmentsRef.current.groups.values());
     const firstGroup = temp[0]; // Access the first element
     console.log("First Group: ", firstGroup);
+    console.log("First Group local properties: ", firstGroup.getLocalProperties());
+    const localProperties = firstGroup.getLocalProperties();
+  
+    // Filter properties to include only IfcRelDefinesByProperties
+    const ifcRelDefinesByProperties = Object.values(localProperties).filter(
+      (property) => property.type === 4186316022
+    );
+    console.log("IfcRelDefinesByProperties: ", ifcRelDefinesByProperties);
+    for (const property of ifcRelDefinesByProperties) {
+      const relatingPropertyDefinitionID = property.RelatingPropertyDefinition.value;
+      const relatingPropertyDefinition = await firstGroup.getProperties(relatingPropertyDefinitionID);
+      console.log(`RelatingPropertyDefinition for ${relatingPropertyDefinitionID}: `, relatingPropertyDefinition);
+      const relatingPropertyDefinitionName = relatingPropertyDefinition.Name.value;
+
+      for (const relatedObject of property.RelatedObjects) {
+        const relatedObjectID = relatedObject.value;
+        const relatedObjectProperties = await firstGroup.getProperties(relatedObjectID);
+        console.log(`RelatedObjectProperties for ${relatedObjectID}: `, relatedObjectProperties);
+  
+        // Append relatingPropertyDefinition to relatedObjectProperties
+        relatedObjectProperties[relatingPropertyDefinitionName] = relatingPropertyDefinition;
+        console.log(`Updated RelatedObjectProperties for ${relatedObjectID}: `, relatedObjectProperties);
+      }
+    }
     const expressID = 968;
     console.log("First Group object: ", firstGroup.getProperties(expressID));
     console.log("First Group expressID 71: ", firstGroup.getProperties(71));
@@ -194,7 +250,6 @@ const IfcViewer = () => {
         if (properties) {
           for (const id in properties) {
             const property = properties[id];
-            console.log("PROPERTY: ",property)
             if (!hasInheritedFromPhysical(property)) {
               continue; // Skip the current iteration if the property has never inherited from IfcBuildingElement
             }
@@ -257,7 +312,8 @@ const IfcViewer = () => {
       modelIDRef.current = model.modelID;
       console.log("Model ID:", modelIDRef.current);
       console.log("FILENAME: ",file.name);
-      getObjectPropertyDict();
+      getObjectPropertyDict(); // fill the object explorer panel
+      resolvePropertyRelationships(); // resolve the property relationships for property display
     } catch (error) {
       console.error("Error loading IFC model:", error);
     }
