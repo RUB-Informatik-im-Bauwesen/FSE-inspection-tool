@@ -16,18 +16,20 @@
     /*left: -25%;*/
     /*right: -25%;*/
     /* Hidden by default */
-    width: 25%;
+    width: 30%;
     height: 100%;
     background-color: #ffffff;
     /*transition: right 0.1s ease;*/
     z-index: 999;
     padding: 20px;
+    padding-bottom: 200px; /* Add extra padding at the bottom */
     outline: 2px solid #000000;
+    overflow-y: auto; /* Enable vertical scrolling */
     /* Add outline */
 }
 
 .side-panel.right {
-    right: -25%;
+    right: -30%;
     transition: right 0.1s ease;
     /* Show the panel */
 }
@@ -36,9 +38,8 @@
     /* Show the panel */
 }
 .side-panel.left {
-    left: -25%;
+    left: -30%;
     transition: left 0.1s ease;
-    overflow-y: scroll;
     /* Show the panel */
 }
 .side-panel.left.open {

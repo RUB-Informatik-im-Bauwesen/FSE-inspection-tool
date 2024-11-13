@@ -102,8 +102,9 @@ const IfcViewer = () => {
               const fragmentProperties = await fragmentGroup.getProperties(expressID);
               console.log("Fragment properties:", fragmentProperties); 
               console.log("isArray:", Array.isArray(fragmentProperties))
-              fragmentProperties.className = fragmentProperties.constructor.name;
-              setPropertySets(fragmentProperties); // Update state with the properties
+              const updatedProperties = await replaceType5Properties(fragmentGroup, fragmentProperties);
+              updatedProperties.className = updatedProperties.constructor.name;
+              setPropertySets(updatedProperties); // Update state with the properties
               const type = fragmentProperties.type
               console.log("Type: ",type)
               fragmentGroup.getAllPropertiesOfType(type).then((properties) => {
@@ -141,7 +142,43 @@ const IfcViewer = () => {
     worldRef.current = world;
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
   };
-
+  const replaceType5Properties = async (fragmentGroup, properties) => {
+    let hasType5 = true;
+    console.log("we in here")
+    while (hasType5) {
+      hasType5 = false;
+      for (const key in properties) {
+        const property = properties[key];
+        if (property && property.type === 5) {
+          const expressID = property.value;
+          const newProperties = await fragmentGroup.getProperties(expressID);
+          properties[key] = await replaceType5Properties(fragmentGroup, newProperties); // Recursively replace type 5 properties
+          hasType5 = true;
+        }
+      }
+    }
+  
+    return properties;
+  };
+  const getTest = async() => {
+    console.log("Fragmentsmanager: ", Array.from(fragmentsRef.current.groups.values()));
+    const temp = Array.from(fragmentsRef.current.groups.values());
+    const firstGroup = temp[0]; // Access the first element
+    console.log("First Group: ", firstGroup);
+    const expressID = 968;
+    console.log("First Group object: ", firstGroup.getProperties(expressID));
+    console.log("First Group expressID 71: ", firstGroup.getProperties(71));
+    const id = firstGroup.getAllPropertiesIDs() // get all IDs of the fragments in the group
+    const fragMap = firstGroup.getFragmentMap(id) 
+    console.log("IDs: ", id);
+    console.log("First Group prop Fragment map: ", fragMap);
+    const vert = firstGroup.getItemVertices(expressID) 
+    console.log("First Group prop Vertices: ", vert);
+    const guids =fragmentsRef.current.fragmentIdMapToGuids(fragMap)
+    console.log("GUIDS: ", guids)
+    const fragMap2 =fragmentsRef.current.guidToFragmentIdMap(guids)
+    console.log("NEW FRAGMAP: ", fragMap2)
+  };
   const getObjectPropertyDict = async () => { // TODO: HIGHLIGHT CLICKED GROUP
     const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
@@ -358,7 +395,7 @@ const IfcViewer = () => {
       <button className="toggle-panel-button" onClick={() => setIsOBJPanelOpen(!isOBJPanelOpen)}>
         {isOBJPanelOpen ? 'Close Object explorer' : 'Open Object explorer'}
       </button>
-      <button className="toggle-panel-button" onClick={() => getObjectPropertyDict()}>
+      <button className="toggle-panel-button" onClick={() => getTest()}>
         {'test'}
       </button>
       <button className="zoom-on-click-button" onClick={() => birdsView()}>
