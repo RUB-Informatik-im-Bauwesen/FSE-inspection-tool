@@ -90,7 +90,7 @@ const IfcViewer = () => {
         modelID = fragment.group?.uuid;
         fragmentsSet = data[fragmentID];
       }
-      console.log("data:", data);
+      console.log("FRAGMENTSREF:", fragmentsRef.current);
       const ids = getKeys(data);
       if (fragmentsSet) {
           const [expressID] = fragmentsSet.values(); // get expressID from the ids
@@ -104,19 +104,8 @@ const IfcViewer = () => {
               console.log("isArray:", Array.isArray(fragmentProperties))
               const updatedProperties = await replaceType5Properties(fragmentGroup, fragmentProperties);
               updatedProperties.className = updatedProperties.constructor.name;
+              console.log("Fragment properties AFTER:", await fragmentGroup.getProperties(expressID)); 
               setPropertySets(updatedProperties); // Update state with the properties
-              const type = fragmentProperties.type
-              console.log("Type: ",type)
-              fragmentGroup.getAllPropertiesOfType(type).then((properties) => {
-                if (properties) {
-                  for (const id in properties) {
-                    const property = properties[id];
-                    //console.log(`ID: ${id}, Name: ${property.name}, Type: ${property.type}`);
-                  }
-                } else {
-                  console.log(`No properties of type ${type} found.`);
-                }
-              });
           } else {
               console.error("FragmentsGroup instance not found.");
           }
@@ -143,22 +132,28 @@ const IfcViewer = () => {
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
   };
   const replaceType5Properties = async (fragmentGroup, properties) => {
-    let hasType5 = true;
-    console.log("we in here")
-    while (hasType5) {
-      hasType5 = false;
-      for (const key in properties) {
-        const property = properties[key];
-        if (property && property.type === 5) {
-          const expressID = property.value;
-          const newProperties = await fragmentGroup.getProperties(expressID);
-          properties[key] = await replaceType5Properties(fragmentGroup, newProperties); // Recursively replace type 5 properties
-          hasType5 = true;
+    const traverseAndReplace = async (props) => {
+      let hasType5 = false;
+  
+      for (const key in props) {
+        const property = props[key];
+        if (property && typeof property === 'object') {
+          if (property.type === 5) {
+            const expressID = property.value;
+            const newProperties = await fragmentGroup.getProperties(expressID);
+            props[key] = await traverseAndReplace(newProperties); // Recursively replace type 5 properties
+            hasType5 = true;
+          } else {
+            // Recursively check nested properties
+            props[key] = await traverseAndReplace(property);
+          }
         }
       }
-    }
   
-    return properties;
+      return props;
+    };
+  
+    return await traverseAndReplace(properties);
   };
   const resolvePropertyRelationships = async() => {
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values());
