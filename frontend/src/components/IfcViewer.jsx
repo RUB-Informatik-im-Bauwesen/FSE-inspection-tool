@@ -15,6 +15,7 @@ const IfcViewer = () => {
   const [propertySets, setPropertySets] = useState([]);
   const [OBJpropertyDict, setOBJPropertyDict] = useState({});
   const [expandedKeys, setExpandedKeys] = useState({}); // Zustand für erweiterte Schlüssel
+  const [checkedState, setCheckedState] = useState({});
   const fileInputRef = useRef(null);
   const fileRef = useRef(null);
   const worldRef = useRef(null);
@@ -25,6 +26,7 @@ const IfcViewer = () => {
   const initializedRef = useRef(false);
   const CameraControlRef = useRef(null);
   const modelIDRef = useRef(null);
+  const hiderRef = useRef(null);
 
   const initializeWorld = (container) => {
     const components = new OBC.Components();
@@ -54,6 +56,9 @@ const IfcViewer = () => {
     const outliner = components.get(OBCF.Outliner);
     outliner.world = world;
     outliner.enabled = true;
+
+    const hider = components.get(OBC.Hider);
+    hiderRef.current = hider;
 
     outliner.create(
         "example",
@@ -90,6 +95,7 @@ const IfcViewer = () => {
         modelID = fragment.group?.uuid;
         fragmentsSet = data[fragmentID];
       }
+      console.log("MODELID:", modelID);
       console.log("FRAGMENTSREF:", fragmentsRef.current);
       const ids = getKeys(data);
       if (fragmentsSet) {
@@ -188,60 +194,24 @@ const IfcViewer = () => {
   };
 
   const getTest = async() => {
-    console.log("Fragmentsmanager: ", Array.from(fragmentsRef.current.groups.values()));
-    const temp = Array.from(fragmentsRef.current.groups.values());
-    const firstGroup = temp[0]; // Access the first element
-    console.log("First Group: ", firstGroup);
-    console.log("First Group local properties: ", firstGroup.getLocalProperties());
-    const localProperties = firstGroup.getLocalProperties();
-  
-    // Filter properties to include only IfcRelDefinesByProperties
-    const ifcRelDefinesByProperties = Object.values(localProperties).filter(
-      (property) => property.type === 4186316022
-    );
-    console.log("IfcRelDefinesByProperties: ", ifcRelDefinesByProperties);
-    for (const property of ifcRelDefinesByProperties) {
-      const relatingPropertyDefinitionID = property.RelatingPropertyDefinition.value;
-      const relatingPropertyDefinition = await firstGroup.getProperties(relatingPropertyDefinitionID);
-      console.log(`RelatingPropertyDefinition for ${relatingPropertyDefinitionID}: `, relatingPropertyDefinition);
-      const relatingPropertyDefinitionName = relatingPropertyDefinition.Name.value;
+    console.log("OBJpropertyDict: ", OBJpropertyDict);
+    console.log("FragmentRef: ", fragmentsRef.current)
 
-      for (const relatedObject of property.RelatedObjects) {
-        const relatedObjectID = relatedObject.value;
-        const relatedObjectProperties = await firstGroup.getProperties(relatedObjectID);
-        console.log(`RelatedObjectProperties for ${relatedObjectID}: `, relatedObjectProperties);
-  
-        // Append relatingPropertyDefinition to relatedObjectProperties
-        relatedObjectProperties[relatingPropertyDefinitionName] = relatingPropertyDefinition;
-        console.log(`Updated RelatedObjectProperties for ${relatedObjectID}: `, relatedObjectProperties);
-      }
-    }
-    const expressID = 968;
-    console.log("First Group object: ", firstGroup.getProperties(expressID));
-    console.log("First Group expressID 71: ", firstGroup.getProperties(71));
-    const id = firstGroup.getAllPropertiesIDs() // get all IDs of the fragments in the group
-    const fragMap = firstGroup.getFragmentMap(id) 
-    console.log("IDs: ", id);
-    console.log("First Group prop Fragment map: ", fragMap);
-    const vert = firstGroup.getItemVertices(expressID) 
-    console.log("First Group prop Vertices: ", vert);
-    const guids =fragmentsRef.current.fragmentIdMapToGuids(fragMap)
-    console.log("GUIDS: ", guids)
-    const fragMap2 =fragmentsRef.current.guidToFragmentIdMap(guids)
-    console.log("NEW FRAGMAP: ", fragMap2)
   };
   const getObjectPropertyDict = async () => { // TODO: HIGHLIGHT CLICKED GROUP
     const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
     console.log("fragmentsmanager: ",fragmentsRef.current)
+    console.log("FRAGMENTSGORUPS: ",fragmentsRef.current.groups.values())
     const promises = fragmentGroups.map(async (group) => {
       const propertyDictionary = {}; // key correspond to the property className, value is name, id, type
+      propertyDictionary["uuid"] = {id : group.uuid};
       const propTypes_unique = group.getAllPropertiesTypes();
   
       const typePromises = propTypes_unique.map(async (type) => {
         const properties = await group.getAllPropertiesOfType(type);
-        console.log("PROPERTIES: ",properties)
-        console.log("GROUP: ",group)
+        //console.log("PROPERTIES: ",properties)
+        //console.log("GROUP: ",group)
         if (properties) {
           for (const id in properties) {
             const property = properties[id];
@@ -259,6 +229,7 @@ const IfcViewer = () => {
               name: property.Name.value,
               id: id,
               type: property.type,
+              group_id: group.uuid, //might be inefficient
             };
           }
         } else {
@@ -276,10 +247,23 @@ const IfcViewer = () => {
     console.log("OBJpropertyDict: ", groupsDictionary);
     console.log("groupsDictionary: ", groupsDictionary);
   };
-  const highlightGroup = (group) =>{ // highlight a group of fragments
-    const id = group.getAllPropertiesIDs() // get all IDs of the fragments in the group
-    const fragMap = group.getFragmentMap(id) 
+  const highlightGroup = (group, highlight_id) =>{ // highlight a group of fragments
+    if (!highlight_id) {
+      highlight_id = group.getAllPropertiesIDs() // get all IDs of the fragments in the group
+    }
+    console.log("Highlight ID: ",highlight_id)
+    const fragMap = group.getFragmentMap(highlight_id) 
+    console.log("fragMap: ",fragMap)
     highlighterRef.current.highlightByID("select",fragMap) // highlight the fragments of the group
+  };
+  const hideGroup = (group, hide_id, visibility) =>{ // hide a group of fragments
+    console.log("Hide ID: ",hide_id)
+    if (!hide_id) {
+      hide_id = group.getAllPropertiesIDs() // get all IDs of the fragments in the group
+    }
+    const fragMap = group.getFragmentMap(hide_id) 
+    console.log("fragMap: ",fragMap)
+    hiderRef.current.set(visibility,fragMap) // hide the fragments
   };
   const hasInheritedFromPhysical = (obj) => {
     let proto = Object.getPrototypeOf(obj);
@@ -370,25 +354,155 @@ const IfcViewer = () => {
   };
 
   const renderOBJPropertyDict = (dict) => {
+    // Function to recursively remove "uuid" key from nested dictionaries
+    const removeUUIDKey = (obj) => {
+      if (obj && typeof obj === 'object') {
+        delete obj["uuid"];
+        Object.keys(obj).forEach((key) => {
+          removeUUIDKey(obj[key]);
+        });
+      }
+    };
+  
+    // Create a deep copy of the dictionary and remove the "uuid" key
+    const filteredDict = JSON.parse(JSON.stringify(dict));
+    removeUUIDKey(filteredDict);
+    // CHECKBOX CLICK EVENTS
+    // Handle checkbox click event
+    const handleCheckboxClick = (groupUUID, className, id, isChecked) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID][className][id];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(selectedDict.group_id); // Get the corresponding fragmentGroup that has been clicked
+      const fragmentProperties = fragmentGroup.getProperties(selectedDict.id);
+      hideGroup(fragmentGroup, [parseInt(selectedDict.id, 10)], !isChecked);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Fragment properties:", fragmentProperties);
+      console.log("Selected Dict with UUID:", selectedDict);
+      // Update the checked state
+      setCheckedState((prevState) => ({
+        ...prevState,
+        [`${groupUUID}-${className}-${id}`]: isChecked,
+      }));
+    };
+  
+    // Handle parent checkbox click event
+    const handleParentCheckboxClick = (groupUUID, className, isChecked) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID][className];
+      const firstElement = Object.values(selectedDict)[0];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(firstElement.group_id);
+      const expressIDs = Object.keys(selectedDict).map(key => parseInt(key, 10)); // 10 specifies the base-10 number system
+      hideGroup(fragmentGroup, expressIDs, !isChecked);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Selected Parent Dict with UUID:", selectedDict);
+      // Update the checked state for all child checkboxes
+      const newCheckedState = { ...checkedState };
+      Object.keys(selectedDict).forEach((id) => {
+        newCheckedState[`${groupUUID}-${className}-${id}`] = isChecked;
+      });
+      // Update the checked state for the parent checkbox
+      newCheckedState[`${groupUUID}-${className}`] = isChecked;
+      setCheckedState(newCheckedState);
+    };
+
+    // Handle group checkbox click event
+    const handleGroupCheckboxClick = (groupUUID, isChecked) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(selectedDict["uuid"].id);
+      hideGroup(fragmentGroup, null, !isChecked);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Selected Group Dict with UUID:", selectedDict);
+      // Update the checked state for all parent and child checkboxes
+      const newCheckedState = { ...checkedState };
+      Object.keys(selectedDict).forEach((className) => {
+        Object.keys(selectedDict[className]).forEach((id) => {
+          newCheckedState[`${groupUUID}-${className}-${id}`] = isChecked;
+        });
+        // Update the checked state for the parent checkbox
+        newCheckedState[`${groupUUID}-${className}`] = isChecked;
+      });
+      // Update the checked state for the group checkbox
+      newCheckedState[groupUUID] = isChecked;
+      setCheckedState(newCheckedState);
+    };
+    //CLICK EVENTS
+    // Handle click event
+    const handleClick = (groupUUID, className, id) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID][className][id];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(selectedDict.group_id); // Get the corresponding fragmentGroup that has been clicked
+      const fragmentProperties = fragmentGroup.getProperties(selectedDict.id);
+      highlightGroup(fragmentGroup, [parseInt(selectedDict.id, 10)]);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Fragment properties:", fragmentProperties);
+      console.log("Selected Dict with UUID:", selectedDict);
+    };
+  
+    // Handle parentclick event
+    const handleParentClick = (groupUUID, className) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID][className];
+      const firstElement = Object.values(selectedDict)[0];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(firstElement.group_id);
+      const expressIDs = Object.keys(selectedDict).map(key => parseInt(key, 10)); // 10 specifies the base-10 number system
+      highlightGroup(fragmentGroup, expressIDs);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Selected Parent Dict with UUID:", selectedDict);
+    };
+  
+    // Handle group click event
+    const handleGroupClick = (groupUUID) => {
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      const selectedDict = originalDict[groupUUID];
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(selectedDict["uuid"].id);
+      highlightGroup(fragmentGroup);
+      console.log("FragmentGroup:", fragmentGroup);
+      console.log("Selected Group Dict with UUID:", selectedDict);
+    };
+  
     return (
       <ul>
-        {Object.keys(dict).map((groupUUID) => (
+        {Object.keys(filteredDict).map((groupUUID) => (
           <li key={groupUUID}>
-            <strong onClick={() => toggleExpand(groupUUID)} style={{ cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={checkedState[groupUUID] || false}
+              onChange={(e) => handleGroupCheckboxClick(groupUUID, e.target.checked)}
+            />
+            <strong onClick={() => { toggleExpand(groupUUID); handleGroupClick(groupUUID); }} style={{ cursor: 'pointer' }}>
               {groupUUID}
             </strong>
             <Collapse isOpened={expandedKeys[groupUUID]}>
               <ul>
-                {Object.keys(dict[groupUUID]).map((className) => (
+                {Object.keys(filteredDict[groupUUID]).map((className) => (
                   <li key={className}>
-                    <strong onClick={() => toggleExpand(`${groupUUID}-${className}`)} style={{ cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={checkedState[`${groupUUID}-${className}`] || false}
+                      onChange={(e) => handleParentCheckboxClick(groupUUID, className, e.target.checked)}
+                    />
+                    <strong onClick={() => { toggleExpand(`${groupUUID}-${className}`); handleParentClick(groupUUID, className); }} style={{ cursor: 'pointer' }}>
                       {className}
                     </strong>
                     <Collapse isOpened={expandedKeys[`${groupUUID}-${className}`]}>
                       <ul>
-                        {Object.keys(dict[groupUUID][className]).map((id) => (
+                        {Object.keys(filteredDict[groupUUID][className]).map((id) => (
                           <li key={id}>
-                            {dict[groupUUID][className][id].name}
+                            <input
+                              type="checkbox"
+                              checked={checkedState[`${groupUUID}-${className}-${id}`] || false}
+                              onChange={(e) => handleCheckboxClick(groupUUID, className, id, e.target.checked)}
+                            />
+                            <span onClick={() => handleClick(groupUUID, className, id)} style={{ cursor: 'pointer' }}>
+                              {filteredDict[groupUUID][className][id].name}
+                            </span>
                           </li>
                         ))}
                       </ul>
