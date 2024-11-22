@@ -107,7 +107,6 @@ const IfcViewer = () => {
           if (fragmentGroup) {
               const fragmentProperties = await fragmentGroup.getProperties(expressID);
               console.log("Fragment properties:", fragmentProperties); 
-              console.log("isArray:", Array.isArray(fragmentProperties))
               const updatedProperties = await replaceType5Properties(fragmentGroup, fragmentProperties);
               updatedProperties.className = updatedProperties.constructor.name;
               console.log("Fragment properties AFTER:", await fragmentGroup.getProperties(expressID)); 
@@ -138,9 +137,14 @@ const IfcViewer = () => {
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
   };
   const replaceType5Properties = async (fragmentGroup, properties) => {
+    let leaveOwnerHistory = true;
     const traverseAndReplace = async (props) => {
       let hasType5 = false;
-  
+      // Remove OwnerHistory if it exists
+      if (props && typeof props === 'object' && 'OwnerHistory' in props && !leaveOwnerHistory) {
+        delete props.OwnerHistory;
+      }
+      leaveOwnerHistory = false;
       for (const key in props) {
         const property = props[key];
         if (property && typeof property === 'object') {
@@ -198,7 +202,7 @@ const IfcViewer = () => {
     console.log("FragmentRef: ", fragmentsRef.current)
 
   };
-  const getObjectPropertyDict = async () => { // TODO: HIGHLIGHT CLICKED GROUP
+  const getObjectPropertyDict = async () => { 
     const groupsDictionary = {}; // key correspond to the group name, value is a dictionary of properties
     const fragmentGroups = Array.from(fragmentsRef.current.groups.values()); // get all groups in an array (they correspond to IFC files)
     console.log("fragmentsmanager: ",fragmentsRef.current)
