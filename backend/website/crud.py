@@ -30,7 +30,8 @@ import base64
 import torch
 import pandas as pd
 import numpy as np
-
+import random
+import string
 
 async def create_user(user):
     user = dict(user)
@@ -125,7 +126,9 @@ async def upload_image_input(id, file: UploadFile, user):
 
 async def writeToPublic_KI_Dienste(file: UploadFile):
     contents = await file.read()
-
+    characters = string.ascii_letters + string.digits
+    name = ''.join(random.choice(characters) for _ in range(10))
+    file.filename = name + ".jpg"
     dest_path = f"frontend/public/{file.filename}"
 
     with open(dest_path, "wb") as f:

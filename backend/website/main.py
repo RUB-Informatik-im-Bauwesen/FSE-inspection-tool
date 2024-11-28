@@ -327,5 +327,9 @@ async def get_collection_jsons():
 @app.post("/get_response_from_llm")
 async def get_response_from_llm(prompt: NewPrompt):
     print(prompt)
-    response = await get_response_llm(prompt, "") #requires API key
+    # Path to the API key file
+    api_key_file = 'api_key.txt'
+    with open(api_key_file, 'r') as file:
+        key = file.read().strip()
+    response = await get_response_llm(prompt, key) #requires API key
     return response

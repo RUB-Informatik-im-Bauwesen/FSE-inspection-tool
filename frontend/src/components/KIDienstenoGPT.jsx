@@ -104,7 +104,7 @@ const KIDienste = ({ accessToken }) => {
             })
             .then((res) => {
               const { filename, image_base64 } = res.data;
-              setImageUpload(files[0].name)
+              setImageUpload(filename)
               setImageBase64(image_base64);
             })
             .catch((err) => {
@@ -145,16 +145,25 @@ const KIDienste = ({ accessToken }) => {
   const navigateToViewJsons = () => {
     window.location.replace("http://localhost:5173/view-jsons");
   };
+  const generateRandomString = (length) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  };
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
-    setImageUpload(imageSrc);
     setIsWebcamOpen(false);
   
     // Convert the captured image to a File object
     fetch(imageSrc)
       .then(res => res.blob())
       .then(blob => {
-        const file = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
+        const filename = generateRandomString(10)+".jpg";
+        const file = new File([blob], filename, { type: "image/jpeg" });
   
         // Create a FileList with the captured File
         const dataTransfer = new DataTransfer();
@@ -181,7 +190,6 @@ const KIDienste = ({ accessToken }) => {
       console.log("IMAGE_UPLOAD",imageBase64)
       });
   }, [webcamRef]);
-
 
   return (
     <div className="visual-fire-inspection-tool-container">

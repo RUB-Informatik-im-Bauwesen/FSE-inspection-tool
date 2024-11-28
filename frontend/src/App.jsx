@@ -13,7 +13,8 @@ import FAQ from './components/FAQ'
 import KIDienste from './components/KIDienste'
 import ViewJsons from './components/ViewJsons'
 import GPT from './components/GPT'
-import IfcViewer from './components/IfcViewer';
+import IfcViewer from './components/IfcViewer'
+import KIDiensteNoGPT from './components/KIDienstenoGPT'
 
 function App() {
 
@@ -83,13 +84,18 @@ function App() {
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
           <Route path="/Statistics" element={<StatisticsMultipleModels accessToken={accessToken} projects={projects}/>}/>
-          <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
+          {/* <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/> */}
+          <Route path="/KIDienst" element={<KIDiensteNoGPT accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
           <Route path="/view-jsons" element={<ViewJsons accessToken={accessToken}/>} />
           <Route path="/chat" element={<GPT accessToken={accessToken}/>} />
           <Route path="/ifc-viewer" element={<IfcViewer />} />
         </Routes>
-        <img src={"Logo/Logo.png"} alt={"Informatik im Bauwesen"} className="logo" />
+        <header className='Ansprechpartner'>
+          <p>Ansprechpartner: M.Eng. Angelina Aziz </p>
+        </header>
+        <img src={"/src/assets/Logo/Logo_RUB_BLAU_rgb.jpg"} alt={"RUB Logo"} className="logoRUB" />
+        <img src={"/src/assets/Logo/InfoBauwesenLogo.png"} alt={"Informatik im Bauwesen"} className="logoInfBau" />
       </div>
     </BrowserRouter>
   )

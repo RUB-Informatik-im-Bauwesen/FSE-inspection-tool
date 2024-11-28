@@ -5,7 +5,6 @@ import * as BUI from "@thatopen/ui";
 import * as OBC from "@thatopen/components";
 import * as OBCF from "@thatopen/components-front";
 import * as OBF from "@thatopen/fragments";
-import Stats from "stats.js";
 import './IfcViewer.css';
 import { Collapse } from 'react-collapse';
 

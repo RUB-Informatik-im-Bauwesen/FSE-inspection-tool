@@ -13,6 +13,8 @@ import torch
 import cv2
 import importlib
 import json
+import random
+import string
 from ultralytics import YOLO
 
 def calculate_blurriness_score(image_path):
@@ -256,10 +258,12 @@ async def render_images_yolov8(model_path, image_paths, model_type, user):
     model = YOLO(model_path)
     results = model(image_paths[0])
     print(results)
-    results[0].save(filename="frontend//public//Annotated_Images//anno.jpg")  # Render the predicted bounding boxes on the image
+    characters = string.ascii_letters + string.digits
+    name =''.join(random.choice(characters) for _ in range(10))
+    results[0].save(filename=f"frontend//public//Annotated_Images//{name}.jpg")  # Render the predicted bounding boxes on the image
     save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_paths[0].split('/')[-1]
     annotated_image_paths = []
-    annotated_image_paths.append("Annotated_Images//anno.jpg")
+    annotated_image_paths.append(f"Annotated_Images//{name}.jpg")
 
     # Assuming results[0].boxes contains the bounding box information
     data_dict = []
@@ -281,7 +285,7 @@ async def render_images_yolov8(model_path, image_paths, model_type, user):
             'input image name': os.path.basename(image_paths[0])
         })
     # Read the image file and encode it in base64
-    with open("frontend//public//Annotated_Images//anno.jpg", "rb") as image_file:
+    with open(f"frontend//public//Annotated_Images//{name}.jpg", "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
     formatted_date = datetime.now().strftime("%d.%m.%Y")
     formatted_timestamp = datetime.now().strftime("%H:%M:%S")
@@ -294,7 +298,7 @@ async def render_images_yolov8(model_path, image_paths, model_type, user):
     }
     await collection_jsons.insert_one(document)
     # Save the data dictionary as a JSON file
-    json_save_path = "frontend//public//Annotated_Images//anno.json"
+    json_save_path = f"frontend//public//Annotated_Images//{name}.json"
     os.makedirs(os.path.dirname(json_save_path), exist_ok=True)
     with open(json_save_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)

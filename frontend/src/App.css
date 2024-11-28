@@ -13,12 +13,29 @@
   background-size: cover;
   background-position: center;
 }
+.Ansprechpartner{
+  position: fixed;
+  bottom: 140px;
+  z-index: -10; /* might need to change this later */
+  right: 20px;
+  height: auto; /* Maintain aspect ratio */
+}
+.logoRUB {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  opacity: 0.7; /* Adjust the opacity as per your requirement */
+  z-index: -10;
+  width: 200px; /* Adjust the width as per your requirement */
+  height: auto; /* Maintain aspect ratio */
+}
 
-.logo {
+.logoInfBau {
   position: fixed;
   bottom: 20px;
   right: 20px;
   opacity: 0.7; /* Adjust the opacity as per your requirement */
+  z-index: -10;
   width: 200px; /* Adjust the width as per your requirement */
   height: auto; /* Maintain aspect ratio */
 }
