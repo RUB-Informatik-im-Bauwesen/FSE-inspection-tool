@@ -17,6 +17,7 @@ const KIDienste = ({ accessToken }) => {
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [imageBase64, setImageBase64] = useState("");
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
+  const [detections, setDetections] = useState([]);
   const webcamRef = useRef(null);
 
   const download_item = () => {
@@ -154,42 +155,36 @@ const KIDienste = ({ accessToken }) => {
     }
     return result;
   };
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setIsWebcamOpen(false);
-  
-    // Convert the captured image to a File object
-    fetch(imageSrc)
-      .then(res => res.blob())
-      .then(blob => {
-        const filename = generateRandomString(10)+".jpg";
-        const file = new File([blob], filename, { type: "image/jpeg" });
-  
-        // Create a FileList with the captured File
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        const fileList = dataTransfer.files;
 
-        // recreation of handleSubmitUpload
-        const formData = new FormData();
-        formData.append('file', fileList[0]);
-        let url = `http://127.0.0.1:8000/upload_image_KI_Dienste`;
-        axios.post(url, formData, {
-                headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': fileList.type }
-              })
-              .then((res) => {
-                const { filename, image_base64 } = res.data;
-                setImageUpload(fileList[0].name)
-                setImageBase64(image_base64);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-  
-      console.log("IMAGE_UPLOAD",imageUpload)
-      console.log("IMAGE_UPLOAD",imageBase64)
-      });
-  }, [webcamRef]);
+  const capture = useCallback(async () => {
+
+    const imageSrc = webcamRef.current.getScreenshot();
+    //setIsWebcamOpen(false);
+
+    // Convert the captured image to a File object
+    const res = await fetch(imageSrc);
+    const blob = await res.blob();
+    const filename = generateRandomString(10) + ".jpg";
+    const file = new File([blob], filename, { type: "image/jpeg" });
+
+    // Upload to backend for object detection
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.post(`http://127.0.0.1:8000/predict_webcam_real_time/${selectedMLService}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    //console.log(response);
+    setDetections(response.data.detections);
+  }, [webcamRef, selectedMLService]);
+
+  useEffect(() => {
+    if (isWebcamOpen) {
+      const interval = setInterval(() => {
+        capture();
+      }, 500); // Capture frame every second
+      return () => clearInterval(interval);
+    }
+  }, [isWebcamOpen, capture]);
 
   return (
     <div className="visual-fire-inspection-tool-container">
@@ -227,6 +222,7 @@ const KIDienste = ({ accessToken }) => {
       <div className="below-header-center">
         <div className="left-side">
           <div className="card-container">
+          {!isWebcamOpen && (
             <div className="card">
               <img src={imageUpload} alt="No Image Uploaded" className="card-img" />
               <div className="card-body">
@@ -234,42 +230,61 @@ const KIDienste = ({ accessToken }) => {
                 <button onClick={() => setIsWebcamOpen(true)} className="card-button btn btn-secondary">Use Webcam</button>
               </div>
             </div>
-
+          )}
             {isWebcamOpen && (
-              <div className="webcam-container">
+              <div className="webcam-container" style={{ position: 'relative' }}>
                 <Webcam
                   audio={false}
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
                   className="webcam"
+                  style={{ width: '100%' }}
                 />
-                <button onClick={capture} className="btn btn-primary">Capture</button>
+                {detections.map((detection, index) => (
+                  <div key={index} style={{
+                    position: 'absolute',
+                    border: '3px solid #39FF14',
+                    left: `${detection.x}px`,
+                    top: `${detection.y}px`,
+                    width: `${detection.width}px`,
+                    height: `${detection.height}px`
+                  }}>
+                    <span style={{ color: 'red' }}>{detection.label} ({Math.round(detection.confidence * 100)}%)</span>
+                  </div>
+                ))}
                 <button onClick={() => setIsWebcamOpen(false)} className="btn btn-secondary">Close</button>
               </div>
             )}
-
-            <div className="buttons-between-cards">
-              <Dropdown onSelect={handleMLServiceSelect}>
-                <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
-                  {selectedMLService ? selectedMLService : "Choose ML Service"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item eventKey="Wartungsinformationen">Detektion Wartungsinformationen</Dropdown.Item>
-                  <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
-                  <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
-                  <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-              <button onClick={predict_image} className="bottom-button btn btn-primary">Start! {isLoadingPredict && <div className="loading-circle"></div>} </button> {/* Adding Bootstrap classes 'btn' and 'btn-danger' */}
-            </div>
-
-            <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
-              <img src={imageResult} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
-              <div className="card-body">
-                <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
-                <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+            
+              
+              <div className="buttons-between-cards">
+                <Dropdown onSelect={handleMLServiceSelect}>
+                  <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
+                    {selectedMLService ? selectedMLService : "Choose ML Service"}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item eventKey="Wartungsinformationen">Detektion Wartungsinformationen</Dropdown.Item>
+                    <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
+                    <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
+                    <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+                {!isWebcamOpen && (
+                  <button onClick={predict_image} className="bottom-button btn btn-primary">
+                    Start! {isLoadingPredict && <div className="loading-circle"></div>}
+                  </button>
+                )}
               </div>
-            </div>
+            {!isWebcamOpen && (
+              <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
+                <img src={imageResult} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
+                <div className="card-body">
+                  <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
+                  <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+                </div>
+              </div>
+              
+            )}
           </div>
         </div>
       </div>

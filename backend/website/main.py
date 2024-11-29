@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, APIRouter, UploadFile
+from fastapi import FastAPI, Depends, APIRouter, UploadFile, File, HTTPException
 from fastapi_login import LoginManager
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
@@ -12,6 +12,10 @@ from datetime import timedelta
 from time import sleep
 from asyncio import sleep as async_sleep
 from starlette.concurrency import run_in_threadpool
+import cv2
+import numpy as np
+from fastapi.responses import JSONResponse
+from ultralytics import YOLO
 
 app = FastAPI()
 
@@ -333,3 +337,50 @@ async def get_response_from_llm(prompt: NewPrompt):
         key = file.read().strip()
     response = await get_response_llm(prompt, key) #requires API key
     return response
+
+@app.post("/predict_webcam_real_time/{Dienst}")
+async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):
+    # Define a dictionary to map keywords to model paths
+    keyword_paths = {
+        "Wartungsinformationen": "storage/Visual_Annotation_Tool/Detektion_Wartungsinformationen_Yolov8/best.pt",
+        "Prüfplakettenaufkleber": "storage/Visual_Annotation_Tool/Detektion_Prüfplakettenaufkleber_Yolov8/best.pt",
+        "Brandschutzanlagen": "storage/Visual_Annotation_Tool/Detektion_Brandschutzanlagen_Yolov8/best.pt",
+        "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
+    }
+
+    # Get the keyword from Dienst (assuming it's a string)
+    keyword = Dienst.strip()
+
+    # Use the keyword to get the corresponding model path
+    model_path =keyword_paths.get(keyword)
+
+    if model_path is None:
+        raise HTTPException(status_code=404, detail="Model not found!")
+    contents = await file.read()
+    nparr = np.frombuffer(contents, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    # Perform object detection
+    model = YOLO(model_path)
+    classNames = model.names
+    # Perform object detection
+    results = model(img)
+
+    # Extract detection results
+    detections = []
+    for r in results:
+        for box in r.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            confidence = round(float(box.conf[0]), 2)
+            cls = int(box.cls[0])
+            label = classNames[cls]
+            detections.append({
+                "label": label,
+                "confidence": confidence,
+                "x": x1,
+                "y": y1,
+                "width": x2 - x1,
+                "height": y2 - y1
+            })
+
+    return JSONResponse(content={"detections": detections})
