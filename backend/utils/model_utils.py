@@ -8,7 +8,7 @@ import numpy as np
 import random
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from backend.website.db import collection_jsons
+from backend.website.db import collection_jsons, collection_result_images
 import torch
 import cv2
 import importlib
@@ -253,17 +253,45 @@ async def render_images_yolov7(model_path, image_paths, model_type):
 
     return annotated_image_paths
 """
-async def render_images_yolov8(model_path, image_paths, model_type, user):
+
+# Function to decode base64 image to numpy array
+def decode_base64_image(base64_string):
+    # Decode base64 string to bytes
+    image_data = base64.b64decode(base64_string)
+    # Convert bytes to numpy array
+    np_arr = np.frombuffer(image_data, np.uint8)
+    # Decode numpy array to image
+    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    return image
+
+# Function to encode numpy array to base64 image
+def encode_image_to_base64(image):
+    _, buffer = cv2.imencode('.jpg', image)
+    base64_image = base64.b64encode(buffer).decode('utf-8')
+    return base64_image
+
+async def render_images_yolov8(model_path, base64_image, model_type, user):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
+    print("render_image")
     model = YOLO(model_path)
-    results = model(image_paths[0])
-    print(results)
+    print("model: ", model)
+    np_image = decode_base64_image(base64_image)
+    results = model(np_image)
+    # Get the annotated image
+    annotated_image = results[0].plot()  # This returns a numpy array with the annotations
+    
+    # Encode the annotated image back to base64
+    annotated_base64_image = encode_image_to_base64(annotated_image)
+    
+    #print(results)
     characters = string.ascii_letters + string.digits
     name =''.join(random.choice(characters) for _ in range(10))
-    results[0].save(filename=f"frontend//public//Annotated_Images//{name}.jpg")  # Render the predicted bounding boxes on the image
-    save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_paths[0].split('/')[-1]
-    annotated_image_paths = []
-    annotated_image_paths.append(f"Annotated_Images//{name}.jpg")
+
+    collection_result_images.insert_one({"filename": name, "base64": annotated_base64_image })
+    #results[0].save(filename=f"frontend//public//Annotated_Images//{name}.jpg")  # Render the predicted bounding boxes on the image
+    #save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_paths[0].split('/')[-1]
+    #annotated_image_paths = []
+    #annotated_image_paths.append(f"Annotated_Images//{name}.jpg")
 
     # Assuming results[0].boxes contains the bounding box information
     data_dict = []
@@ -281,29 +309,28 @@ async def render_images_yolov8(model_path, image_paths, model_type, user):
                 'y_center': xywh[0][1],
                 'width': xywh[0][2],
                 'height': xywh[0][3]
-            },
-            'input image name': os.path.basename(image_paths[0])
+            }
+            #'input image name': os.path.basename(image_paths[0])
         })
-    # Read the image file and encode it in base64
-    with open(f"frontend//public//Annotated_Images//{name}.jpg", "rb") as image_file:
-        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
     formatted_date = datetime.now().strftime("%d.%m.%Y")
     formatted_timestamp = datetime.now().strftime("%H:%M:%S")
     document = {
+        "name": name,
         "user": user["username"],
         "data_json": data_dict,
-        "encoded_image": encoded_image,
+        "encoded_image": annotated_base64_image,
         "date": formatted_date,
         "timestamp": formatted_timestamp
     }
     await collection_jsons.insert_one(document)
+    """
     # Save the data dictionary as a JSON file
     json_save_path = f"frontend//public//Annotated_Images//{name}.json"
     os.makedirs(os.path.dirname(json_save_path), exist_ok=True)
     with open(json_save_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)
-    
-    return annotated_image_paths
+    """
+    return annotated_base64_image, name
 
 
 

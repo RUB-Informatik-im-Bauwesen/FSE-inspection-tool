@@ -1,10 +1,7 @@
 import React, { useRef, useState } from 'react';
 import * as THREE from "three";
-import * as WEBIFC from "web-ifc";
-import * as BUI from "@thatopen/ui";
 import * as OBC from "@thatopen/components";
 import * as OBCF from "@thatopen/components-front";
-import * as OBF from "@thatopen/fragments";
 import './IfcViewer.css';
 import { Collapse } from 'react-collapse';
 
@@ -15,6 +12,7 @@ const IfcViewer = () => {
   const [OBJpropertyDict, setOBJPropertyDict] = useState({});
   const [expandedKeys, setExpandedKeys] = useState({}); // Zustand für erweiterte Schlüssel
   const [checkedState, setCheckedState] = useState({});
+  const [highlightDataState, setHighlightDataState] = useState([]);
   const fileInputRef = useRef(null);
   const fileRef = useRef(null);
   const worldRef = useRef(null);
@@ -79,7 +77,7 @@ const IfcViewer = () => {
       }
       return ids;
     };
-    highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS //TODO: GET COORDINATES OF FRAGMENTS
+    highlighter.events.select.onHighlight.add(async (data) => { // HIGHLIGHT WHEN CLICKING ON FRAGMENTS, GET PROPERTIES OF FRAGMENTS
       let modelID = null;
       let fragmentsSet = null; 
       console.log("Data:", data);
@@ -103,6 +101,7 @@ const IfcViewer = () => {
           console.log("Express ID:", expressID);
           const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
           const fragmentGroup = fragmentGroups.get(modelID); // Get the corresponding fragmentGroup that has been clicked
+          console.log("FragmentGroup:", fragmentGroup);
           if (fragmentGroup) {
               const fragmentProperties = await fragmentGroup.getProperties(expressID);
               console.log("Fragment properties:", fragmentProperties); 
@@ -110,9 +109,11 @@ const IfcViewer = () => {
               updatedProperties.className = updatedProperties.constructor.name;
               console.log("Fragment properties AFTER:", await fragmentGroup.getProperties(expressID)); 
               setPropertySets(updatedProperties); // Update state with the properties
+              setHighlightDataState([fragmentGroup.name,updatedProperties.className, expressID]);
           } else {
               console.error("FragmentsGroup instance not found.");
           }
+          
       } else {
           console.error("No IDs found in the highlighted data.");
       }
@@ -127,10 +128,6 @@ const IfcViewer = () => {
         absolute: true,
     };
 
-    const stats = new Stats();
-    stats.dom.style.zIndex = "unset";
-    world.renderer.onBeforeUpdate.add(() => stats.begin());
-    world.renderer.onAfterUpdate.add(() => stats.end());
 
     worldRef.current = world;
     fragmentIfcLoaderRef.current = fragmentIfcLoader;
@@ -271,7 +268,7 @@ const IfcViewer = () => {
   const hasInheritedFromPhysical = (obj) => {
     let proto = Object.getPrototypeOf(obj);
     while (proto) {
-      if (proto.constructor.name === 'IfcBuildingElement' || proto.constructor.name === 'IfcPhysicalComplexQuantity') {
+      if (proto.constructor.name === 'IfcBuildingElement'|| proto.constructor.name === 'IfcSpace'|| proto.constructor.name === 'IfcFireSuppressionTerminal'|| proto.constructor.name === 'IfcBuildingElementPart') {
         return true;
       }
       proto = Object.getPrototypeOf(proto);
@@ -444,6 +441,9 @@ const IfcViewer = () => {
       console.log("FragmentGroup:", fragmentGroup);
       console.log("Fragment properties:", fragmentProperties);
       console.log("Selected Dict with UUID:", selectedDict);
+      console.log("groupID:", groupUUID);
+      console.log("className:", className);
+      console.log("id:", id);
     };
   
     // Handle parentclick event
@@ -519,7 +519,42 @@ const IfcViewer = () => {
       </ul>
     );
   };
+  const renderPropertyCheckbox = (dict) => {
+    const data = highlightDataState;
+    const handleCheckboxClickProperties = (groupUUID, className, id, isChecked) => {
+      console.log("highlightDataRef:", data);
+      console.log("groupUUID:", groupUUID);
+      console.log("className:", className);
+      console.log("id:", id);
+      console.log("dict:", dict);
+      const originalDict = JSON.parse(JSON.stringify(dict)); // Get the original dictionary
+      console.log("Original Dict:", originalDict);
+      const selectedDict = originalDict[groupUUID][className][id];
+      console.log("Selected Dict with UUID:", selectedDict);
+      const fragmentGroups = fragmentsRef.current.groups; // Get the FragmentsGroups
+      const fragmentGroup = fragmentGroups.get(selectedDict.group_id); // Get the corresponding fragmentGroup that has been clicked
+      console.log("FragmentGroup:", fragmentGroup);
+      const fragmentProperties = fragmentGroup.getProperties(selectedDict.id);
+      console.log("Fragment properties:", fragmentProperties);
+      hideGroup(fragmentGroup, [parseInt(selectedDict.id, 10)], !isChecked);
 
+      // Update the checked state
+      setCheckedState((prevState) => ({
+        ...prevState,
+        [`${groupUUID}-${className}-${id}`]: isChecked,
+      }));
+    };
+    return (
+      <div>
+        <input
+        type="checkbox"
+        checked={checkedState[`${data[0]}-${data[1]}-${data[2]}`] || false}
+        onChange={(e) => handleCheckboxClickProperties(data[0], data[1], data[2], e.target.checked)}
+        />
+        <label>Hide</label>
+      </div>
+    );
+  };
   const birdsView = () => {
     if (CameraControlRef.current) {
       const camera = CameraControlRef.current._camera;
@@ -571,6 +606,7 @@ const IfcViewer = () => {
       </button>
       <div className={`side-panel right ${isPanelOpen ? 'open' : ''}`}>
         <h2>Properties</h2>
+        {renderPropertyCheckbox(OBJpropertyDict)}
         {renderPropertySets(propertySets)}
       </div>
       <div className={`side-panel left ${isOBJPanelOpen ? 'open' : ''}`}>

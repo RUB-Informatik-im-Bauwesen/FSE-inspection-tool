@@ -6,7 +6,8 @@ import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-
+//const apiUrl = "http://127.0.0.1:8000"; // Defaults to local for testing
+const apiUrl =  "https://fse-xoztb.ondigitalocean.app/therob-1-fse-backend";
 const KIDienste = ({ accessToken }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +29,7 @@ const KIDienste = ({ accessToken }) => {
     const createurl = new URL(imageResult, window.location.href);
     const fileNameWithExtension = createurl.pathname.split('/').pop();
 
-    let url = `http://127.0.0.1:8000/download_image_json/${fileNameWithExtension}`;
+    let url = `${apiUrl}/download_image_json/${fileNameWithExtension}`;
 
     const axiosConfig = {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -95,7 +96,7 @@ const KIDienste = ({ accessToken }) => {
   const handleSubmitUpload = () => {
       const formData = new FormData();
       formData.append('file', files[0]);
-      let url = `http://127.0.0.1:8000/upload_image_KI_Dienste`;
+      let url = `${apiUrl}/upload_image_KI_Dienste`;
       axios.post(url, formData, {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': files.type }
             })
@@ -124,7 +125,7 @@ const KIDienste = ({ accessToken }) => {
       return;
     }
 
-    const url = `http://127.0.0.1:8000/predict_image_KI_Dienste/${selectedMLService}/${fileNameWithoutExtension}`
+    const url = `${apiUrl}/predict_image_KI_Dienste/${selectedMLService}/${fileNameWithoutExtension}`
       axios
       .get(url, {
         headers: {  Authorization: `Bearer ${accessToken}`},

@@ -7,12 +7,17 @@ import axios from 'axios';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Webcam from 'react-webcam';
 
+
+//const apiUrl = "http://127.0.0.1:8000"; // Defaults to local for testing
+//const apiUrl =  "https://fse-xoztb.ondigitalocean.app/therob-1-fse-backend";
+const apiUrl = import.meta.env.VITE_BACKEND_IP
 const KIDienste = ({ accessToken }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [files, setFiles] = useState(null);
   const [imageUpload, setImageUpload] = useState("");
   const [imageResult, setImageResult] = useState("");
+  const [downloadImageName, setDownloadImageName] = useState("");
   const [selectedMLService, setSelectedMLService] = useState(null);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [imageBase64, setImageBase64] = useState("");
@@ -26,11 +31,11 @@ const KIDienste = ({ accessToken }) => {
       return
     }
 
-    let dataSource;
+    let dataSource; // I have no idea what this is supposed to be for, might have to ask ayman
     const createurl = new URL(imageResult, window.location.href);
     const fileNameWithExtension = createurl.pathname.split('/').pop();
-
-    let url = `http://127.0.0.1:8000/download_image_json/${fileNameWithExtension}`;
+    console.log("filenamewithextension", fileNameWithExtension)
+    let url = `${apiUrl}/download_image_json/${downloadImageName}`;
 
     const axiosConfig = {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -99,11 +104,14 @@ const KIDienste = ({ accessToken }) => {
       const formData = new FormData();
       console.log(files)
       formData.append('file', files[0]);
-      let url = `http://127.0.0.1:8000/upload_image_KI_Dienste`;
+      console.log("UPLOAD")
+      let url = `${apiUrl}/upload_image_KI_Dienste`;
+      console.log("url", url)
       axios.post(url, formData, {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': files.type }
             })
             .then((res) => {
+              console.log(res);
               const { filename, image_base64 } = res.data;
               setImageUpload(filename)
               setImageBase64(image_base64);
@@ -128,13 +136,15 @@ const KIDienste = ({ accessToken }) => {
       return;
     }
 
-    const url = `http://127.0.0.1:8000/predict_image_KI_Dienste/${selectedMLService}/${fileNameWithoutExtension}`
+    const url = `${apiUrl}/predict_image_KI_Dienste/${selectedMLService}/${fileNameWithoutExtension}`
       axios
       .get(url, {
         headers: {  Authorization: `Bearer ${accessToken}`},
             })
         .then((res) => {
-          setImageResult(res.data)
+          console.log("RES:", res)
+          setImageResult(res.data[0])
+          setDownloadImageName(res.data[1])
           setLoadingPredict(false)
           console.log(res.data)
         })
@@ -170,7 +180,7 @@ const KIDienste = ({ accessToken }) => {
     // Upload to backend for object detection
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`http://127.0.0.1:8000/predict_webcam_real_time/${selectedMLService}`, formData, {
+    const response = await axios.post(`${apiUrl}/predict_webcam_real_time/${selectedMLService}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     //console.log(response);
@@ -224,7 +234,7 @@ const KIDienste = ({ accessToken }) => {
           <div className="card-container">
           {!isWebcamOpen && (
             <div className="card">
-              <img src={imageUpload} alt="No Image Uploaded" className="card-img" />
+              <img src={`data:image/jpeg;base64,${imageBase64}`} alt="Uploaded" />
               <div className="card-body">
                 <button onClick={openModal} className="card-button btn btn-secondary">Upload Image</button>
                 <button onClick={() => setIsWebcamOpen(true)} className="card-button btn btn-secondary">Use Webcam</button>
@@ -277,7 +287,7 @@ const KIDienste = ({ accessToken }) => {
               </div>
             {!isWebcamOpen && (
               <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
-                <img src={imageResult} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
+                <img src={`data:image/jpeg;base64,${imageResult}`} alt="No Result Image uploaded" className="card-img" /> {/* Adding Bootstrap class 'card-img-top' */}
                 <div className="card-body">
                   <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
                   <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}

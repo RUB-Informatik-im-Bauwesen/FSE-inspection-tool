@@ -3,7 +3,7 @@ services:
 
   web:
     image: hydropic/visual_fire_inspection_tool_backend:v1.2
-    container_name: fastapiwork
+    container_name: fastapiwork1
     build:
       context: .
       dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
 
 
   mongo:
-    container_name: mongowork
+    container_name: mongowork1
     image: mongo
     restart: always
     environment:
@@ -35,13 +35,13 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=example
     ports:
-      - "3:27017"
+      - "27017:27017"
     networks:
       - app-network
 
   frontend:
     image: hydropic/visual_fire_inspection_tool_frontend:v1.2
-    container_name: frontendwork
+    container_name: frontendwork1
     build:
       context: .
       dockerfile: frontend/Dockerfile
@@ -52,6 +52,9 @@ services:
     restart: always
     volumes:
       - ./frontend/public:/code/public
+      - ./frontend/src:/code/src
+    environment:
+      - VITE_BACKEND_IP=http://127.0.0.1:8000
 
 networks:
   cvat_cvat:

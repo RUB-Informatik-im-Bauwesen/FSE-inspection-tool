@@ -4,6 +4,10 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "./LoginStyle.css"
 import axios from 'axios'
 
+//const apiUrl = "http://127.0.0.1:8000"; // Defaults to local for testing
+//const apiUrl =  "https://fse-xoztb.ondigitalocean.app/therob-1-fse-backend";
+const apiUrl = import.meta.env.VITE_BACKEND_IP
+
 export default function (props) {
   const [authMode, setAuthMode] = useState("signin")
   const [loggedIn, setLoggedIn] = useState(false)
@@ -19,7 +23,7 @@ export default function (props) {
   }
 
   const register = () => {
-    axios.post("http://127.0.0.1:8000/register",{
+    axios.post(`${apiUrl}/register`,{
         username: userRef.current.value,
         password: passwordRef.current.value
       }
@@ -37,7 +41,7 @@ export default function (props) {
   }
 
   const get_username = (access_token) => {
-    axios.get("http://127.0.0.1:8000/get_user", {
+    axios.get(`${apiUrl}/get_user`, {
       headers: { Authorization: `Bearer ${access_token}` },
       }).then((res) => {
         props.setUsername(res.data)
@@ -49,7 +53,7 @@ export default function (props) {
     data.append("username", userRef.current.value)
     data.append("password",passwordRef.current.value)
 
-    axios.post("http://127.0.0.1:8000/login", data).then((res) => {
+    axios.post(`${apiUrl}/login`, data).then((res) => {
       setLoggedIn(true);
       props.login()
       props.setToken(res.data.access_token)
@@ -62,6 +66,16 @@ export default function (props) {
       }, 3000);
     })
   }
+
+  const fetchTest = () => {
+    axios.get(`${apiUrl}/test`)
+      .then((res) => {
+        console.log("Test response:", res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching test endpoint:", err);
+      });
+  };
 
   if (authMode === "signin" && !props.isLoggedIn) {
     return (
@@ -142,6 +156,11 @@ export default function (props) {
               </button>
             </div>
           </div>
+          <div>
+            <button onClick={fetchTest} type="button" className="btn btn-secondary">
+              Fetch Test Endpoint
+            </button>
+            </div>
         </form>
       </div>
     )

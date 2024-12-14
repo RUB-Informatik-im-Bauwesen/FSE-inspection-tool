@@ -155,6 +155,10 @@ async def download_new_image(id: str, user=Depends(manager)):
     image_new = await download_image(id, user)
     return image_new
 
+@app.get("/test")
+async def get_temp_file():
+    return "it works"
+
 @app.post("/download_predicted_image/")
 async def download_demo_image(pathToFile: pathModel, user=Depends(manager)):
     fileToDownload = await download_predicted_image(pathToFile,user)
@@ -315,8 +319,8 @@ async def get_validation_data(path: pathModel):
 
 @app.get("/predict_image_KI_Dienste/{Dienst}/{imageName}")
 async def predict_image_KI_Dienste(Dienst:str, imageName:str, user=Depends(manager)):
-    predicted_image = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
-    return predicted_image
+    image_and_name = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
+    return image_and_name
 
 @app.get("/download_image_json/{imageName}")
 async def download_image_json(imageName: str, user=Depends(manager)):

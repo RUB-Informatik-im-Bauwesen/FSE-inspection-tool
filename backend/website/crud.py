@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
-from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models, collection_jsons
+from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_models, collection_jsons, collection_temp_images
 from backend.website.models import User, Project, Image, Model, Annotation, TrainModel, AnnotationModel, JSONDocument, Prompt
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
@@ -32,6 +32,7 @@ import pandas as pd
 import numpy as np
 import random
 import string
+import json 
 
 async def create_user(user):
     user = dict(user)
@@ -126,16 +127,20 @@ async def upload_image_input(id, file: UploadFile, user):
 
 async def writeToPublic_KI_Dienste(file: UploadFile):
     contents = await file.read()
+    base64_image = base64.b64encode(contents).decode('utf-8')
     characters = string.ascii_letters + string.digits
     name = ''.join(random.choice(characters) for _ in range(10))
     file.filename = name + ".jpg"
+    document={"filename":file.filename, "base64":base64_image}
+    await collection_temp_images.insert_one(document)
+    """
     dest_path = f"frontend/public/{file.filename}"
 
     with open(dest_path, "wb") as f:
         f.write(contents)
-    image_base64 = base64.b64encode(contents).decode('utf-8')
+    """
 
-    return {"filename": file.filename, "image_base64": image_base64}
+    return {"filename": file.filename, "image_base64": base64_image}
 
 
 
@@ -943,6 +948,12 @@ async def get_valid_data(pathModel):
 
 async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
 
+    filename = imageName + ".jpg"
+    document = await collection_temp_images.find_one({"filename": filename})
+    if document is None:
+        raise HTTPException(status_code=404, detail="Image not found!")
+    base64_image = document["base64"]
+    """
     # Adding "frontend/public/" to the beginning of the path
     base_path = "frontend/public/"
     new_path = base_path + imageName
@@ -973,7 +984,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     final_path = [str(final_file_path).replace('\\', '/')]
 
     save_path = ""
-
+    """
         # Define a dictionary to map keywords to model paths
     keyword_paths = {
         "Wartungsinformationen": "storage/Visual_Annotation_Tool/Detektion_Wartungsinformationen_Yolov8/best.pt",
@@ -991,9 +1002,9 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     if model_path is None:
         raise HTTPException(status_code=404, detail="Model not found!")
     
-    rendered_image = await render_images_yolov8(model_path, final_path, keyword, user)
+    rendered_image, name = await render_images_yolov8(model_path, base64_image, keyword, user)
 
-    return rendered_image 
+    return [rendered_image, name]
 """
     if keyword != "Brandschutzanlagen":
         rendered_image = await render_images_yolov7(model_path, final_path, keyword)
@@ -1003,19 +1014,27 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     return rendered_image
 """
 async def download_zipped(imageName, user):
-    # Assuming imageName has the file name with its extension (e.g., "example.jpg")
-    file_path_image = Path(f"frontend//public//Annotated_Images//anno.jpg")
+    document_json = await collection_jsons.find_one({"name": imageName})
+    if not document_json:
+            raise HTTPException(status_code=404, detail="Result document not found")
 
-    # Change the extension to .json
-    json_file = file_path_image.with_suffix(".json")
+    # Convert the JSON data to a JSON file
+    data_json = document_json["data_json"]
+    json_bytes = json.dumps(data_json, indent=4).encode('utf-8')
+    json_file = io.BytesIO(json_bytes)
 
+    # Decode the base64 image and save it as a JPEG file
+    encoded_image = document_json["encoded_image"]
+    image_bytes = base64.b64decode(encoded_image)
+    image_file = io.BytesIO(image_bytes)
+    
     # Create a BytesIO object to store the zip file in memory
     zip_buffer = io.BytesIO()
 
-    # Create a zip file containing the image and JSON
+    # Create a zip file containing the JSON and JPEG image
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zipf:
-        zipf.write(file_path_image, arcname="image.jpg")
-        zipf.write(json_file, arcname="data.json")
+        zipf.writestr("data.json", json_bytes)
+        zipf.writestr("image.jpg", image_bytes)
         zipf.close()
 
     # Set the pointer to the beginning of the buffer
