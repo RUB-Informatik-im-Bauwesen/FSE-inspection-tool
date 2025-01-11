@@ -14,6 +14,7 @@ from asyncio import sleep as async_sleep
 from starlette.concurrency import run_in_threadpool
 import cv2
 import numpy as np
+import time
 from fastapi.responses import JSONResponse
 from ultralytics import YOLO
 
@@ -319,8 +320,15 @@ async def get_validation_data(path: pathModel):
 
 @app.get("/predict_image_KI_Dienste/{Dienst}/{imageName}")
 async def predict_image_KI_Dienste(Dienst:str, imageName:str, user=Depends(manager)):
+    print("Predicting image with KI Dienst: ", Dienst)
+    # Record the start time
+    start_time = time.time()
     image_and_name = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
-    return image_and_name
+    # Record the end time
+    end_time = time.time()
+    # Calculate the duration
+    duration = end_time - start_time
+    return [image_and_name, duration]
 
 @app.get("/download_image_json/{imageName}")
 async def download_image_json(imageName: str, user=Depends(manager)):
@@ -350,6 +358,8 @@ async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):
         "Prüfplakettenaufkleber": "storage/Visual_Annotation_Tool/Detektion_Prüfplakettenaufkleber_Yolov8/best.pt",
         "Brandschutzanlagen": "storage/Visual_Annotation_Tool/Detektion_Brandschutzanlagen_Yolov8/best.pt",
         "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
+        "Blockiertheit_modal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt",
+        "Blockiertheit_amodal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt",
     }
 
     # Get the keyword from Dienst (assuming it's a string)
@@ -386,5 +396,12 @@ async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):
                 "width": x2 - x1,
                 "height": y2 - y1
             })
-
+    """
+    # this didnt work well
+    # Extract segmentation results if available
+    if hasattr(r, 'masks') and r.masks is not None:
+        masks = r.masks.data.cpu().numpy()  # Convert masks to numpy array
+        for i, mask in enumerate(masks):
+            detections[i]["mask"] = mask.tolist()  # Convert mask to list for JSON serialization
+    """
     return JSONResponse(content={"detections": detections})

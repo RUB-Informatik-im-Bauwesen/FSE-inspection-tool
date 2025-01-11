@@ -991,6 +991,8 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
         "Prüfplakettenaufkleber": "storage/Visual_Annotation_Tool/Detektion_Prüfplakettenaufkleber_Yolov8/best.pt",
         "Brandschutzanlagen": "storage/Visual_Annotation_Tool/Detektion_Brandschutzanlagen_Yolov8/best.pt",
         "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
+        "Blockiertheit_modal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt",
+        "Blockiertheit_amodal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt",
     }
 
     # Get the keyword from Dienst (assuming it's a string)
@@ -1001,7 +1003,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
 
     if model_path is None:
         raise HTTPException(status_code=404, detail="Model not found!")
-    
+    print("Model path: ", model_path)
     rendered_image, name = await render_images_yolov8(model_path, base64_image, keyword, user)
 
     return [rendered_image, name]

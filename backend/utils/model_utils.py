@@ -277,41 +277,56 @@ async def render_images_yolov8(model_path, base64_image, model_type, user):
     print("model: ", model)
     np_image = decode_base64_image(base64_image)
     results = model(np_image)
-    # Get the annotated image
-    annotated_image = results[0].plot()  # This returns a numpy array with the annotations
-    
-    # Encode the annotated image back to base64
-    annotated_base64_image = encode_image_to_base64(annotated_image)
-    
-    #print(results)
-    characters = string.ascii_letters + string.digits
-    name =''.join(random.choice(characters) for _ in range(10))
-
-    collection_result_images.insert_one({"filename": name, "base64": annotated_base64_image })
-    #results[0].save(filename=f"frontend//public//Annotated_Images//{name}.jpg")  # Render the predicted bounding boxes on the image
-    #save_image_path = "Visual_Annotation_Tool_Images/Images" + '/' + image_paths[0].split('/')[-1]
-    #annotated_image_paths = []
-    #annotated_image_paths.append(f"Annotated_Images//{name}.jpg")
-
-    # Assuming results[0].boxes contains the bounding box information
-    data_dict = []
-    class_names = results[0].names  # Extract class names from results
-    for box in results[0].boxes:
-        xywh = box.xywh.tolist()  # Convert tensor to list
-        cls = int(box.cls)  # Extract class index
-        class_name = class_names[cls]  # Get class name using index
-        data_dict.append({
-            'type': class_name,
-            'guid': 542348234,
-            'comment': f'{class_name}',
-            'bounding_box': {
-                'x_center': xywh[0][0],
-                'y_center': xywh[0][1],
-                'width': xywh[0][2],
-                'height': xywh[0][3]
-            }
-            #'input image name': os.path.basename(image_paths[0])
-        })
+    if model_type == 'Blockiertheit_modal' or model_type == 'Blockiertheit_amodal':
+        # Process segmentation results
+        masks = results[0].masks  # Assuming results[0].masks contains the segmentation masks
+        annotated_image = results[0].plot()  # This returns a numpy array with the annotations
+        # Encode the annotated image back to base64
+        annotated_base64_image = encode_image_to_base64(annotated_image)
+        
+        # Save the annotated image and masks
+        characters = string.ascii_letters + string.digits
+        name = ''.join(random.choice(characters) for _ in range(10))
+        collection_result_images.insert_one({"filename": name, "base64": annotated_base64_image })
+        
+        data_dict = []
+        class_names = results[0].names  # Extract class names from results
+        for mask, cls in zip(masks.data, results[0].boxes.cls):
+            class_name = class_names[int(cls)]  # Get class name using index
+            data_dict.append({
+                'type': class_name,
+                'guid': 542348234,
+                'comment': f'{class_name}',
+                'segmentation_mask': mask.tolist()  # Convert mask data to list
+            })
+    else:
+        # Process bounding box results
+        annotated_image = results[0].plot()  # This returns a numpy array with the annotations
+        # Encode the annotated image back to base64
+        annotated_base64_image = encode_image_to_base64(annotated_image)
+        
+        # Save the annotated image and bounding boxes
+        characters = string.ascii_letters + string.digits
+        name = ''.join(random.choice(characters) for _ in range(10))
+        collection_result_images.insert_one({"filename": name, "base64": annotated_base64_image })
+        
+        data_dict = []
+        class_names = results[0].names  # Extract class names from results
+        for box in results[0].boxes:
+            xywh = box.xywh.tolist()  # Convert tensor to list
+            cls = int(box.cls)  # Extract class index
+            class_name = class_names[cls]  # Get class name using index
+            data_dict.append({
+                'type': class_name,
+                'guid': 542348234,
+                'comment': f'{class_name}',
+                'bounding_box': {
+                    'x_center': xywh[0][0],
+                    'y_center': xywh[0][1],
+                    'width': xywh[0][2],
+                    'height': xywh[0][3]
+                }
+            })
     formatted_date = datetime.now().strftime("%d.%m.%Y")
     formatted_timestamp = datetime.now().strftime("%H:%M:%S")
     document = {

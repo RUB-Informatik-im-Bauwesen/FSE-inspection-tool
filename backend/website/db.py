@@ -1,7 +1,8 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-connection_string = "mongodb+srv://doadmin:24M7arH310OW8Gt6@db-mongodb-fra1-91907-18b86622.mongo.ondigitalocean.com/admin?tls=true&authSource=admin"
-client = AsyncIOMotorClient(connection_string)
+client = AsyncIOMotorClient("mongodb://mongowork1", username="root", password="example")
+#connection_string = "mongodb+srv://doadmin:3AHJTO20CE81647U@firesafetydb-d8489600.mongo.ondigitalocean.com/admin?tls=true&authSource=admin&replicaSet=firesafetydb"
+#client = AsyncIOMotorClient(connection_string)
 db = client.test
 
 collection_users = db.users

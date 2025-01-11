@@ -19,6 +19,7 @@ const KIDienste = ({ accessToken }) => {
   const [imageResult, setImageResult] = useState("");
   const [downloadImageName, setDownloadImageName] = useState("");
   const [selectedMLService, setSelectedMLService] = useState(null);
+  const [inferenceTime, setInferenceTime] = useState(null);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [imageBase64, setImageBase64] = useState("");
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
@@ -143,8 +144,9 @@ const KIDienste = ({ accessToken }) => {
             })
         .then((res) => {
           console.log("RES:", res)
-          setImageResult(res.data[0])
-          setDownloadImageName(res.data[1])
+          setImageResult(res.data[0][0])
+          setDownloadImageName(res.data[0][1])
+          setInferenceTime(res.data[1])
           setLoadingPredict(false)
           console.log(res.data)
         })
@@ -234,7 +236,7 @@ const KIDienste = ({ accessToken }) => {
           <div className="card-container">
           {!isWebcamOpen && (
             <div className="card">
-              <img src={`data:image/jpeg;base64,${imageBase64}`} alt="Uploaded" />
+              <img src={`data:image/jpeg;base64,${imageBase64}`} alt="No Input Image uploaded" />
               <div className="card-body">
                 <button onClick={openModal} className="card-button btn btn-secondary">Upload Image</button>
                 <button onClick={() => setIsWebcamOpen(true)} className="card-button btn btn-secondary">Use Webcam</button>
@@ -277,6 +279,8 @@ const KIDienste = ({ accessToken }) => {
                     <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
                     <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
                     <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
+                    <Dropdown.Item eventKey="Blockiertheit_modal">Detektion Blockiertheit modal</Dropdown.Item>
+                    <Dropdown.Item eventKey="Blockiertheit_amodal">Detektion Blockiertheit amodal</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
                 {!isWebcamOpen && (
@@ -291,6 +295,7 @@ const KIDienste = ({ accessToken }) => {
                 <div className="card-body">
                   <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
                   <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
+                  <p>Inference Time: {inferenceTime} seconds</p>
                 </div>
               </div>
               
