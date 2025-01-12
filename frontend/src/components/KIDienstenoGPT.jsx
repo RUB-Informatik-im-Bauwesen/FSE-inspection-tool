@@ -311,9 +311,11 @@ const KIDienste = ({ accessToken }) => {
               <span style={{ color: 'red' }}>{detection.label} ({Math.round(detection.confidence * 100)}%)</span>
             </div>
           ))}
-          <button onClick={() => setIsWebcamOpen(false)} className="btn btn-secondary">Close</button>
         </div>
-      )}
+              )}
+              {isWebcamOpen && (
+                <button onClick={() => setIsWebcamOpen(false)} className="btn btn-secondary" style={{ marginTop: '10px' }}>Close</button>
+              )}
               <div className="buttons-between-cards">
                 <Dropdown onSelect={handleMLServiceSelect}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
