@@ -25,7 +25,7 @@ const KIDienste = ({ accessToken }) => {
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [detections, setDetections] = useState([]);
   const webcamRef = useRef(null);
-
+  const canvasRef = useRef(null);
   const download_item = () => {
 
     if(!imageResult){
@@ -197,6 +197,42 @@ const KIDienste = ({ accessToken }) => {
       return () => clearInterval(interval);
     }
   }, [isWebcamOpen, capture]);
+  
+  const drawMask = (mask, canvas) => {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(mask[0].length, mask.length);
+    console.log("MASK ", mask);
+    console.log("IMAGEDATA ", imageData);
+    for (let y = 0; y < mask.length; y++) {
+      for (let x = 0; x < mask[0].length; x++) {
+        const value = mask[y][x] ? 255 : 0; // Assuming binary mask
+        const index = (y * mask[0].length + x) * 4;
+        imageData.data[index] = value; // R
+        imageData.data[index + 1] = value; // G
+        imageData.data[index + 2] = value; // B
+        imageData.data[index + 3] = 127; // A (transparency)
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+  useEffect(() => {
+    if (canvasRef.current && webcamRef.current) {
+      const canvas = canvasRef.current;
+      const video = webcamRef.current.video;
+      if (video) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+      detections.forEach((detection) => {
+        if (detection.mask) {
+          drawMask(detection.mask, canvas);
+        }
+      });
+    }
+  }, [detections, isWebcamOpen]);
 
   return (
     <div className="visual-fire-inspection-tool-container">
@@ -243,32 +279,41 @@ const KIDienste = ({ accessToken }) => {
               </div>
             </div>
           )}
-            {isWebcamOpen && (
-              <div className="webcam-container" style={{ position: 'relative' }}>
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  className="webcam"
-                  style={{ width: '100%' }}
-                />
-                {detections.map((detection, index) => (
-                  <div key={index} style={{
-                    position: 'absolute',
-                    border: '3px solid #39FF14',
-                    left: `${detection.x}px`,
-                    top: `${detection.y}px`,
-                    width: `${detection.width}px`,
-                    height: `${detection.height}px`
-                  }}>
-                    <span style={{ color: 'red' }}>{detection.label} ({Math.round(detection.confidence * 100)}%)</span>
-                  </div>
-                ))}
-                <button onClick={() => setIsWebcamOpen(false)} className="btn btn-secondary">Close</button>
-              </div>
-            )}
-            
-              
+      {isWebcamOpen && (
+        <div className="webcam-container" style={{ position: 'relative' }}>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            className="webcam"
+            style={{ width: '100%' }}
+          />
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          />
+          {detections.map((detection, index) => (
+            <div key={index} style={{
+              position: 'absolute',
+              border: '3px solid #39FF14',
+              left: `${detection.x}px`,
+              top: `${detection.y}px`,
+              width: `${detection.width}px`,
+              height: `${detection.height}px`
+            }}>
+              <span style={{ color: 'red' }}>{detection.label} ({Math.round(detection.confidence * 100)}%)</span>
+            </div>
+          ))}
+          <button onClick={() => setIsWebcamOpen(false)} className="btn btn-secondary">Close</button>
+        </div>
+      )}
               <div className="buttons-between-cards">
                 <Dropdown onSelect={handleMLServiceSelect}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
