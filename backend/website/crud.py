@@ -10,7 +10,7 @@ from backend.website.models import User, Project, Image, Model, Annotation, Trai
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException
-from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov8, render_images_annotation_tool
+from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov8, render_blockedarea_yolov8, render_images_annotation_tool
 from backend.utils.cvat_utils import create_and_upload_task
 from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
 from backend.utils.llm_utils import get_answer, get_answer_no_image
@@ -993,6 +993,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
         "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
         "Blockiertheit_modal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt",
         "Blockiertheit_amodal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt",
+        "Blockiertheit_areal": ["storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt","storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt"],
     }
 
     # Get the keyword from Dienst (assuming it's a string)
@@ -1004,9 +1005,13 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     if model_path is None:
         raise HTTPException(status_code=404, detail="Model not found!")
     print("Model path: ", model_path)
-    rendered_image, name = await render_images_yolov8(model_path, base64_image, keyword, user)
+    if keyword != "Blockiertheit_areal":
+        rendered_image, name, time = await render_images_yolov8(model_path, base64_image, keyword, user)
+    else:
+        rendered_image, name, time = await render_blockedarea_yolov8(model_path, base64_image, keyword, user)
+    
 
-    return [rendered_image, name]
+    return [rendered_image, name], time
 """
     if keyword != "Brandschutzanlagen":
         rendered_image = await render_images_yolov7(model_path, final_path, keyword)

@@ -274,12 +274,12 @@ async def render_images_yolov8(model_path, base64_image, model_type, user):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
     print("render_image")
     model = YOLO(model_path)
-    print("model: ", model)
     np_image = decode_base64_image(base64_image)
     results = model(np_image)
     if model_type == 'Blockiertheit_modal' or model_type == 'Blockiertheit_amodal':
         # Process segmentation results
         masks = results[0].masks  # Assuming results[0].masks contains the segmentation masks
+        print("masks", masks)
         annotated_image = results[0].plot()  # This returns a numpy array with the annotations
         # Encode the annotated image back to base64
         annotated_base64_image = encode_image_to_base64(annotated_image)
@@ -345,7 +345,132 @@ async def render_images_yolov8(model_path, base64_image, model_type, user):
     with open(json_save_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)
     """
-    return annotated_base64_image, name
+    return annotated_base64_image, name, [results[0].speed['preprocess'], results[0].speed['inference'], results[0].speed['postprocess']]
+
+async def render_blockedarea_yolov8(model_path, base64_image, model_type, user):
+    #model = await asyncio.to_thread(load_yolov7_model, model_path)
+    print("render_image")
+    results = [None] * len(model_path)
+    masks = []
+    for i, mp in enumerate(model_path):
+        model = YOLO(mp)
+        print("model: ", model)
+        np_image = decode_base64_image(base64_image)
+        results[i] = model(np_image)
+        masks.append(results[i][0].masks.data.cpu().numpy())  # Assuming masks are stored in results[i].masks.data
+
+    if model_type == 'Blockiertheit_areal':
+        # Resize masks to match the original image size
+        original_height, original_width, _ = np_image.shape
+        binary_masks = []
+
+        for mask in masks:
+            # Assuming each mask can contain multiple segmentation channels, combine them into one binary mask
+            combined_mask = np.zeros((original_height, original_width), dtype=np.uint8)
+            for channel in mask:
+                resized_channel = cv2.resize(channel, (original_width, original_height), interpolation=cv2.INTER_NEAREST)
+                combined_mask = np.maximum(combined_mask, (resized_channel > 0).astype(np.uint8))
+            binary_masks.append(combined_mask)
+
+        # Binary masks for the two segmentations
+        binary_mask1 = binary_masks[0]  # First segmentation
+        binary_mask2 = binary_masks[1]  # Second segmentation
+        
+        # Compute the non-overlapping part of the second segmentation
+        non_overlapping_mask = cv2.bitwise_and(binary_mask2, cv2.bitwise_not(binary_mask1))
+
+        # Calculate the area of the non-overlapping region
+        non_overlapping_area = np.sum(non_overlapping_mask)
+
+        # Calculate the total area of the second segmentation
+        total_area_mask2 = np.sum(binary_mask2)
+        # Percentage of the non-overlapping area in relation to the second segmentation
+        remaining_percentage = (non_overlapping_area / total_area_mask2) * 100 if total_area_mask2 > 0 else 0
+        print(f"Remaining area percentage: {remaining_percentage:.2f}%")
+
+        # Find the bounding box of the non-overlapping region
+        non_zero_coords = cv2.findNonZero(non_overlapping_mask)
+        if non_zero_coords is not None:
+            x, y, w, h = cv2.boundingRect(non_zero_coords)
+
+            # Annotate the image with the bounding box
+            annotated_image = np_image.copy()
+            annotated_image[non_overlapping_mask > 0] = [0, 255, 0]  # Highlight non-overlapping area in green
+            cv2.rectangle(annotated_image, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue bounding box
+        else:
+            print("No non-overlapping area found.")
+            annotated_image = np_image.copy()
+        # Dynamic font size and thickness based on image size
+        font_scale = original_height / 500  # Adjust divisor as needed to scale text
+        font_thickness = max(1, int(original_height / 500))  # Ensure a minimum thickness
+
+        # Add the percentage text to the bottom-left corner of the image
+        label = f"{remaining_percentage:.2f}%"
+        text_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)[0]
+        text_x, text_y = 10, original_height - 10  # Bottom-left corner
+        text_width, text_height = text_size[0], text_size[1]
+
+        # Draw a white rectangle for the background
+        cv2.rectangle(
+            annotated_image,
+            (text_x - 5, text_y - text_height - 5),  # Top-left corner of the background
+            (text_x + text_width + 5, text_y + 5),  # Bottom-right corner of the background
+            (255, 255, 255),  # White color
+            -1,  # Filled rectangle
+        )
+
+        # Overlay the black text on top of the white background
+        cv2.putText(
+            annotated_image,
+            label,
+            (text_x, text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale,  # Dynamic font scale
+            (0, 0, 0),  # Black text
+            font_thickness,  # Dynamic thickness
+            cv2.LINE_AA,
+        )
+
+        # Encode the annotated image back to base64
+        annotated_base64_image = encode_image_to_base64(annotated_image)
+        # Save the annotated image and masks
+        characters = string.ascii_letters + string.digits
+        name = ''.join(random.choice(characters) for _ in range(10))
+        collection_result_images.insert_one({"filename": name, "base64": annotated_base64_image })
+        
+        data_dict = []
+        class_names = results[1][0].names  # Extract class names from results
+        for mask, cls in zip(non_overlapping_mask, results[1][0].boxes.cls):
+            class_name = class_names[int(cls)]  # Get class name using index
+            data_dict.append({
+                'type': class_name,
+                'guid': 542348234,
+                'comment': f'{class_name}',
+                'segmentation_mask': mask.tolist()  # Convert mask data to list
+            })
+    formatted_date = datetime.now().strftime("%d.%m.%Y")
+    formatted_timestamp = datetime.now().strftime("%H:%M:%S")
+    document = {
+        "name": name,
+        "user": user["username"],
+        "data_json": data_dict,
+        "encoded_image": annotated_base64_image,
+        "date": formatted_date,
+        "timestamp": formatted_timestamp
+    }
+    await collection_jsons.insert_one(document)
+    """
+    # Save the data dictionary as a JSON file
+    json_save_path = f"frontend//public//Annotated_Images//{name}.json"
+    os.makedirs(os.path.dirname(json_save_path), exist_ok=True)
+    with open(json_save_path, 'w') as json_file:
+        json.dump(data_dict, json_file, indent=4)
+    """
+    preproTime = results[1][0].speed['preprocess']+results[0][0].speed['preprocess']
+    inferenceTime = results[1][0].speed['inference']+results[0][0].speed['inference']
+    postproTime = results[1][0].speed['postprocess']+results[0][0].speed['postprocess']
+    return annotated_base64_image, name, [preproTime, inferenceTime, postproTime]
+
 
 
 

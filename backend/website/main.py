@@ -323,12 +323,12 @@ async def predict_image_KI_Dienste(Dienst:str, imageName:str, user=Depends(manag
     print("Predicting image with KI Dienst: ", Dienst)
     # Record the start time
     start_time = time.time()
-    image_and_name = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
+    image_and_name, timeArray = await get_predicted_image_KI_Dienst(Dienst, imageName, user)
     # Record the end time
     end_time = time.time()
     # Calculate the duration
     duration = end_time - start_time
-    return [image_and_name, duration]
+    return [image_and_name, duration, timeArray]
 
 @app.get("/download_image_json/{imageName}")
 async def download_image_json(imageName: str, user=Depends(manager)):
@@ -360,6 +360,7 @@ async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):
         "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
         "Blockiertheit_modal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt",
         "Blockiertheit_amodal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt",
+        "Blockiertheit_areal": ["storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt","storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt"],
     }
 
     # Get the keyword from Dienst (assuming it's a string)
@@ -373,35 +374,76 @@ async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    if keyword != "Blockiertheit_areal":
+        # Perform object detection
+        model = YOLO(model_path)
+        classNames = model.names
+        # Perform object detection
+        results = model(img)
 
-    # Perform object detection
-    model = YOLO(model_path)
-    classNames = model.names
-    # Perform object detection
-    results = model(img)
+        # Extract detection results
+        detections = []
+        for r in results:
+            for box in r.boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                confidence = round(float(box.conf[0]), 2)
+                cls = int(box.cls[0])
+                label = classNames[cls]
+                detections.append({
+                    "label": label,
+                    "confidence": confidence,
+                    "x": x1,
+                    "y": y1,
+                    "width": x2 - x1,
+                    "height": y2 - y1
+                })
 
-    # Extract detection results
-    detections = []
-    for r in results:
-        for box in r.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            confidence = round(float(box.conf[0]), 2)
-            cls = int(box.cls[0])
-            label = classNames[cls]
-            detections.append({
-                "label": label,
-                "confidence": confidence,
-                "x": x1,
-                "y": y1,
-                "width": x2 - x1,
-                "height": y2 - y1
-            })
-    """
-    # this didnt work well
-    # Extract segmentation results if available
-    if hasattr(r, 'masks') and r.masks is not None:
-        masks = r.masks.data.cpu().numpy()  # Convert masks to numpy array
-        for i, mask in enumerate(masks):
+        # Extract segmentation results if available
+        if hasattr(r, 'masks') and r.masks is not None:
+            masks = r.masks.data.cpu().numpy()  # Convert masks to numpy array
+            for i, mask in enumerate(masks):
+                detections[i]["mask"] = mask.tolist()  # Convert mask to list for JSON serialization
+        """
+    else:
+        
+        # Perform object detection
+        model1 = YOLO(model_path[0])
+        model2 = YOLO(model_path[1])
+        classNames = model2.names
+        # Perform object detection
+        results1 = model1(img)
+        results2 = model2(img)
+
+        # Extract detection results
+        detections = []
+        for r1,r2 in zip(results1,results2):
+            for box in r2.boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                confidence = round(float(box.conf[0]), 2)
+                cls = int(box.cls[0])
+                label = classNames[cls]
+                detections.append({
+                    "label": label,
+                    "confidence": confidence,
+                    "x": x1,
+                    "y": y1,
+                    "width": x2 - x1,
+                    "height": y2 - y1
+                })
+
+        # Extract segmentation results if available
+        mask1 = r1.masks.data.cpu().numpy()  # Convert masks to numpy array
+        mask2 = r2.masks.data.cpu().numpy()  # Convert masks to numpy array
+        mask1 = (mask1 > 0).astype(np.uint8)  # Convert to binary mask if not already
+        mask2 = (mask2 > 0).astype(np.uint8)
+
+        # Compute the difference mask: areas in mask2 not in mask1
+        difference_mask = np.bitwise_and(mask2, np.bitwise_not(mask1))
+        # Convert the binary mask back to a format suitable for visualization
+        visualization_mask = (difference_mask * 255).astype(np.uint8)
+        for i, mask in enumerate(difference_mask):
             detections[i]["mask"] = mask.tolist()  # Convert mask to list for JSON serialization
-    """
+        """
+
+
     return JSONResponse(content={"detections": detections})
