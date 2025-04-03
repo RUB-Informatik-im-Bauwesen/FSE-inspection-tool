@@ -1006,6 +1006,8 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
         raise HTTPException(status_code=404, detail="Model not found!")
     print("Model path: ", model_path)
     if keyword != "Blockiertheit_areal":
+        print("model_path: ", model_path)
+        print("keyword: ", keyword)
         rendered_image, name, time = await render_images_yolov8(model_path, base64_image, keyword, user)
     else:
         rendered_image, name, time = await render_blockedarea_yolov8(model_path, base64_image, keyword, user)

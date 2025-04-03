@@ -19,7 +19,10 @@ const KIDienste = ({ accessToken }) => {
   const [imageResult, setImageResult] = useState("");
   const [downloadImageName, setDownloadImageName] = useState("");
   const [selectedMLService, setSelectedMLService] = useState(null);
+  const [backendTime, setBackendTime] = useState(null);
   const [inferenceTime, setInferenceTime] = useState(null);
+  const [preprocessTime, setPreprocessTime] = useState(null);
+  const [postprocessTime, setPostprocessTime] = useState(null);
   const [isLoadingPredict, setLoadingPredict] = useState(false);
   const [imageBase64, setImageBase64] = useState("");
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
@@ -146,7 +149,10 @@ const KIDienste = ({ accessToken }) => {
           console.log("RES:", res)
           setImageResult(res.data[0][0])
           setDownloadImageName(res.data[0][1])
-          setInferenceTime(res.data[1])
+          setBackendTime(res.data[1])
+          setPreprocessTime(res.data[2][0])
+          setInferenceTime(res.data[2][1])
+          setPostprocessTime(res.data[2][2])
           setLoadingPredict(false)
           console.log(res.data)
         })
@@ -201,12 +207,60 @@ const KIDienste = ({ accessToken }) => {
   const drawMask = (mask, canvas) => {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.createImageData(mask[0].length, mask.length);
-    console.log("MASK ", mask);
-    console.log("IMAGEDATA ", imageData);
     for (let y = 0; y < mask.length; y++) {
       for (let x = 0; x < mask[0].length; x++) {
         const value = mask[y][x] ? 255 : 0; // Assuming binary mask
         const index = (y * mask[0].length + x) * 4;
+        imageData.data[index] = value; // R
+        imageData.data[index + 1] = value; // G
+        imageData.data[index + 2] = value; // B
+        imageData.data[index + 3] = 127; // A (transparency)
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+
+  useEffect(() => {
+    if (canvasRef.current && webcamRef.current) {
+      const canvas = canvasRef.current;
+      const video = webcamRef.current.video;
+      if (video) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+      detections.forEach((detection) => {
+        if (detection.mask) {
+          drawMask(detection.mask, canvas);
+        }
+      });
+    }
+  }, [detections, isWebcamOpen]);
+/*
+  const drawCompositeMask = (masks, canvas) => {
+    const ctx = canvas.getContext('2d');
+    const width = masks[0][0].length;
+    const height = masks[0].length;
+    const compositeMask = Array.from({ length: height }, () => Array(width).fill(0));
+
+    // Combine all masks into a composite mask
+    masks.forEach(mask => {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (mask[y][x]) {
+            compositeMask[y][x] = 255; // Set to 255 if any mask has a value at this position
+          }
+        }
+      }
+    });
+
+    const imageData = ctx.createImageData(width, height);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const value = compositeMask[y][x];
+        const index = (y * width + x) * 4;
         imageData.data[index] = value; // R
         imageData.data[index + 1] = value; // G
         imageData.data[index + 2] = value; // B
@@ -226,14 +280,13 @@ const KIDienste = ({ accessToken }) => {
       }
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
-      detections.forEach((detection) => {
-        if (detection.mask) {
-          drawMask(detection.mask, canvas);
-        }
-      });
+      const masks = detections.map(detection => detection.mask).filter(mask => mask);
+      if (masks.length > 0) {
+        drawCompositeMask(masks, canvas);
+      }
     }
   }, [detections, isWebcamOpen]);
-
+*/
   return (
     <div className="visual-fire-inspection-tool-container">
       <div className="header-center">
@@ -328,6 +381,7 @@ const KIDienste = ({ accessToken }) => {
                     <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
                     <Dropdown.Item eventKey="Blockiertheit_modal">Detektion Blockiertheit modal</Dropdown.Item>
                     <Dropdown.Item eventKey="Blockiertheit_amodal">Detektion Blockiertheit amodal</Dropdown.Item>
+                    <Dropdown.Item eventKey="Blockiertheit_areal">Detektion Blockiertheit amodal-modal</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
                 {!isWebcamOpen && (
@@ -342,7 +396,11 @@ const KIDienste = ({ accessToken }) => {
                 <div className="card-body">
                   <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
                   <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
-                  <p>Inference Time: {inferenceTime} seconds</p>
+                  <p>Backend Time: {backendTime} seconds</p>
+                  <p>Preprocess Time: {preprocessTime} ms</p>
+                  <p>Inference Time: {inferenceTime} ms</p>
+                  <p>Postprocess Time: {postprocessTime} ms</p>
+                  <p>Total Time: {preprocessTime+inferenceTime+postprocessTime} ms</p>
                 </div>
               </div>
               

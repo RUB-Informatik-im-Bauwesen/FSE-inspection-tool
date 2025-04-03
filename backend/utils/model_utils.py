@@ -345,7 +345,14 @@ async def render_images_yolov8(model_path, base64_image, model_type, user):
     with open(json_save_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)
     """
-    return annotated_base64_image, name, [results[0].speed['preprocess'], results[0].speed['inference'], results[0].speed['postprocess']]
+    preproTime = 0
+    inferenceTime = 0
+    postproTime = 0
+    for r in results:
+        preproTime = preproTime + r.speed['preprocess']
+        inferenceTime = inferenceTime + r.speed['inference']
+        postproTime = postproTime + r.speed['postprocess']
+    return annotated_base64_image, name, [preproTime, inferenceTime, postproTime]
 
 async def render_blockedarea_yolov8(model_path, base64_image, model_type, user):
     #model = await asyncio.to_thread(load_yolov7_model, model_path)
@@ -466,9 +473,14 @@ async def render_blockedarea_yolov8(model_path, base64_image, model_type, user):
     with open(json_save_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)
     """
-    preproTime = results[1][0].speed['preprocess']+results[0][0].speed['preprocess']
-    inferenceTime = results[1][0].speed['inference']+results[0][0].speed['inference']
-    postproTime = results[1][0].speed['postprocess']+results[0][0].speed['postprocess']
+    preproTime = 0
+    inferenceTime = 0
+    postproTime = 0
+    for model in results:
+        for r in model:
+            preproTime = preproTime + r.speed['preprocess']
+            inferenceTime = inferenceTime + r.speed['inference']
+            postproTime = postproTime + r.speed['postprocess']
     return annotated_base64_image, name, [preproTime, inferenceTime, postproTime]
 
 
