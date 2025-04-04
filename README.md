@@ -89,7 +89,7 @@ URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Bu
 
 ### Step 1 (Clone the Git Repository):
 
-URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset (github.com)
+URL: https://github.com/RUB-Informatik-im-Bauwesen/fse-web-tool.git (github.com)
 
 ### Step 2:
 Start the services defined in the docker-compose.yml file:
