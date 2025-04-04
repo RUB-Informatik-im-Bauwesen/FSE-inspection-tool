@@ -30,6 +30,7 @@ This repository provides:
 
 ## Setup
 
+
 ### SKIP AHEAD IF YOU WANT TO USE DOCKER
 
 ### Step 1 (Cloning the Git Repository):
@@ -59,19 +60,13 @@ URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Bu
   pip install -r requirements.txt
   ```
 
-### Step 4 (Downloading Models and Images):
-  - Download validation images from this link: (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) and replace the folder in Storage.
-  - Download models for the Visual Annotation Tool from this link: (https://drive.google.com/file/d/1vcIlMRK7yZg0_sooOtaNWitnj1suudHJ/view?usp=sharing) and replace the folder in Storage.
-  - Download rare images from this link: (https://drive.google.com/file/d/1jgORHgpLZ_uT1sp0gbRu2Gpfae_wyDKU/view?usp=sharing) and replace the folder in Storage.
-
-
-### Step 5 (Starting the Backend):
+### Step 4 (Starting the Backend):
   - Run the backend with the following command: 
   ```
   uvicorn backend.website.main:app –reload
   ```
 
-### Step 6 (Starting the Frontend):
+### Step 5 (Starting the Frontend):
   - Open a new PowerShell window and navigate to the frontend directory: 
   ```
   cd frontend
@@ -107,3 +102,27 @@ Acess Localhost at: http://127.0.0.1:5173/
 
 ### Step 4:
 Enjoy!
+
+
+# Downloading Models and Images:
+To use this application, you need YOLOv8 weights and organize them as described below. The weights can be requested from **Angelina Aziz** via email at **angelina.aziz@ruhr-uni-bochum.de**.
+
+### Directory Structure for Weights
+Organize the weights for each service in the following structure:
+```plaintext
+storage/
+└── Visual_Annotation_Tool/
+    ├── Detektion_Blockiertheit_amodal_Yolov8/
+    │   └── best.pt
+    ├── Detektion_Blockiertheit_modal_Yolov8/
+    │   └── best.pt
+    ├── Detektion_Brandschutzanlagen_Yolov8/
+    │   └── best.pt
+    ├── Detektion_Sicherheitsschilder_Yolov8/
+    │   └── best.pt
+    └── Detektion_Wartungsinformationen_Yolov8/
+        └── best.pt
+```
+  - Download validation images from this link: (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) and replace the folder in Storage.
+  
+  - Download rare images from this link: (https://drive.google.com/file/d/1jgORHgpLZ_uT1sp0gbRu2Gpfae_wyDKU/view?usp=sharing) and replace the folder in Storage.
