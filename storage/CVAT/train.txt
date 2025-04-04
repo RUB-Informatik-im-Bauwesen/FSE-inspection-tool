@@ -1,1 +1,0 @@
-data/obj_train_data/20210803_112151.jpg
