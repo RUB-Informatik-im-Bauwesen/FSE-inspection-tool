@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import GPT from "./GPT";
 import './KIDiensteStyle.css';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';

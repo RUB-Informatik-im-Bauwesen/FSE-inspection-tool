@@ -10,9 +10,7 @@ import ProjectSite from './components/ProjectSite'
 import Statistics from './components/Statistics'
 import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
-import KIDienste from './components/KIDienste'
 import ViewJsons from './components/ViewJsons'
-import GPT from './components/GPT'
 import IfcViewer from './components/IfcViewer'
 import KIDiensteNoGPT from './components/KIDienstenoGPT'
 
@@ -88,7 +86,6 @@ function App() {
           <Route path="/KIDienst" element={<KIDiensteNoGPT accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
           <Route path="/view-jsons" element={<ViewJsons accessToken={accessToken}/>} />
-          <Route path="/chat" element={<GPT accessToken={accessToken}/>} />
           <Route path="/ifc-viewer" element={<IfcViewer />} />
         </Routes>
         <header className='Ansprechpartner'>
