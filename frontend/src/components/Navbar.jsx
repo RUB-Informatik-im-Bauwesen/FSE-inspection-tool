@@ -60,10 +60,8 @@ const Navbar = ({ username, accessToken, isLoggedIn, onLogout, setProjects }) =>
 
       <div className={isLoggedIn ? "display-on" : "display-off"}>
         <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-          {/* 
-          <li><a onClick={get_projects_by_user}>Models</a></li>
-          */}
-          <li><a onClick={get_projects_by_user2}>Evaluation</a></li>
+          <li><a onClick={get_projects_by_user}>Active Learning Models</a></li>
+          <li><a onClick={get_projects_by_user2}>Active Learning Evaluation</a></li>
           <li><a href='/KIDienst'>FSE Services</a></li>
           <li><a href='/FAQ'>FAQ</a></li>
           <li><a href='/ifc-viewer'>IFC Viewer</a></li>
