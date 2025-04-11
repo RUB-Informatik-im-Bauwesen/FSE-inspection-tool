@@ -1,5 +1,7 @@
 </div>
 
+**Web-Based Fire Safety Inspection Platform Utilizing FSE ML Services**
+
 This project is a **web-based tool** designed to simplify the process of **fire safety inspection and documentation** utilizing **FSE ML services**. 
 It provides an intuitive interface for users to annotate images, manage datasets, and iteratively improve object detection models. 
 
