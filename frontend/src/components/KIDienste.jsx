@@ -37,7 +37,6 @@ const KIDienste = ({ accessToken }) => {
     let dataSource; // I have no idea what this is supposed to be for, might have to ask ayman
     const createurl = new URL(imageResult, window.location.href);
     const fileNameWithExtension = createurl.pathname.split('/').pop();
-    console.log("filenamewithextension", fileNameWithExtension)
     let url = `${apiUrl}/download_image_json/${downloadImageName}`;
 
     const axiosConfig = {
@@ -53,7 +52,6 @@ const KIDienste = ({ accessToken }) => {
     }
 
     axios(url,axiosConfig).then((res) => { // Create a Blob URL for the file
-        console.log(res);
 
         const blob = new Blob([res.data], { type: res.headers['content-type'] });
 
@@ -61,7 +59,6 @@ const KIDienste = ({ accessToken }) => {
         const reader = new FileReader();
         reader.onload = () => {
           // Use reader.result as your data URL
-          console.log(reader.result);
 
           // Here you can handle the data URL as needed
           // For example, you can display an image in the browser or trigger a download
@@ -89,10 +86,8 @@ const KIDienste = ({ accessToken }) => {
   };
 
   const handleFileUpload = (event) => {
-    console.log(event)
     const files = event.target.files;
     setFiles(files)
-    console.log(files)
   }
 
   const openModal = () => {
@@ -105,25 +100,18 @@ const KIDienste = ({ accessToken }) => {
 
   const handleSubmitUpload = () => {
       const formData = new FormData();
-      console.log(files)
       formData.append('file', files[0]);
-      console.log("UPLOAD")
       let url = `${apiUrl}/upload_image_KI_Dienste`;
-      console.log("url", url)
       axios.post(url, formData, {
               headers: {  Authorization: `Bearer ${accessToken}`, 'Content-Type': files.type }
             })
             .then((res) => {
-              console.log(res);
               const { filename, image_base64 } = res.data;
               setImageUpload(filename)
               setImageBase64(image_base64);
             })
             .catch((err) => {
-              console.log(err);
             });
-
-    console.log(imageUpload)
     closeModal()
   }
 
@@ -132,7 +120,6 @@ const KIDienste = ({ accessToken }) => {
 
     const filePath = imageUpload;
     const fileNameWithoutExtension = filePath.split('/').pop().replace(/\.[^/.]+$/, '');
-    console.log(fileNameWithoutExtension)
 
     if(!selectedMLService){
       alert("Please choose a ML Service!");
@@ -145,7 +132,6 @@ const KIDienste = ({ accessToken }) => {
         headers: {  Authorization: `Bearer ${accessToken}`},
             })
         .then((res) => {
-          console.log("RES:", res)
           setImageResult(res.data[0][0])
           setDownloadImageName(res.data[0][1])
           setBackendTime(res.data[1])
@@ -153,7 +139,6 @@ const KIDienste = ({ accessToken }) => {
           setInferenceTime(res.data[2][1])
           setPostprocessTime(res.data[2][2])
           setLoadingPredict(false)
-          console.log(res.data)
         })
         .catch((err) => {
             console.log(err);
@@ -190,7 +175,6 @@ const KIDienste = ({ accessToken }) => {
     const response = await axios.post(`${apiUrl}/predict_webcam_real_time/${selectedMLService}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    //console.log(response);
     setDetections(response.data.detections);
   }, [webcamRef, selectedMLService]);
 
@@ -307,12 +291,12 @@ const KIDienste = ({ accessToken }) => {
             </Button>
           </Modal.Footer>
         </Modal>
-
+        {/*
         <div className="title-text-container">
           <h1>Visual Fire Inspection Tool</h1>
           <p>Welcome to Visual Fire Inspection Tool! What can I inspect for you? 😃</p>
         </div>
-        {/*
+        
         <div className="top-right-button">
           <button onClick={navigateToViewJsons} className="btn btn-primary">View all inspections</button>
         </div>
@@ -370,17 +354,22 @@ const KIDienste = ({ accessToken }) => {
               )}
               <div className="buttons-between-cards">
                 <Dropdown onSelect={handleMLServiceSelect}>
-                  <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{ width: '200px' }}>
-                    {selectedMLService ? selectedMLService : "Choose ML Service"}
-                  </Dropdown.Toggle>
+                <Dropdown.Toggle
+                  variant="secondary"
+                  id="dropdown-basic"
+                  style={{ width: '200px' }}
+                  dangerouslySetInnerHTML={{
+                    __html: selectedMLService
+                      ? selectedMLService.replace(/_/g, ' ').replace('(', '<br />(')
+                      : "Choose ML Service",
+                  }}
+                ></Dropdown.Toggle>
                   <Dropdown.Menu>
-                    <Dropdown.Item eventKey="Wartungsinformationen">Detektion Wartungsinformationen</Dropdown.Item>
-                    <Dropdown.Item eventKey="Prüfplakettenaufkleber">Detektion Prüfplakettenaufkleber</Dropdown.Item>
-                    <Dropdown.Item eventKey="Brandschutzanlagen">Detektion Brandschutzanalgen</Dropdown.Item>
-                    <Dropdown.Item eventKey="Sicherheitsschilder">Detektion Sicherheitsschilder</Dropdown.Item>
-                    <Dropdown.Item eventKey="Blockiertheit_modal">Detektion Blockiertheit modal</Dropdown.Item>
-                    <Dropdown.Item eventKey="Blockiertheit_amodal">Detektion Blockiertheit amodal</Dropdown.Item>
-                    <Dropdown.Item eventKey="Blockiertheit_areal">Detektion Blockiertheit amodal-modal</Dropdown.Item>
+                    <Dropdown.Item eventKey="FSE_Details_Extraction_(fire_class_symbols)">FSE Details Extraction (fire class symbols)</Dropdown.Item>
+                    <Dropdown.Item eventKey="FSE_Details_Extraction_(inspection_tags)">FSE Details Extraction (inspection tags)</Dropdown.Item>
+                    <Dropdown.Item eventKey="FSE_Detection">FSE Detection</Dropdown.Item>
+                    <Dropdown.Item eventKey="FSE_Marking_Detection">FSE Marking Detection</Dropdown.Item>
+                    <Dropdown.Item eventKey="FSE_Condition_Check">FSE Condition Check</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
                 {!isWebcamOpen && (
@@ -395,14 +384,23 @@ const KIDienste = ({ accessToken }) => {
                 <div className="card-body">
                   <button className="card-button btn btn-secondary">Save and choose next ML Service</button>
                   <button onClick={download_item} className="card-button btn btn-primary">Download Output</button>  {/* Adding Bootstrap classes 'btn' and 'btn-primary' */}
-                  <p>Backend Time: {backendTime} seconds</p>
-                  <p>Preprocess Time: {preprocessTime} ms</p>
-                  <p>Inference Time: {inferenceTime} ms</p>
-                  <p>Postprocess Time: {postprocessTime} ms</p>
-                  <p>Total Time: {preprocessTime+inferenceTime+postprocessTime} ms</p>
                 </div>
               </div>
-              
+            )}
+            {!isWebcamOpen && (
+              <div className="card card-deck"> {/* Adding Bootstrap class 'card-deck' */}
+                <div className="timing-info">
+                <p style={{ fontWeight: 'bold' }}>Runtime Information:</p>
+                {backendTime == null && <p>Please start a Service to view the runtime.</p>}
+                  {backendTime !== null && <p>Backend Time: {backendTime.toFixed(3)} seconds</p>}
+                  {preprocessTime !== null && <p>Preprocess Time: {preprocessTime.toFixed(3)} ms</p>}
+                  {inferenceTime !== null && <p>Inference Time: {inferenceTime.toFixed(3)} ms</p>}
+                  {postprocessTime !== null && <p>Postprocess Time: {postprocessTime.toFixed(3)} ms</p>}
+                  {preprocessTime !== null && inferenceTime !== null && postprocessTime !== null && (
+                    <p>Total Time: {(preprocessTime + inferenceTime + postprocessTime).toFixed(3)} ms</p>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>

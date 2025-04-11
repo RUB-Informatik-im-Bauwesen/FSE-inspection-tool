@@ -43,7 +43,12 @@
   justify-content: center; /* Center horizontally */
   height: 70vh; /* Set height to 100% of the viewport height */
 }
-
+.timing-info {
+  min-height: 120px; /* Adjust this value based on the maximum expected height */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align content to the top */
+}
 .card {
 
   width: 300px; /* Set a fixed width for the card */
@@ -75,7 +80,6 @@
   margin-top: 10px;
   width:260px;
 }
-
 /* Webcam container */
 .webcam-container {
   display: flex;
