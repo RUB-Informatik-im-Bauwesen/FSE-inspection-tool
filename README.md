@@ -19,7 +19,7 @@ This repository provides:
 - A **Frontend Interface** for annotating images, managing datasets, and visualizing results.
 - **Pre-trained and executable ML models** for detecting FSE objects and FSE-related information in images.
 - An **Active Learning Framework** for object detection tasks, enabling iterative model improvement.
-- Tools for **data preparation**, including downloading and managing validation and rare images.
+- Tools for **data preparation**, including downloading and managing validation and rare images.´
 - Dockerized setup for easy deployment and scalability.
 
 ## Setup
@@ -44,7 +44,8 @@ Enjoy!
 
 
 # Downloading Models and Images:
-To use this application, you need YOLOv8 weights and organize them as described below. The weights can be requested from **Angelina Aziz** via email at **angelina.aziz@ruhr-uni-bochum.de**.
+To use this application, you need to obtain YOLOv8 weights and organize them as described below. The weights for the YOLOv8 services can be requested by contacting **Angelina Aziz** via email at **angelina.aziz@ruhr-uni-bochum.de**.
+Additionally, the current implementation of the Active Learning framework is based on YOLOv5.
 
 ### Directory Structure for Weights
 Organize the weights for each service in the following structure:
