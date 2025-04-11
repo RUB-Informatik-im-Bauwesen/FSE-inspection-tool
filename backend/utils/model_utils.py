@@ -366,7 +366,7 @@ async def render_blockedarea_yolov8(model_path, base64_image, model_type, user):
         results[i] = model(np_image)
         masks.append(results[i][0].masks.data.cpu().numpy())  # Assuming masks are stored in results[i].masks.data
 
-    if model_type == 'Blockiertheit_areal':
+    if model_type == 'FSE_Condition_Check':
         # Resize masks to match the original image size
         original_height, original_width, _ = np_image.shape
         binary_masks = []
