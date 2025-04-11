@@ -5,7 +5,7 @@ from fastapi_login.exceptions import InvalidCredentialsException
 from fastapi.middleware.cors import CORSMiddleware
 from backend.website.db import collection_users, collection_annotations, collection_images, collection_projects, collection_rankings, collection_jsons
 from backend.website.models import User, NewUser, NewProject, Project, NewImage, Image, NewModel, Model, NewAnnotation, Annotation, TrainModel, AnnotationModel, pathModel, NewPrompt
-from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat, get_csv, uploadCSV, get_annotated_images, validate_model, get_valid_data, download_models, download_image, download_annotations, download_predicted_image, writeToPublic_KI_Dienste, get_predicted_image_KI_Dienst, download_zipped, fetch_jsons, get_response_llm
+from backend.website.crud import create_user, create_project, update_project, delete_project, fetch_projects_by_user, upload_image, update_image, delete_image, fetch_images_by_user, fetch_images_by_projects, upload_model, update_model, delete_model, fetch_models_by_user, fetch_models_by_project, fetch_rankings_images_by_project, fetch_selected_images, prepare_for_training, train_models, upload_annotation, update_annotation, delete_annotation, fetch_annotations_by_user, fetch_annotations_by_project, prepare_model_folder, upload_image_input, upload_model_input, upload_annotation_input, annotate_images_cvat, get_csv, uploadCSV, get_annotated_images, validate_model, get_valid_data, download_models, download_image, download_annotations, download_predicted_image, writeToPublic_KI_Dienste, get_predicted_image_KI_Dienst, download_zipped, fetch_jsons
 import logging
 from typing import List, Dict
 from datetime import timedelta
@@ -340,15 +340,6 @@ async def get_collection_jsons():
     collection = await fetch_jsons()
     return collection
 
-@app.post("/get_response_from_llm")
-async def get_response_from_llm(prompt: NewPrompt):
-    print(prompt)
-    # Path to the API key file
-    api_key_file = 'api_key.txt'
-    with open(api_key_file, 'r') as file:
-        key = file.read().strip()
-    response = await get_response_llm(prompt, key) #requires API key
-    return response
 
 @app.post("/predict_webcam_real_time/{Dienst}")
 async def predict_webcam_real_time(Dienst: str, file: UploadFile = File(...)):

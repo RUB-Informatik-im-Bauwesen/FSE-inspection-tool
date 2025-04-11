@@ -13,7 +13,6 @@ from fastapi import HTTPException
 from backend.utils.model_utils import iou, get_class_matches, get_roi_matches, merge_subarrays_match, variation_ratio, train_model, render_images, validate_model_yolo, calculate_blurriness_score,render_images_yolov8, render_blockedarea_yolov8, render_images_annotation_tool
 from backend.utils.cvat_utils import create_and_upload_task
 from backend.utils.cluster_utils import add_image_to_clusters_async, cluster_images_async
-from backend.utils.llm_utils import get_answer, get_answer_no_image
 import os
 import io
 import zipfile
@@ -249,11 +248,13 @@ async def download_predicted_image(pathToFile, user):
     existing_path = pathToFile.path
 
     # Adding "frontend/public/" to the beginning of the path
-    new_path = "frontend/public/" + existing_path
-
+    new_path = "frontend/public" + existing_path
+    new_path = new_path.replace(".jpeg", ".jpg")
+    print("############### new_path:", new_path)
     # Now, new_path contains the updated path
     file_path = Path(new_path)
     # Check if the file exists
+    print("############### file_path:", file_path)
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")
 
@@ -734,6 +735,7 @@ async def get_annotated_images(project_id, user):
         image_ids.append(image_id)
 
     save_path = "frontend\public\Annotated_Images"
+    print("############### images:", images)
     rendered_images = await render_images(model_path, images, save_path)
 
     return rendered_images
@@ -1066,21 +1068,3 @@ async def fetch_jsons():
         jsons.append(model)
     return jsons
 
-async def get_response_llm(prompt, api_key):
-    # Initialize the Dialogue class with the API key
-    if prompt.context and prompt.context.image:
-        prompt_answer = get_answer(prompt, api_key)
-    else:
-        prompt_answer = get_answer_no_image(prompt, api_key)
-    
-    """
-    # Add the prompt to the dialogue
-    dialogue.add_prompt(real_prompt)
-    
-    dialogue.get_answer(-1)
-    
-    # Retrieve the answer from the dialogues list
-    _, prompt_answer = dialogue.dialogues[-1]
-    """
-    # Return the answer in the expected format
-    return {"response": prompt_answer}
