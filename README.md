@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1>Active Learning Application for Object Detection on a Technical Building Equipment Dataset</h1>
+  <h1>Web-Based Fire Safety Inspection Platform Utilizing Self-Trained FSE ML Services</h1>
 
 
   <div>
