@@ -1,18 +1,3 @@
-<div align="center">
-
-  <h1>Web-Based Fire Safety Inspection Platform Utilizing Self-Trained FSE ML Services</h1>
-
-
-  <div>
-      Robin Ov&emsp;
-      Ayman Soultana&emsp;
-      Angelina Aziz&emsp;
-  </div>
-  <div>
-      Ruhr University Bochum
-
-  </div>
-
 </div>
 
 This project is a **web-based tool** designed to simplify the process of **fire safety inspection and documentation** utilizing **FSE ML services**. 
