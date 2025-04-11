@@ -989,13 +989,13 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     """
         # Define a dictionary to map keywords to model paths
     keyword_paths = {
-        "Wartungsinformationen": "storage/Visual_Annotation_Tool/Detektion_Wartungsinformationen_Yolov8/best.pt",
-        "Prüfplakettenaufkleber": "storage/Visual_Annotation_Tool/Detektion_Prüfplakettenaufkleber_Yolov8/best.pt",
-        "Brandschutzanlagen": "storage/Visual_Annotation_Tool/Detektion_Brandschutzanlagen_Yolov8/best.pt",
-        "Sicherheitsschilder": "storage/Visual_Annotation_Tool/Detektion_Sicherheitsschilder_Yolov8/best.pt",
+        "FSE_Details_Extraction_(fire_class_symbols)": "storage/Visual_Annotation_Tool/Detection_fire_class_symbols_Yolov8/best.pt",
+        "FSE_Details_Extraction_(inspection_tags)": "storage/Visual_Annotation_Tool/Detection_inspection_tags_Yolov8/best.pt",
+        "FSE_Detection": "storage/Visual_Annotation_Tool/Detection_FSE_Yolov8/best.pt",
+        "FSE_Marking_Detection": "storage/Visual_Annotation_Tool/Detection_marking_Yolov8/best.pt",
         "Blockiertheit_modal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt",
         "Blockiertheit_amodal": "storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt",
-        "Blockiertheit_areal": ["storage/Visual_Annotation_Tool/Detektion_Blockiertheit_modal_Yolov8/best.pt","storage/Visual_Annotation_Tool/Detektion_Blockiertheit_amodal_Yolov8/best.pt"],
+        "FSE_Condition_Check": ["storage/Visual_Annotation_Tool/Detection_Condition_modal_Yolov8/best.pt","storage/Visual_Annotation_Tool/Detection_Condition_amodal_Yolov8/best.pt"],
     }
 
     # Get the keyword from Dienst (assuming it's a string)
@@ -1007,7 +1007,7 @@ async def get_predicted_image_KI_Dienst(Dienst, imageName, user):
     if model_path is None:
         raise HTTPException(status_code=404, detail="Model not found!")
     print("Model path: ", model_path)
-    if keyword != "Blockiertheit_areal":
+    if keyword != "FSE_Condition_Check":
         print("model_path: ", model_path)
         print("keyword: ", keyword)
         rendered_image, name, time = await render_images_yolov8(model_path, base64_image, keyword, user)
