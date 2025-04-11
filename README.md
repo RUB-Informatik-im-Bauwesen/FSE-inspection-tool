@@ -1,30 +1,24 @@
-<div align="center">
-
-  <h1>Active Learning Application for Object Detection on a Technical Building Equipment Dataset</h1>
-
-
-  <div>
-      Robin Ov&emsp;
-      Ayman Soultana&emsp;
-      Angelina Aziz&emsp;
-  </div>
-  <div>
-      Ruhr University Bochum
-
-  </div>
-
 </div>
 
-This project is a **web-based tool** designed to simplify the process of **active learning** and **object detection** focusing on **fire safety equipment**. It provides an intuitive interface for users to annotate images, manage datasets, and iteratively improve object detection models. Additionally, the tool integrates an **IFC viewer** to visualize and interact with building information models, enabling seamless analysis and management of fire safety equipment in technical environments.
+<h1 align="center">🧯 Web-Based Fire Safety Inspection Platform Using ML Services 🤖📸</h1>
+<p align="center">
+
+This project is a **web-based tool** designed to simplify the process of **fire safety inspection and documentation** utilizing **FSE ML services**. 
+It provides an intuitive interface for users to annotate images, manage datasets, and iteratively improve object detection models. 
+
+This repository is based on the research presented in the following publications:
+- Aziz, A., & König, M. (Forthcoming). *Creation of a web-based tool for the visual inspection of building equipment*.
+- Soultana, A., & Aziz, A. (2023). *Active learning approach for object detection in technical building equipment images*. Ruhr-Universität Bochum.
+
 
 ## Overview
 
 
 This repository provides:
-- An **Active Learning Framework** for object detection tasks, enabling iterative model improvement.
 - A **Backend API** built with FastAPI to handle model inference, training, and data management.
 - A **Frontend Interface** for annotating images, managing datasets, and visualizing results.
-- Pre-trained models for detecting objects in technical building equipment datasets.
+- **Pre-trained and executable ML models** for detecting FSE objects and FSE-related information in images.
+- An **Active Learning Framework** for object detection tasks, enabling iterative model improvement.
 - Tools for **data preparation**, including downloading and managing validation and rare images.
 - Dockerized setup for easy deployment and scalability.
 
