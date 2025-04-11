@@ -1,6 +1,6 @@
 </div>
 
-<h1 align="center">🔥🧯 Web-Based Fire Safety Inspection Platform Using ML Services 🤖📸</h1>
+<h1 align="center">🧯 Web-Based Fire Safety Inspection Platform Using ML Services 🤖📸</h1>
 <p align="center">
 
 This project is a **web-based tool** designed to simplify the process of **fire safety inspection and documentation** utilizing **FSE ML services**. 
