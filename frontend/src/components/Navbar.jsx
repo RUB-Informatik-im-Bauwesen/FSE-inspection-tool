@@ -56,19 +56,20 @@ const Navbar = ({ username, accessToken, isLoggedIn, onLogout, setProjects }) =>
         <img src={img} />
 
       </a>
-      <h1>Visual Fire Inspection Tool</h1>
+      <h1>FSE Inspection Tool</h1>
 
       <div className={isLoggedIn ? "display-on" : "display-off"}>
         <ul id="navbar" className={clicked ? "#navbar active" : "#navbar"}>
-          <li><a onClick={get_projects_by_user}>Active Learning Models</a></li>
-          <li><a onClick={get_projects_by_user2}>Active Learning Evaluation</a></li>
           <li><a href='/KIDienst'>FSE Services</a></li>
+          <li><a onClick={get_projects_by_user}>ML-Models</a></li>
+          <li><a onClick={get_projects_by_user2}>Evaluation</a></li>
           <li><a href='/FAQ'>FAQ</a></li>
-          <li><a href='/ifc-viewer'>IFC Viewer</a></li>
           {/* 
+          <li><a href='/ifc-viewer'>IFC Viewer</a></li>
+
           <li><a href='/chat'>Chat</a></li>
           */}
-          <li><a onClick={onLogout} href='/'>Welcome {username}! Logout</a></li>
+          <li><a onClick={onLogout} href='/'>Logout</a></li>
           
         </ul>
       </div>
