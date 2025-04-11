@@ -112,15 +112,15 @@ Organize the weights for each service in the following structure:
 ```plaintext
 storage/
 └── Visual_Annotation_Tool/
-    ├── Detektion_Blockiertheit_amodal_Yolov8/
+    ├── Detection_Condition_amodal_Yolov8/
     │   └── best.pt
-    ├── Detektion_Blockiertheit_modal_Yolov8/
+    ├── Detection_Condition_modal_Yolov8/
     │   └── best.pt
-    ├── Detektion_Brandschutzanlagen_Yolov8/
+    ├── Detection_fire_class_symbols_Yolov8/
     │   └── best.pt
-    ├── Detektion_Sicherheitsschilder_Yolov8/
+    ├── Detection_FSE_Yolov8/
     │   └── best.pt
-    └── Detektion_Wartungsinformationen_Yolov8/
+    └── Detection_marking_Yolov8/
         └── best.pt
 ```
   - Download validation images from this link: (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) and replace the folder in Storage.
