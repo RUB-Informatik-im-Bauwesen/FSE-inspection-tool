@@ -15,7 +15,6 @@ RUN pip install opencv-python
 COPY ./backend /code/backend
 COPY ./storage /code/storage
 COPY ./yolov_5 /code/yolov_5
-COPY ./yolov_7 /code/yolov_7
 COPY ./ultralytics_yolov5_master /root/.cache/torch/hub/ultralytics_yolov5_master
 COPY ./labels.yaml /code/labels.yaml
 
