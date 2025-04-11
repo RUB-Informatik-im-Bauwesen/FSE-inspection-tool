@@ -23,78 +23,23 @@ This repository provides:
 - Dockerized setup for easy deployment and scalability.
 
 ## Setup
-
-
-### SKIP AHEAD IF YOU WANT TO USE DOCKER
-
-### Step 1 (Cloning the Git Repository):
-
-URL: Hydropic/Active-Learning-Application-for-Object-Detection-on-a-Technical-Building-Equipment-Dataset (github.com)
-
-### Step 2 (Creating the Database):
-  - Set the port in docker-compose.yaml to "27017:27017".
-  - Run the command:  
-  ```
-  docker-compose up 
-  ```
-  - (OPTIONAL) Download MongoDB Compass and connect to the database using the following URL:     
- “mongodb://root:example@localhost:27017/”
-
-### Step 3 (Creating a Virtual Environment):
-  - Run the command: 
-  ```
-  python -m venv venv
-  ```
-  - Then activate the virtual environment using: 
-  ```
-  venv\Scripts\Activate.ps1
-  ```
-  - Finally, install the required dependencies: 
-  ```
-  pip install -r requirements.txt
-  ```
-
-### Step 4 (Starting the Backend):
-  - Run the backend with the following command: 
-  ```
-  uvicorn backend.website.main:app –reload
-  ```
-
-### Step 5 (Starting the Frontend):
-  - Open a new PowerShell window and navigate to the frontend directory: 
-  ```
-  cd frontend
-  ```
-  - Install dependencies: 
-  ```
-  npm install
-  ```
-  - Finally, start the frontend: 
-  ```
-  npm run dev
-  ```
-
-
-
-
----------------------
-
-### IF DOCKER IS INSTALLED (RECOMMENDED)
+### A NVIDIA GPU is required to run the backend!
 
 ### Step 1 (Clone the Git Repository):
-
 URL: https://github.com/RUB-Informatik-im-Bauwesen/fse-web-tool.git (github.com)
-
-### Step 2:
-Start the services defined in the docker-compose.yml file:
+### Step 2
+Download docker desktop: https://www.docker.com/products/docker-desktop/
+### Step 3:
+Build and start the services defined in the docker-compose.yml file:
 ```
+docker compose build
 docker compose up -d
 ```
 
-### Step 3:
+### Step 4:
 Acess Localhost at: http://127.0.0.1:5173/
 
-### Step 4:
+### Step 5:
 Enjoy!
 
 
@@ -117,6 +62,3 @@ storage/
     └── Detection_marking_Yolov8/
         └── best.pt
 ```
-  - Download validation images from this link: (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) and replace the folder in Storage.
-  
-  - Download rare images from this link: (https://drive.google.com/file/d/1jgORHgpLZ_uT1sp0gbRu2Gpfae_wyDKU/view?usp=sharing) and replace the folder in Storage.
