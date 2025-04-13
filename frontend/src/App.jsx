@@ -11,7 +11,6 @@ import Statistics from './components/Statistics'
 import StatisticsMultipleModels from './components/StatisticsMultipleModels'
 import FAQ from './components/FAQ'
 import ViewJsons from './components/ViewJsons'
-import IfcViewer from './components/IfcViewer'
 import KIDienste from './components/KIDienste'
 
 function App() {
@@ -82,11 +81,9 @@ function App() {
           <Route path="/Projects" element={<ProjectList setProject={setProject} projects = {projects} accessToken={accessToken}/>}/>
           <Route path="/Projects/:id" element={<ProjectSite accessToken={accessToken} />}/>
           <Route path="/Statistics" element={<StatisticsMultipleModels accessToken={accessToken} projects={projects}/>}/>
-          {/* <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/> */}
           <Route path="/KIDienst" element={<KIDienste accessToken={accessToken}/>}/>
           <Route path="/FAQ" element={<FAQ/>}/>
           <Route path="/view-jsons" element={<ViewJsons accessToken={accessToken}/>} />
-          <Route path="/ifc-viewer" element={<IfcViewer />} />
         </Routes>
         <header className='Ansprechpartner'>
           <p>Ansprechpartner: M.Eng. Angelina Aziz </p>

@@ -4,13 +4,12 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
 import "./StatisticsStyle.css"
 import axios from "axios"
@@ -33,8 +32,7 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
   ChartJS.register(
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Title,
     Tooltip,
     Legend
@@ -487,10 +485,10 @@ const StatisticsMultipleModels = ({accessToken, projects}) => {
         <div className="row justify-content-center mb-4">
           <div className="col-lg-6 col-md-8">
 
-            <div className="card-header">
+          <div className="card-header">
                 <h4 className="card-title">Graph</h4>
               </div>
-              <Line options={options} data={dataForGraph} height={200} />
+              <Bar options={options} data={dataForGraph} height={200} />
               <div className="card-body">
               </div>
             </div>
