@@ -1,10 +1,6 @@
 app/
 venv/
 frontend/public/
-storage/Models
-storage/Validationset/images
-storage/Validationset/labels
-storage/Rare_images
 storage/Visual_Annotation_Tool
 app/Lib/site-packages/six.py
 backend/utils/__pycache__/model_utils.cpython-39.pyc
