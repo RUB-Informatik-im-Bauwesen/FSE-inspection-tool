@@ -63,3 +63,5 @@ storage/
     └── Detection_marking_Yolov8/
         └── best.pt
 ```
+  - Download validation images from this link: (https://drive.google.com/file/d/1nueXWhQNkAwiC7LDdTp8bbO2GRrOHo88/view?usp=sharing) and replace the folder in Storage.
+  - Download rare images from this link: (https://drive.google.com/file/d/1jgORHgpLZ_uT1sp0gbRu2Gpfae_wyDKU/view?usp=sharing) and replace the folder in Storage.
